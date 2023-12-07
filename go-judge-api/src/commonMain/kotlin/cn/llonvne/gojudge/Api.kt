@@ -1,26 +1,25 @@
 package cn.llonvne.gojudge
 
-interface GoJudgeFile {
-    
+sealed interface GoJudgeFile {
+    data class LocalFile(
+        val src: String // absolute path for the file
+    ) : GoJudgeFile
+
+    data class MemoryFile(
+        val content: Any // file contents, can be String or ByteArray (Buffer in TypeScript)
+    ) : GoJudgeFile
+
+    data class PreparedFile(
+        val fileId: String // fileId defines file uploaded by /file
+    ) : GoJudgeFile
+
+    data class Collector(
+        val name: String, // file name in copyOut
+        val max: Int,  // maximum bytes to collect from pipe
+        val pipe: Boolean? = null // collect over pipe or not (default false)
+    ) : GoJudgeFile
 }
 
-data class LocalFile(
-    val src: String // absolute path for the file
-)
-
-data class MemoryFile(
-    val content: Any // file contents, can be String or ByteArray (Buffer in TypeScript)
-)
-
-data class PreparedFile(
-    val fileId: String // fileId defines file uploaded by /file
-)
-
-data class Collector(
-    val name: String, // file name in copyOut
-    val max: Int,  // maximum bytes to collect from pipe
-    val pipe: Boolean? = null // collect over pipe or not (default false)
-)
 
 data class Symlink(
     val symlink: String // symlink destination (v1.6.0+)
@@ -31,7 +30,7 @@ data class Cmd(
     val env: List<String>? = null, // environment
 
     // specifies file input / pipe collector for program file descriptors
-    val files: List<Any>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Collector
+    val files: List<GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Collector
     val tty: Boolean? = null, // enables tty on the input and output pipes (should have just one input & one output)
     // Notice: must have TERM environment variables (e.g. TERM=xterm)
 
@@ -49,7 +48,7 @@ data class Cmd(
     val addressSpaceLimit: Boolean? = null, // Linux only: use (+ rlimit_address_space limit)
 
     // copy the correspond file to the container dst path
-    val copyIn: Map<String, Any>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Symlink
+    val copyIn: Map<String, GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Symlink
 
     // copy out specifies files need to be copied out from the container after execution
     // append '?' after file name will make the file optional and do not cause FileError when missing
@@ -108,18 +107,20 @@ data class FileError(
     val message: String? = null // detailed message
 )
 
-data class Request(
-    val requestId: String? = null, // for WebSocket requests
-    val cmd: List<Cmd>,
-    val pipeMapping: List<PipeMap>? = null
-)
+sealed interface RequestType {
+    data class Request(
+        val requestId: String? = null, // for WebSocket requests
+        val cmd: List<Cmd>,
+        val pipeMapping: List<PipeMap>? = null
+    ) : RequestType
 
-data class CancelRequest(
-    val cancelRequestId: String
-)
+    data class CancelRequest(
+        val cancelRequestId: String
+    ) : RequestType
+}
 
 // WebSocket request
-typealias WSRequest = Any // Any can be Request or CancelRequest
+typealias WSRequest = RequestType // Any can be Request or CancelRequest
 
 data class Result(
     val status: Status,

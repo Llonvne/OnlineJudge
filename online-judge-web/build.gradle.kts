@@ -97,6 +97,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("io.kvision:kvision-server-spring-boot:$kvisionVersion")
+                implementation(projects.goJudgeApi)
             }
         }
         val commonTest by getting {
