@@ -8,4 +8,6 @@ plugins {
     val kvisionVersion: String by System.getProperties()
     id("io.kvision") version kvisionVersion apply false
     id("de.jensklingenberg.ktorfit") version "1.10.2" apply false
+    id("io.ktor.plugin") version "2.3.6" apply false
+    id("com.google.devtools.ksp") version "1.9.21-1.0.15" apply false
 }

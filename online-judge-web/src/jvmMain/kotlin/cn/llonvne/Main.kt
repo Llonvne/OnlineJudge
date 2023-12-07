@@ -24,6 +24,8 @@ fun main(args: Array<String>) {
     runApplication<KVApplication>(*args)
 }
 
+
+
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")

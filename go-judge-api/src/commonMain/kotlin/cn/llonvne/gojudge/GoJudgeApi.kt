@@ -1,18 +1,27 @@
+@file:Suppress("UNUSED")
+
 package cn.llonvne.gojudge
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed interface GoJudgeFile {
+    @Serializable
     data class LocalFile(
         val src: String // absolute path for the file
     ) : GoJudgeFile
 
+    @Serializable
     data class MemoryFile(
-        val content: Any // file contents, can be String or ByteArray (Buffer in TypeScript)
+        val content: String // file contents, can be String or ByteArray (Buffer in TypeScript)
     ) : GoJudgeFile
 
+    @Serializable
     data class PreparedFile(
         val fileId: String // fileId defines file uploaded by /file
     ) : GoJudgeFile
 
+    @Serializable
     data class Collector(
         val name: String, // file name in copyOut
         val max: Int,  // maximum bytes to collect from pipe
@@ -20,11 +29,12 @@ sealed interface GoJudgeFile {
     ) : GoJudgeFile
 }
 
-
+@Serializable
 data class Symlink(
     val symlink: String // symlink destination (v1.6.0+)
 )
 
+@Serializable
 data class Cmd(
     val args: List<String>, // command line argument
     val env: List<String>? = null, // environment
@@ -61,6 +71,7 @@ data class Cmd(
     val copyOutMax: Int? = null // byte
 )
 
+@Serializable
 enum class Status {
     Accepted, // normal
     MemoryLimitExceeded, // mle
@@ -72,11 +83,13 @@ enum class Status {
     InternalError // system error
 }
 
+@Serializable
 data class PipeIndex(
     val index: Int, // the index of cmd
     val fd: Int    // the fd number of cmd
 )
 
+@Serializable
 data class PipeMap(
     val `in`: PipeIndex,  // input end of the pipe
     val out: PipeIndex, // output end of the pipe
@@ -89,6 +102,7 @@ data class PipeMap(
     val max: Int? = null
 )
 
+@Serializable
 enum class FileErrorType {
     CopyInOpenFile,
     CopyInCreateFile,
@@ -101,19 +115,23 @@ enum class FileErrorType {
     CollectSizeExceeded
 }
 
+@Serializable
 data class FileError(
     val name: String, // error file name
     val type: FileErrorType, // type
     val message: String? = null // detailed message
 )
 
+@Serializable
 sealed interface RequestType {
+    @Serializable
     data class Request(
         val requestId: String? = null, // for WebSocket requests
         val cmd: List<Cmd>,
         val pipeMapping: List<PipeMap>? = null
     ) : RequestType
 
+    @Serializable
     data class CancelRequest(
         val cancelRequestId: String
     ) : RequestType
@@ -122,6 +140,7 @@ sealed interface RequestType {
 // WebSocket request
 typealias WSRequest = RequestType // Any can be Request or CancelRequest
 
+@Serializable
 data class Result(
     val status: Status,
     val error: String? = null, // potential system error message
@@ -137,6 +156,7 @@ data class Result(
     val fileError: List<FileError>? = null
 )
 
+@Serializable
 // WebSocket results
 data class WSResult(
     val requestId: String,
