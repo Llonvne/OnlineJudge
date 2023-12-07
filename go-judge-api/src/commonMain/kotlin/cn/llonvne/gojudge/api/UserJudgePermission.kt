@@ -1,11 +1,11 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.api
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.ratelimit.*
 import kotlin.time.Duration.Companion.seconds
 
 enum class UserJudgePermission(val costTokenPer: Int) {
-    Normal(100), Vip(10), Admin(0), Unregister(1000)
+    Normal(100), Vip(10), Admin(0), Unregister(TOTAL_TOKEN_IN_DURATION)
 }
 
 val ApplicationCall.userJudgePermission: UserJudgePermission

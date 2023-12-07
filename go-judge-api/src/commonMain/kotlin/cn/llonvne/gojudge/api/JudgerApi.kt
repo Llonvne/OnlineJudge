@@ -1,4 +1,4 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.api
 
 import de.jensklingenberg.ktorfit.http.GET
 

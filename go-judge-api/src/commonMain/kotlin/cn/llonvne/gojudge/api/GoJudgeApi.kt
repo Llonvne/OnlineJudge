@@ -1,7 +1,8 @@
 @file:Suppress("UNUSED")
 
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.api
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -66,7 +67,7 @@ data class Cmd(
     // similar to copyOut but stores file in go judge and returns fileId, later download through /file/:fileId
     val copyOutCached: List<String>? = null,
     // specifies the directory to dump container /w content
-    val copyOutDir: String,
+    val copyOutDir: String? = null,
     // specifies the max file size to copy out
     val copyOutMax: Int? = null // byte
 )
@@ -74,12 +75,18 @@ data class Cmd(
 @Serializable
 enum class Status {
     Accepted, // normal
+    @SerialName("Memory Limit Exceeded")
     MemoryLimitExceeded, // mle
+    @SerialName("Time Limit Exceeded")
     TimeLimitExceeded, // tle
+    @SerialName("Output Limit Exceeded")
     OutputLimitExceeded, // ole
+    @SerialName("File Error")
     FileError, // fe
+    @SerialName("Nonzero Exit Status")
     NonzeroExitStatus,
     Signalled,
+    @SerialName("Internal Error")
     InternalError // system error
 }
 
@@ -149,7 +156,7 @@ data class Result(
     val memory: Long, // byte
     val runTime: Long, // ns (wall clock time)
     // copyFile name -> content
-    val files: Map<String, String>? = null,
+    val files: Map<String, String?>? = null,
     // copyFileCached name -> fileId
     val fileIds: Map<String, String>? = null,
     // fileError contains detailed file errors

@@ -1,5 +1,6 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.ktor
 
+import cn.llonvne.gojudge.api.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.ratelimit.*
 

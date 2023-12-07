@@ -24,6 +24,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors-jvm:2.3.6")
     implementation("io.ktor:ktor-server-metrics-micrometer-jvm:2.3.6")
     implementation("io.micrometer:micrometer-registry-prometheus:1.6.3")
+    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.6")
 }
 
 kotlin {
@@ -37,6 +38,13 @@ kotlin {
         }
     }
 
+    val ktorfitVersion = "1.10.2"
+
+    dependencies{
+        add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+        add("kspJvm","de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -47,12 +55,14 @@ kotlin {
                 implementation("io.ktor:ktor-server-auto-head-response")
                 implementation("io.ktor:ktor-server-request-validation")
                 implementation("io.ktor:ktor-server-content-negotiation")
+                implementation("io.ktor:ktor-client-content-negotiation")
                 implementation("io.ktor:ktor-serialization-kotlinx-json")
                 implementation("io.ktor:ktor-server-rate-limit")
                 implementation("io.ktor:ktor-server-html-builder")
                 implementation("io.ktor:ktor-server-auth")
                 implementation("io.ktor:ktor-server-compression")
                 implementation("io.ktor:ktor-server-cors")
+                implementation("io.ktor:ktor-client-core")
 
                 implementation("io.ktor:ktor-server-metrics-micrometer")
                 implementation("io.micrometer:micrometer-registry-prometheus:1.12.0")
@@ -61,6 +71,12 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("ch.qos.logback:logback-classic:1.2.0")
+                implementation("io.ktor:ktor-client-okhttp")
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

@@ -1,5 +1,8 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.ktor
 
+import cn.llonvne.gojudge.api.JUDGE_TOKEN_REFILL_DURATION
+import cn.llonvne.gojudge.api.TOTAL_TOKEN_IN_DURATION
+import cn.llonvne.gojudge.api.userJudgePermission
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*

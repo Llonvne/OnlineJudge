@@ -1,5 +1,6 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.api.impl
 
+import cn.llonvne.gojudge.api.JudgerApi
 import io.ktor.resources.*
 
 @Resource("/")

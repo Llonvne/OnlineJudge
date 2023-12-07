@@ -1,4 +1,4 @@
-package cn.llonvne.gojudge
+package cn.llonvne.gojudge.ktor
 
 import io.ktor.http.*
 import io.ktor.server.application.*
