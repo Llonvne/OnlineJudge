@@ -1,25 +1,14 @@
-package cn.llonvne.gojudge.task.gpp.task
+package cn.llonvne.gojudge.api
 
-import cn.llonvne.gojudge.api.GoJudgeService
-import cn.llonvne.gojudge.api.Status
-import cn.llonvne.gojudge.api.ext.*
-import cn.llonvne.gojudge.api.ext.request
-import cn.llonvne.gojudge.api.ext.useGpp
-import cn.llonvne.gojudge.api.ext.useStdOutErrForFiles
-import cn.llonvne.gojudge.api.ext.useUsrBinEnv
-import cn.llonvne.gojudge.api.goJudgeClient
-import cn.llonvne.gojudge.task.Task
-import cn.llonvne.gojudge.task.gpp.api.GppInput
-import cn.llonvne.gojudge.task.gpp.api.GppOutput
-import java.util.*
+import com.benasher44.uuid.uuid4
 
-class GppCompileTask : Task<GppInput, GppOutput> {
+class GppCompileTask(val goJudgeService: GoJudgeService) : Task<GppInput, GppOutput> {
     private val String.cpp: String
         get() = "$this.cc"
 
     override suspend fun run(input: GppInput, service: GoJudgeService): GppOutput {
-        val sourceCodeFilename = UUID.randomUUID().toString().cpp
-        val outputCodeFilename = UUID.randomUUID().toString()
+        val sourceCodeFilename = uuid4().toString()
+        val outputCodeFilename = uuid4().toString()
 
         val compileRequest = request {
             cmd {
@@ -32,8 +21,9 @@ class GppCompileTask : Task<GppInput, GppOutput> {
             }
         }
 
+
         val compileResult =
-            goJudgeClient.run(compileRequest).getOrNull(0) ?: return GppOutput.Failure.CompileResultIsNull(
+            goJudgeService.run(compileRequest).getOrNull(0) ?: return GppOutput.Failure.CompileResultIsNull(
                 compileRequest
             )
 
@@ -47,7 +37,7 @@ class GppCompileTask : Task<GppInput, GppOutput> {
                 compileResult
             )
 
-        val runFilename = UUID.randomUUID().toString()
+        val runFilename = uuid4().toString()
 
         val runRequest = request {
             cmd {
@@ -58,7 +48,7 @@ class GppCompileTask : Task<GppInput, GppOutput> {
             }
         }
 
-        val runResult = goJudgeClient.run(runRequest).getOrNull(0) ?: return GppOutput.Failure.RunResultIsNull(
+        val runResult = goJudgeService.run(runRequest).getOrNull(0) ?: return GppOutput.Failure.RunResultIsNull(
             compileRequest,
             compileResult,
             runRequest

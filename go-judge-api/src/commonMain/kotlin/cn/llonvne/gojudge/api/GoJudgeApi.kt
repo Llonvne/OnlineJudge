@@ -1,7 +1,9 @@
 @file:Suppress("UNUSED")
 
 package cn.llonvne.gojudge.api
-import kotlinx.serialization.*
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface GoJudgeFile {
@@ -73,17 +75,23 @@ data class Cmd(
 @Serializable
 enum class Status {
     Accepted, // normal
+
     @SerialName("Memory Limit Exceeded")
     MemoryLimitExceeded, // mle
+
     @SerialName("Time Limit Exceeded")
     TimeLimitExceeded, // tle
+
     @SerialName("Output Limit Exceeded")
     OutputLimitExceeded, // ole
+
     @SerialName("File Error")
     FileError, // fe
+
     @SerialName("Nonzero Exit Status")
     NonzeroExitStatus,
     Signalled,
+
     @SerialName("Internal Error")
     InternalError // system error
 }

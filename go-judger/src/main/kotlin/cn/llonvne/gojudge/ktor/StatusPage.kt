@@ -1,8 +1,6 @@
 package cn.llonvne.gojudge.ktor
 
-import cn.llonvne.gojudge.api.JUDGE_TOKEN_REFILL_DURATION
-import cn.llonvne.gojudge.api.TOTAL_TOKEN_IN_DURATION
-import cn.llonvne.gojudge.api.userJudgePermission
+import cn.llonvne.gojudge.api.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -59,3 +57,14 @@ fun Application.installJudgeStatusPage() {
         }
     }
 }
+
+val ApplicationCall.userJudgePermission: UserJudgePermission
+    get() {
+        return try {
+            cn.llonvne.gojudge.api.UserJudgePermission.valueOf(
+                this.request.queryParameters[KEY_IN_QUERY] ?: FALL_BACK_PERMISSION.name
+            )
+        } catch (e: IllegalArgumentException) {
+            FALL_BACK_PERMISSION
+        }
+    }

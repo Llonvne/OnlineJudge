@@ -1,8 +1,4 @@
-package cn.llonvne.gojudge.task.gpp.api
-
-import cn.llonvne.gojudge.api.RequestType
-
-import cn.llonvne.gojudge.api.Result
+package cn.llonvne.gojudge.api
 
 data class GppInput(val code: String)
 

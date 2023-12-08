@@ -12,6 +12,7 @@ import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
@@ -19,6 +20,8 @@ import org.slf4j.event.Level
 class JudgerConfig {
 
 }
+
+//val RACE_LIMIT_JUDGE_NAME = RateLimitName("judge")
 
 fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     install(Resources)
@@ -48,16 +51,13 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
 
 
     routing {
-        globalAuth {
+//        globalAuth {
 //            rateLimit(RACE_LIMIT_JUDGE_NAME) {
 //
 //            }
-        }
+            get("/version") {
+                call.respondText("Hello")
+            }
+//        }
     }
-}
-
-fun main() {
-    embeddedServer(Netty, port = 3000) {
-        judging { }
-    }.start(wait = true)
 }

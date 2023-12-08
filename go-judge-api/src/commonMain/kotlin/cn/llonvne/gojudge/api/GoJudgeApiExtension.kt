@@ -1,6 +1,4 @@
-package cn.llonvne.gojudge.api.ext
-
-import cn.llonvne.gojudge.api.*
+package cn.llonvne.gojudge.api
 
 
 fun request(

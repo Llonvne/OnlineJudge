@@ -12,3 +12,5 @@ const val KEY_IN_QUERY = "type"
 val FALL_BACK_PERMISSION = UserJudgePermission.Unregister
 
 val JUDGE_TOKEN_REFILL_DURATION = 60.seconds
+
+

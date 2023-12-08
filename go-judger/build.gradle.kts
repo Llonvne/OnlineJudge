@@ -43,6 +43,7 @@ dependencies {
     implementation("io.ktor:ktor-server-metrics-micrometer:2.2.4")
     implementation("io.ktor:ktor-server-cors-jvm:2.3.6")
     // CLIENT KTOR
+    implementation("io.ktor:ktor-client-resources:2.3.6")
     implementation("io.ktor:ktor-client-content-negotiation:2.2.4")
     implementation("io.ktor:ktor-client-core:2.2.4")
     implementation("ch.qos.logback:logback-classic:1.4.7")

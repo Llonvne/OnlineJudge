@@ -18,11 +18,12 @@ kotlin {
         nodejs()
     }
     sourceSets {
-
         commonMain {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2")
-                api("de.jensklingenberg.ktorfit:ktorfit-annotations:1.10.2")
+                implementation("io.ktor:ktor-client-resources:2.3.2")
+                implementation("io.ktor:ktor-client-core:2.3.2")
+                implementation("com.benasher44:uuid:0.8.2")
             }
         }
     }
