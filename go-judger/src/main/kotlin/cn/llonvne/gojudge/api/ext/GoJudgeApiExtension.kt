@@ -3,7 +3,7 @@ package cn.llonvne.gojudge.api.ext
 import cn.llonvne.gojudge.api.*
 
 
-internal fun request(
+fun request(
     requestId: String? = null,
     pipeMap: List<PipeMap>? = null,
     cmdListBuilder: CmdListBuilder.() -> Unit
@@ -16,13 +16,13 @@ internal fun request(
     return RequestType.Request(requestId, cmd = cmd.build(), pipeMapping = pipeMap)
 }
 
-internal suspend fun GoJudgeService.run(
+suspend fun GoJudgeService.run(
     requestId: String? = null,
     pipeMap: List<PipeMap>? = null,
     cmdListBuilder: CmdListBuilder.() -> Unit
 ) = run(request(requestId, pipeMap, cmdListBuilder))
 
-internal class CmdListBuilder {
+class CmdListBuilder {
     private val cmds = mutableListOf<Cmd>()
 
     fun cmd(builder: Cmd.() -> Unit) {
@@ -37,13 +37,13 @@ internal class CmdListBuilder {
     }
 }
 
-internal fun useGpp(source: String, output: String): List<String> {
+fun useGpp(source: String, output: String): List<String> {
     return listOf("/usr/bin/g++", source, "-o", output)
 }
 
-internal val useUsrBinEnv = listOf("PATH=/usr/bin:/bin")
+val useUsrBinEnv = listOf("PATH=/usr/bin:/bin")
 
-internal fun useStdOutErrForFiles(stdin: String = "", max: Int = 10240) = mutableListOf(
+fun useStdOutErrForFiles(stdin: String = "", max: Int = 10240) = mutableListOf(
     GoJudgeFile.MemoryFile(
         content = stdin
     ),
@@ -57,13 +57,13 @@ internal fun useStdOutErrForFiles(stdin: String = "", max: Int = 10240) = mutabl
     )
 )
 
-internal fun useStdOutErrForCopyOut() = mutableListOf("stdout", "stderr")
+fun useStdOutErrForCopyOut() = mutableListOf("stdout", "stderr")
 
-internal fun useMemoryCodeCopyIn(sourceFilename: String, content: String) = mutableMapOf(
+fun useMemoryCodeCopyIn(sourceFilename: String, content: String) = mutableMapOf(
     sourceFilename to GoJudgeFile.MemoryFile(content)
 )
 
-internal fun useFileIdCopyIn(fileId: String, newName: String) = mapOf(newName to GoJudgeFile.PreparedFile(fileId))
+fun useFileIdCopyIn(fileId: String, newName: String) = mapOf(newName to GoJudgeFile.PreparedFile(fileId))
 
 private fun Cmd.default() {
     procLimit = 50

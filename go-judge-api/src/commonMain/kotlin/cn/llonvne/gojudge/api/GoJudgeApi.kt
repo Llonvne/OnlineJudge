@@ -1,9 +1,7 @@
 @file:Suppress("UNUSED")
 
 package cn.llonvne.gojudge.api
-
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 @Serializable
 sealed interface GoJudgeFile {

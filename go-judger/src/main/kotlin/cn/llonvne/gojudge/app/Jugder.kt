@@ -1,20 +1,17 @@
 package cn.llonvne.gojudge.app
 
-import cn.llonvne.gojudge.api.RACE_LIMIT_JUDGE_NAME
-import cn.llonvne.gojudge.api.GoJudgeFile
-import cn.llonvne.gojudge.api.impl.JudgerApiImpl
 import cn.llonvne.gojudge.ktor.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.doublereceive.*
-import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import org.slf4j.event.Level
@@ -38,10 +35,12 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
         filter { call -> call.request.path().startsWith("/") }
     }
     installJudgeStatusPage()
-    installJudgeRateLimit()
+
+//    installJudgeRateLimit()
     installAuthentication()
     installCompression()
     installMicrometer()
+    installCORS()
 
     val config = JudgerConfig()
 
@@ -50,11 +49,15 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
 
     routing {
         globalAuth {
-            rateLimit(RACE_LIMIT_JUDGE_NAME) {
-                get<JudgerApiImpl> {
-                    call.respond(GoJudgeFile.LocalFile("123"))
-                }
-            }
+//            rateLimit(RACE_LIMIT_JUDGE_NAME) {
+//
+//            }
         }
     }
+}
+
+fun main() {
+    embeddedServer(Netty, port = 3000) {
+        judging { }
+    }.start(wait = true)
 }

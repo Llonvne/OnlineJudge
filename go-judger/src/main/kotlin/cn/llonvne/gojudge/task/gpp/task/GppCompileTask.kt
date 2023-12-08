@@ -18,7 +18,6 @@ class GppCompileTask : Task<GppInput, GppOutput> {
         get() = "$this.cc"
 
     override suspend fun run(input: GppInput, service: GoJudgeService): GppOutput {
-
         val sourceCodeFilename = UUID.randomUUID().toString().cpp
         val outputCodeFilename = UUID.randomUUID().toString()
 
