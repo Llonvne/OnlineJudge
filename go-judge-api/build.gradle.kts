@@ -28,7 +28,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+//    jvmToolchain(17)
     jvm {
         withJava()
         compilations.all {

@@ -3,14 +3,10 @@ package cn.llonvne.gojudge.api
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.http.*
-import de.jensklingenberg.ktorfit.http.RequestType
 import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
 import io.ktor.serialization.kotlinx.json.*
-import jdk.jfr.ContentType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
@@ -56,10 +52,10 @@ val goJudgeClient by lazy {
         .converterFactories(
             GoJudgeFileConverterFactory
         )
-        .build().create<GoJudgeRestApi>()
+        .build().create<GoJudgeService>()
 }
 
-interface GoJudgeRestApi {
+interface GoJudgeService {
     @GET(GoJudgeRestEndPoint.VERSION)
     suspend fun version(@ReqBuilder ext: HttpRequestBuilder.() -> Unit = {}): String
 
@@ -68,7 +64,7 @@ interface GoJudgeRestApi {
 
     @POST(GoJudgeRestEndPoint.RUN)
     @Headers("Content-Type: application/json")
-    suspend fun run(@Body request: cn.llonvne.gojudge.api.RequestType.Request): List<Result>
+    suspend fun run(@Body request: RequestType.Request): List<Result>
 }
 
 internal object GoJudgeRestEndPoint {

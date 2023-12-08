@@ -37,39 +37,39 @@ data class Symlink(
 
 @Serializable
 data class Cmd(
-    val args: List<String>, // command line argument
-    val env: List<String>? = null, // environment
+    var args: List<String>, // command line argument
+    var env: List<String>? = null, // environment
 
     // specifies file input / pipe collector for program file descriptors
-    val files: List<GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Collector
-    val tty: Boolean? = null, // enables tty on the input and output pipes (should have just one input & one output)
+    var files: List<GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Collector
+    var tty: Boolean? = null, // enables tty on the input and output pipes (should have just one input & one output)
     // Notice: must have TERM environment variables (e.g. TERM=xterm)
 
     // limitations
-    val cpuLimit: Long? = null,     // ns
-    val realCpuLimit: Long? = null, // deprecated: use clock limit instead (still working)
-    val clockLimit: Long? = null,   // ns
-    val memoryLimit: Long? = null,  // byte
-    val stackLimit: Long? = null,   // byte (N/A on windows, macOS cannot set over 32M)
-    val procLimit: Int? = null,
-    val cpuRateLimit: Int? = null, // limit cpu usage (1000 equals 1 cpu)
-    val cpuSetLimit: String? = null, // Linux only: set the cpuSet for cgroup
-    val strictMemoryLimit: Boolean? = null, // deprecated: use dataSegmentLimit instead (still working)
-    val dataSegmentLimit: Boolean? = null, // Linux only: use (+ rlimit_data limit) enable by default if cgroup not enabled
-    val addressSpaceLimit: Boolean? = null, // Linux only: use (+ rlimit_address_space limit)
+    var cpuLimit: Long? = null,     // ns
+    var realCpuLimit: Long? = null, // deprecated: use clock limit instead (still working)
+    var clockLimit: Long? = null,   // ns
+    var memoryLimit: Long? = null,  // byte
+    var stackLimit: Long? = null,   // byte (N/A on windows, macOS cannot set over 32M)
+    var procLimit: Int? = null,
+    var cpuRateLimit: Int? = null, // limit cpu usage (1000 equals 1 cpu)
+    var cpuSetLimit: String? = null, // Linux only: set the cpuSet for cgroup
+    var strictMemoryLimit: Boolean? = null, // deprecated: use dataSegmentLimit instead (still working)
+    var dataSegmentLimit: Boolean? = null, // Linux only: use (+ rlimit_data limit) enable by default if cgroup not enabled
+    var addressSpaceLimit: Boolean? = null, // Linux only: use (+ rlimit_address_space limit)
 
     // copy the correspond file to the container dst path
-    val copyIn: Map<String, GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Symlink
+    var copyIn: Map<String, GoJudgeFile>? = null, // Any can be LocalFile, MemoryFile, PreparedFile, Symlink
 
     // copy out specifies files need to be copied out from the container after execution
     // append '?' after file name will make the file optional and do not cause FileError when missing
-    val copyOut: List<String>? = null,
+    var copyOut: List<String>? = null,
     // similar to copyOut but stores file in go judge and returns fileId, later download through /file/:fileId
-    val copyOutCached: List<String>? = null,
+    var copyOutCached: List<String>? = null,
     // specifies the directory to dump container /w content
-    val copyOutDir: String? = null,
+    var copyOutDir: String? = null,
     // specifies the max file size to copy out
-    val copyOutMax: Int? = null // byte
+    var copyOutMax: Int? = null // byte
 )
 
 @Serializable
