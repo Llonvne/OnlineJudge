@@ -2,12 +2,12 @@ package cn.llonvne.gojudge.api
 
 import com.benasher44.uuid.uuid4
 
-class GppCompileTask(val goJudgeService: GoJudgeService) : Task<GppInput, GppOutput> {
+class GppCompileTask : Task<GppInput, GppOutput> {
     private val String.cpp: String
-        get() = "$this.cc"
+        get() = "$this.cpp"
 
     override suspend fun run(input: GppInput, service: GoJudgeService): GppOutput {
-        val sourceCodeFilename = uuid4().toString()
+        val sourceCodeFilename = uuid4().toString().cpp
         val outputCodeFilename = uuid4().toString()
 
         val compileRequest = request {
@@ -23,7 +23,7 @@ class GppCompileTask(val goJudgeService: GoJudgeService) : Task<GppInput, GppOut
 
 
         val compileResult =
-            goJudgeService.run(compileRequest).getOrNull(0) ?: return GppOutput.Failure.CompileResultIsNull(
+            service.run(compileRequest).getOrNull(0) ?: return GppOutput.Failure.CompileResultIsNull(
                 compileRequest
             )
 
@@ -43,12 +43,12 @@ class GppCompileTask(val goJudgeService: GoJudgeService) : Task<GppInput, GppOut
             cmd {
                 args = listOf(runFilename)
                 env = useUsrBinEnv
-                files = useStdOutErrForFiles()
+                files = useStdOutErrForFiles(input.stdin)
                 copyIn = useFileIdCopyIn(fileId = fileId, newName = runFilename)
             }
         }
 
-        val runResult = goJudgeService.run(runRequest).getOrNull(0) ?: return GppOutput.Failure.RunResultIsNull(
+        val runResult = service.run(runRequest).getOrNull(0) ?: return GppOutput.Failure.RunResultIsNull(
             compileRequest,
             compileResult,
             runRequest

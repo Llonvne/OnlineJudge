@@ -1,6 +1,6 @@
 package cn.llonvne.gojudge.api
 
-data class GppInput(val code: String)
+data class GppInput(val code: String, val stdin: String)
 
 sealed interface GppOutput {
 

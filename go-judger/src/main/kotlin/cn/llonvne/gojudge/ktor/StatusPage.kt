@@ -6,7 +6,6 @@ import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import kotlinx.html.body
 import kotlinx.html.h1
 import kotlinx.html.h4
@@ -16,6 +15,16 @@ fun Application.installJudgeStatusPage() {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+
+        status(HttpStatusCode.BadRequest) { call, cause ->
+            call.respondHtml {
+                body {
+                    h1 {
+                        +"Bad Request"
+                    }
+                }
+            }
         }
 
         status(HttpStatusCode.NotFound) { call, stat ->
