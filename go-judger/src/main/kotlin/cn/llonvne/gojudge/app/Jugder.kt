@@ -3,8 +3,6 @@ package cn.llonvne.gojudge.app
 import cn.llonvne.gojudge.ktor.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -21,7 +19,7 @@ class JudgerConfig {
 
 }
 
-//val RACE_LIMIT_JUDGE_NAME = RateLimitName("judge")
+
 
 fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     install(Resources)
@@ -39,7 +37,7 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     }
     installJudgeStatusPage()
 
-//    installJudgeRateLimit()
+    installJudgeRateLimit()
     installAuthentication()
     installCompression()
     installMicrometer()
@@ -55,9 +53,9 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
 //            rateLimit(RACE_LIMIT_JUDGE_NAME) {
 //
 //            }
-            get("/version") {
-                call.respondText("Hello")
-            }
+        get("/version") {
+            call.respondText("Hello")
+        }
 //        }
     }
 }

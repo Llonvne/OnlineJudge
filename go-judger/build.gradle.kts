@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.libsDirectory
-
 plugins {
     kotlin("jvm")
     id("io.ktor.plugin")
@@ -16,6 +14,10 @@ group = "cn.llonvne"
 version = "unspecified"
 
 val ktorfitVersion = "1.10.2"
+val ktorVersion = "2.3.6"
+
+fun ktor(name: String) = ("io.ktor:$name:$version")
+fun ktorServer(name: String) = ktor("ktor-server-$name")
 
 dependencies {
     implementation(projects.goJudgeApi)
@@ -24,28 +26,28 @@ dependencies {
     ksp("de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.0")
-
-    // SERVER KTOR
-    implementation("io.ktor:ktor-server-netty:2.2.4")
-    implementation("io.ktor:ktor-server-resources:2.2.4")
-    implementation("io.ktor:ktor-server-auto-head-response:2.2.4")
-    implementation("io.ktor:ktor-server-request-validation:2.2.4")
-    implementation("io.ktor:ktor-server-content-negotiation:2.2.4")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.4")
-    implementation("io.ktor:ktor-server-html-builder:2.2.4")
-    implementation("io.ktor:ktor-server-auth:2.2.4")
-    implementation("io.ktor:ktor-server-compression:2.2.4")
-    implementation("io.ktor:ktor-server-core-jvm:2.3.6")
-    implementation("io.ktor:ktor-server-double-receive-jvm:2.3.6")
-    implementation("io.ktor:ktor-server-call-logging-jvm:2.3.6")
-    implementation("io.ktor:ktor-server-host-common-jvm:2.3.6")
-    implementation("io.ktor:ktor-server-status-pages-jvm:2.3.6")
-    implementation("io.ktor:ktor-server-metrics-micrometer:2.2.4")
-    implementation("io.ktor:ktor-server-cors-jvm:2.3.6")
+    // SERVER KTOR
+    implementation(ktorServer("netty"))
+    implementation(ktorServer("resources"))
+    implementation(ktorServer("auto-head-response"))
+    implementation(ktorServer("request-validation"))
+    implementation(ktorServer("content-negotiation"))
+    implementation(ktorServer("html-builder"))
+    implementation(ktorServer("auth"))
+    implementation(ktorServer("compression"))
+    implementation(ktorServer("core-jvm"))
+    implementation(ktorServer("double-receive"))
+    implementation(ktorServer("call-logging"))
+    implementation(ktorServer("host-common"))
+    implementation(ktorServer("status-pages"))
+    implementation(ktorServer("metrics-micrometer"))
+    implementation(ktorServer("cors"))
+    implementation(ktorServer("rate-limit"))
     // CLIENT KTOR
     implementation("io.ktor:ktor-client-resources:2.3.6")
-    implementation("io.ktor:ktor-client-content-negotiation:2.2.4")
-    implementation("io.ktor:ktor-client-core:2.2.4")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
+    implementation("io.ktor:ktor-client-core:2.3.6")
     implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("io.ktor:ktor-client-okhttp:2.2.4")
 
