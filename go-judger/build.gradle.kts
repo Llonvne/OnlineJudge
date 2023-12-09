@@ -62,7 +62,18 @@ dependencies {
     implementation("org.apache.kafka:kafka-streams:3.6.1")
     implementation("org.testcontainers:kafka:1.19.3")
 
+
+    // COPYKAT
+    val kopyKatVersion = "1.0.4"
+    ksp("at.kopyk:kopykat-ksp:$kopyKatVersion")
+    compileOnly("at.kopyk:kopykat-annotations:$kopyKatVersion")
+
+    // FOR TEST
     testImplementation(kotlin("test"))
+}
+
+ksp {
+    arg("generate", "annotated")
 }
 
 
