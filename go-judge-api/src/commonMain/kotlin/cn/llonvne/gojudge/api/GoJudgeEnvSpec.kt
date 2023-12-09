@@ -1,5 +1,7 @@
 package cn.llonvne.gojudge.api
 
+import com.benasher44.uuid.uuid4
+
 fun portValidCheck(port: Int) = port in 1..65535
 
 const val LATEST = "latest"
@@ -9,6 +11,56 @@ const val LOCALHOST = "localhost"
 val Long.Kib get() = this * 1024
 
 val Long.Mib get() = this.Kib * 1024
+
+@Suppress("unused")
+sealed interface GoJudgeVersion {
+
+    val tag: String
+
+    data object Latest : GoJudgeVersion {
+        override val tag: String = LATEST
+    }
+
+    data class Customized(override val tag: String) : GoJudgeVersion
+}
+
+data class GoJudgePortMapping(
+    val outer: Int = 5050, val inner: Int = 5050
+) {
+    init {
+        require(portValidCheck(outer)) {
+            "outer:$outer is not a valid port in 1..65535"
+        }
+        require(portValidCheck(inner)) {
+            "inner:$inner is not a valid port in 1..65535"
+        }
+    }
+
+    val asDockerPortMappingString get() = "$inner:$outer"
+}
+
+sealed interface GoJudgePortMappings {
+    val binds: List<GoJudgePortMapping>
+
+    data object Default : GoJudgePortMappings {
+        override val binds: List<GoJudgePortMapping> = listOf(GoJudgePortMapping())
+    }
+
+    @Suppress("unused")
+    data class Customized(override val binds: List<GoJudgePortMapping>) : GoJudgePortMappings
+}
+
+sealed interface ContainerName {
+    val name: String
+
+    data class GeneratorWithPrefix(val prefix: String, val randomLatterLength: Int = 6) :
+        ContainerName {
+        override val name: String = "$prefix:${uuid4().toString().subSequence(0..randomLatterLength)}"
+    }
+
+    @Suppress("unused")
+    data class Customized(override val name: String) : ContainerName
+}
 
 data class HttpAddr(val url: String, val port: Int) {
     init {
@@ -23,7 +75,6 @@ data class HttpAddr(val url: String, val port: Int) {
 interface IsDefaultSetting {
     val isDefault: Boolean
 }
-
 
 data class GoJudgeEnvSpec(
     val httpAddr: HttpAddr = DEFAULT_HTTP_ADDR,
@@ -299,7 +350,7 @@ data class GoJudgeEnvSpec(
 
         data object Disabled : FileTimeoutSetting
 
-        data class Timeout(private val minutes: Int) : FileTimeoutSetting {
+        data class Timeout(val minutes: Int) : FileTimeoutSetting {
             val seconds = (minutes * 60).toString() + "s"
         }
     }

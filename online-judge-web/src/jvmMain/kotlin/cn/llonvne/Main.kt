@@ -1,6 +1,7 @@
 package cn.llonvne
 
 import io.kvision.remote.getAllServiceManagers
+import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -20,6 +21,7 @@ class KVApplication {
 }
 
 fun main(args: Array<String>) {
+    BeanUtils.copyProperties()
     runApplication<KVApplication>(*args)
 }
 

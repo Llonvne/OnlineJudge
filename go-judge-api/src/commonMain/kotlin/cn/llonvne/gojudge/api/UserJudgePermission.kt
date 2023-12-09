@@ -1,4 +1,5 @@
 package cn.llonvne.gojudge.api
+
 import kotlin.time.Duration.Companion.seconds
 
 enum class UserJudgePermission(val costTokenPer: Int) {

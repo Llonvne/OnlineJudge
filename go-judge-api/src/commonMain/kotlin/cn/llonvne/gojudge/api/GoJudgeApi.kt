@@ -104,7 +104,8 @@ data class PipeIndex(
 
 @Serializable
 data class PipeMap(
-    val `in`: PipeIndex,  // input end of the pipe
+    @SerialName("in")
+    val In: PipeIndex,  // input end of the pipe
     val out: PipeIndex, // output end of the pipe
     // enable pipe proxy from in to out,
     // content from in will be discarded if out closes

@@ -1,91 +1,39 @@
 package cn.llonvne.gojudge.docker
 
-import arrow.fx.coroutines.ExitCase
-import arrow.fx.coroutines.resource
-import arrow.fx.coroutines.resourceScope
 import cn.llonvne.gojudge.api.GoJudgeEnvSpec
-import cn.llonvne.gojudge.api.LATEST
-import cn.llonvne.gojudge.api.portValidCheck
+import cn.llonvne.gojudge.api.GoJudgePortMappings
+import cn.llonvne.gojudge.api.GoJudgeVersion
 import com.github.dockerjava.api.model.HostConfig
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
+import java.math.BigInteger
+import java.security.SecureRandom
 
 private val GO_JUDGE_DOCKER_NAME = DockerImageName.parse("criyle/go-judge")
 
 val isLinux by lazy {
     val dockerHost = System.getenv("DOCKER_HOST")
-
-    if (dockerHost != null && dockerHost.startsWith("unix://")) {
-        true
-    } else {
-        false
-    }
+    dockerHost != null && dockerHost.startsWith("unix://")
 }
 
-@Suppress("unused")
-sealed interface GoJudgeVersion {
-
-    val tag: String
-
-    data object Latest : GoJudgeVersion {
-        override val tag: String = LATEST
-    }
-
-    data class Customized(override val tag: String) : GoJudgeVersion
+fun generateSecureKey(length: Int): String {
+    val secureRandom = SecureRandom()
+    val randomBytes = ByteArray(length)
+    secureRandom.nextBytes(randomBytes)
+    return BigInteger(1, randomBytes).toString(16)
 }
 
-data class GoJudgePortMapping(
-    val outer: Int = 5050, val inner: Int = 5050
-) {
-    init {
-        require(portValidCheck(outer)) {
-            "outer:$outer is not a valid port in 1..65535"
-        }
-        require(portValidCheck(inner)) {
-            "inner:$inner is not a valid port in 1..65535"
-        }
-    }
-
-    val asDockerPortMappingString get() = "$inner:$outer"
-}
-
-sealed interface GoJudgePortMappings {
-    val binds: List<GoJudgePortMapping>
-
-    data object Default : GoJudgePortMappings {
-        override val binds: List<GoJudgePortMapping> = listOf(GoJudgePortMapping())
-    }
-
-    @Suppress("unused")
-    data class Customized(override val binds: List<GoJudgePortMapping>) : GoJudgePortMappings
-}
-
-sealed interface ContainerName {
-    val name: String
-
-    data class GeneratorWithPrefix(private val prefix: String, private val randomLatterLength: Int = 6) :
-        ContainerName {
-        override val name: String = "$prefix:${UUID.randomUUID().toString().subSequence(0..randomLatterLength)}"
-    }
-
-    @Suppress("unused")
-    data class Customized(override val name: String) : ContainerName
-}
-
-suspend fun startGoJudgeContainer(
+fun configureGoJudgeContainer(
     version: GoJudgeVersion = GoJudgeVersion.Latest,
     portMappings: GoJudgePortMappings = GoJudgePortMappings.Default,
     isPrivilegedMode: Boolean = true,
     reuseContainer: Boolean = false,
     envsConfigure: GoJudgeEnvSpec.() -> Unit = {}
-) {
-    val logger = LoggerFactory.getLogger(GoJudgeContainer::class.java)
+): GoJudgeContainer {
 
     // 初始化 DockerImage
     val container = GoJudgeContainer(GO_JUDGE_DOCKER_NAME.withTag(version.tag))
-
 
     // 处理暴露端口
     portMappings.binds.map { it.asDockerPortMappingString }.forEach { container.portBindings.add(it) }
@@ -105,22 +53,12 @@ suspend fun startGoJudgeContainer(
 
     // ENVS
     val spec = GoJudgeEnvSpec()
+
     spec.envsConfigure()
 
+    container.applySpec(spec)
 
-    resourceScope {
-        resource(acquire = {
-            container.start()
-        }) { _, exit ->
-            when (exit) {
-                is ExitCase.Cancelled -> println("Go-Judge Container Exit Cancelled")
-                ExitCase.Completed -> println("Go-Judge Container Exit Success")
-                is ExitCase.Failure -> println("Go-Judge Container Exit Failure")
-            }
-        }
-
-
-    }
+    return container
 }
 
 fun shouldHappen(): Nothing =
