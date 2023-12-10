@@ -66,6 +66,8 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
 
+
+
     // COPYKAT
     val kopyKatVersion = "1.0.4"
     ksp("at.kopyk:kopykat-ksp:$kopyKatVersion")
@@ -76,8 +78,6 @@ dependencies {
 }
 
 ksp {
-//    arg("generate", "annotated")
-    arg("generate", "packages:cn.llonvne.gojudge.api.*")
 }
 
 

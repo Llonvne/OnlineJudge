@@ -4,6 +4,7 @@ import cn.llonvne.gojudge.ktor.*
 import cn.llonvne.gojudge.web.installManageWeb
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.application.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -26,6 +27,7 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     install(Resources)
     install(AutoHeadResponse)
     install(RequestValidation)
+    install(HiddenUserPassword)
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
@@ -44,9 +46,16 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     installCORS()
     installManageWeb()
 
+
     val config = JudgerConfig()
 
     config.configuration()
+
+    routing {
+        get("/user") {
+            call.respond(User("llonvne","12345"))
+        }
+    }
 
 
     routing {
