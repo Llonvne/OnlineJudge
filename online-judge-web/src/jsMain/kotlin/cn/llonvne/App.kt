@@ -1,7 +1,5 @@
 package cn.llonvne
 
-import cn.llonvne.gojudge.api.GoJudgeEnvSpec
-import cn.llonvne.gojudge.api.copy
 import io.kvision.*
 import io.kvision.html.h1
 import io.kvision.panel.root

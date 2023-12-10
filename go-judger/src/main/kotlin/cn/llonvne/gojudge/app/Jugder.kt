@@ -2,8 +2,8 @@ package cn.llonvne.gojudge.app
 
 import cn.llonvne.gojudge.ktor.*
 import cn.llonvne.gojudge.web.installManageWeb
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.callloging.*
@@ -24,10 +24,12 @@ class JudgerConfig {
 
 
 fun Application.judging(configuration: JudgerConfig.() -> Unit) {
+
+    val logger = KotlinLogging.logger {}
+
     install(Resources)
     install(AutoHeadResponse)
     install(RequestValidation)
-    install(HiddenUserPassword)
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
@@ -50,13 +52,6 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     val config = JudgerConfig()
 
     config.configuration()
-
-    routing {
-        get("/user") {
-            call.respond(User("llonvne","12345"))
-        }
-    }
-
 
     routing {
         globalAuth {

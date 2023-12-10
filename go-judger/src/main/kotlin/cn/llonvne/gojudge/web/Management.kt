@@ -9,7 +9,6 @@ import kotlinx.html.*
 
 fun Application.installManageWeb() {
     routing {
-
         get("/submit") {
             if (call.parameters.names().size != 1) {
                 call.respond(HttpStatusCode.BadRequest)

@@ -1,8 +1,10 @@
 package cn.llonvne.gojudge.api
 
 import com.benasher44.uuid.uuid4
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
-fun portValidCheck(port: Int) = port in 1..65535
+fun isValidPort(port: Int) = port in 1..65535
 
 const val LATEST = "latest"
 
@@ -17,21 +19,24 @@ sealed interface GoJudgeVersion {
 
     val tag: String
 
+    @Serializable
     data object Latest : GoJudgeVersion {
         override val tag: String = LATEST
     }
 
+    @Serializable
     data class Customized(override val tag: String) : GoJudgeVersion
 }
 
+@Serializable
 data class GoJudgePortMapping(
     val outer: Int = 5050, val inner: Int = 5050
 ) {
     init {
-        require(portValidCheck(outer)) {
+        require(isValidPort(outer)) {
             "outer:$outer is not a valid port in 1..65535"
         }
-        require(portValidCheck(inner)) {
+        require(isValidPort(inner)) {
             "inner:$inner is not a valid port in 1..65535"
         }
     }
@@ -39,22 +44,26 @@ data class GoJudgePortMapping(
     val asDockerPortMappingString get() = "$inner:$outer"
 }
 
+@Serializable
 sealed interface GoJudgePortMappings {
     val binds: List<GoJudgePortMapping>
 
+    @Serializable
     data object Default : GoJudgePortMappings {
         override val binds: List<GoJudgePortMapping> = listOf(GoJudgePortMapping())
     }
 
     @Suppress("unused")
+    @Serializable
     data class Customized(override val binds: List<GoJudgePortMapping>) : GoJudgePortMappings
 }
 
+@Serializable
 sealed interface ContainerName {
     val name: String
 
-    data class GeneratorWithPrefix(val prefix: String, val randomLatterLength: Int = 6) :
-        ContainerName {
+    @Serializable
+    data class GeneratorWithPrefix(val prefix: String, val randomLatterLength: Int = 6) : ContainerName {
         override val name: String = "$prefix:${uuid4().toString().subSequence(0..randomLatterLength)}"
     }
 
@@ -62,9 +71,10 @@ sealed interface ContainerName {
     data class Customized(override val name: String) : ContainerName
 }
 
+@Serializable
 data class HttpAddr(val url: String, val port: Int) {
     init {
-        require(portValidCheck(port))
+        require(isValidPort(port))
     }
 
     override fun toString(): String {
@@ -73,9 +83,11 @@ data class HttpAddr(val url: String, val port: Int) {
 }
 
 interface IsDefaultSetting {
+    @Transient
     val isDefault: Boolean
 }
 
+@Serializable
 data class GoJudgeEnvSpec(
     val httpAddr: HttpAddr = DEFAULT_HTTP_ADDR,
     val enableGrpc: Boolean = DEFAULT_ENABLE_GRPC,
@@ -116,32 +128,42 @@ data class GoJudgeEnvSpec(
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface GoJudgeLogLevel : IsDefaultSetting {
 
         override val isDefault get() = this is INFO
 
+        @Serializable
         data object INFO : GoJudgeLogLevel
 
+        @Serializable
         data object SILENT : GoJudgeLogLevel
 
+        @Serializable
         data object RELEASE : GoJudgeLogLevel
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface GoJudgeAuthTokenSetting : IsDefaultSetting {
         override val isDefault: Boolean get() = this is Disabled
 
+        @Serializable
         data object Disabled : GoJudgeAuthTokenSetting
 
+        @Serializable
         data class Enable(val token: String) : GoJudgeAuthTokenSetting
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface ConcurrencyNumberSetting : IsDefaultSetting {
         override val isDefault: Boolean get() = this is EqualCpuCore
 
+        @Serializable
         data object EqualCpuCore : ConcurrencyNumberSetting
 
+        @Serializable
         data class Customized(val number: Int) : ConcurrencyNumberSetting {
             init {
                 require(number > 0)
@@ -150,46 +172,58 @@ data class GoJudgeEnvSpec(
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface FileStoreSetting : IsDefaultSetting {
         override val isDefault: Boolean get() = this is Memory
 
+        @Serializable
         data object Memory : FileStoreSetting
+
+        @Serializable
         data object Dir : FileStoreSetting
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface CGroupPrefixSetting : IsDefaultSetting {
 
         val prefix: String
 
         override val isDefault: Boolean get() = this is Default
 
+        @Serializable
         data object Default : CGroupPrefixSetting {
             override val prefix: String = "gojudge"
         }
 
+        @Serializable
         data class Customized(override val prefix: String) : CGroupPrefixSetting {}
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface GoJudgeTimeInterval : IsDefaultSetting {
         val time: String
         override val isDefault: Boolean get() = this is Default
 
+        @Serializable
         data object Default : GoJudgeTimeInterval {
             override val time: String = "100ms"
         }
 
+        @Serializable
         data class Ms(val ms: Int) : GoJudgeTimeInterval {
             override val time: String = "${ms}ms"
         }
 
+        @Serializable
         data class Second(val second: Int) : GoJudgeTimeInterval {
             override val time: String = "${second}s"
         }
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface OutputLimitSetting : IsDefaultSetting {
 
         val byte: Long
@@ -197,38 +231,46 @@ data class GoJudgeEnvSpec(
         override val isDefault: Boolean
             get() = this is Default
 
+        @Serializable
         data object Default : OutputLimitSetting {
             override val byte: Long
                 get() = 256L.Mib
         }
 
+        @Serializable
         data class Customize(override val byte: Long) : OutputLimitSetting
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface ExtraMemoryLimitSetting : IsDefaultSetting {
         val byte: Long
 
         override val isDefault: Boolean
             get() = this is Default
 
+        @Serializable
         data object Default : ExtraMemoryLimitSetting {
             override val byte: Long = 16L.Kib
         }
 
+        @Serializable
         data class Customized(override val byte: Long) : ExtraMemoryLimitSetting
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface CopyOutLimitSetting : IsDefaultSetting {
         val byte: Long
         override val isDefault: Boolean
             get() = this is Default
 
+        @Serializable
         data object Default : CopyOutLimitSetting {
             override val byte: Long = 64L.Mib
         }
 
+        @Serializable
         data class Customized(override val byte: Long) : CopyOutLimitSetting
     }
 
@@ -238,16 +280,18 @@ data class GoJudgeEnvSpec(
         override val isDefault: Boolean
             get() = this is Default
 
+        @Serializable
         data object Default : OpenFileLimitSetting {
             override val limit: Long = 256
         }
 
+        @Serializable
         data class Customized(override val limit: Long) : OpenFileLimitSetting
     }
 
     @Suppress("unused")
     sealed interface LinuxOnlySpec : IsDefaultSetting {
-
+        @Serializable
         data object NotLinuxPlatform : LinuxOnlySpec {
             override val isDefault: Boolean
                 get() = true
@@ -257,6 +301,7 @@ data class GoJudgeEnvSpec(
             fun default() = NotLinuxPlatform
         }
 
+        @Serializable
         data class LinuxPlatformSpec(
             // specifies cpuset.cpus cgroup for each container (Linux only)
             val cpuSets: CpuSetting = CpuSetting.Default,
@@ -271,85 +316,109 @@ data class GoJudgeEnvSpec(
             override val isDefault: Boolean
                 get() = false
 
+            @Serializable
             sealed interface CpuSetting : IsDefaultSetting {
 
                 override val isDefault: Boolean
                     get() = this is Default
 
+                @Serializable
                 data object Default : CpuSetting
 
+                @Serializable
                 data class Customized(val settings: String) : CpuSetting
             }
 
+            @Serializable
             sealed interface ContainerCredStartSetting : IsDefaultSetting {
                 val start: Int
 
                 override val isDefault: Boolean
                     get() = this is Default
 
+                @Serializable
                 data object Default : ContainerCredStartSetting {
                     override val start: Int
                         get() = 10000
                 }
 
+                @Serializable
                 data class Customized(override val start: Int) : ContainerCredStartSetting
             }
 
+            @Serializable
             sealed interface CpuRateSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Disable
 
+                @Serializable
                 data object Disable : CpuRateSetting
 
+                @Serializable
                 data object Enable : CpuRateSetting
             }
 
+            @Serializable
             sealed interface SeccompConfSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Disable
 
+                @Serializable
                 data object Disable : SeccompConfSetting
 
+                @Serializable
                 data class Customized(val settings: String) : SeccompConfSetting
             }
 
+            @Serializable
             sealed interface TmsFsParamSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Default
 
+                @Serializable
                 data object Default : TmsFsParamSetting
+
+                @Serializable
                 data class Customized(val command: String) : TmsFsParamSetting
             }
 
+            @Serializable
             sealed interface MountConfSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Default
 
+                @Serializable
                 data object Default : MountConfSetting
 
+                @Serializable
                 data class Customized(val settings: String) : MountConfSetting
             }
         }
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface PreForkSetting : IsDefaultSetting {
         override val isDefault: Boolean
             get() = this is Default
 
+        @Serializable
         data object Default : PreForkSetting
 
+        @Serializable
         data class Customized(val instance: Int) : PreForkSetting
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface FileTimeoutSetting : IsDefaultSetting {
         override val isDefault: Boolean
             get() = this is Disabled
 
-
+        @Serializable
         data object Disabled : FileTimeoutSetting
 
+        @Serializable
         data class Timeout(val minutes: Int) : FileTimeoutSetting {
             val seconds = (minutes * 60).toString() + "s"
         }

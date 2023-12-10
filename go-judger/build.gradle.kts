@@ -19,6 +19,7 @@ fun ktor(name: String) = ("io.ktor:$name")
 fun ktorServer(name: String) = ktor("ktor-server-$name")
 
 dependencies {
+    // API
     implementation(projects.goJudgeApi)
 
     // ARROW
@@ -27,9 +28,14 @@ dependencies {
     implementation("io.arrow-kt:suspendapp:0.4.0")
     implementation("io.arrow-kt:suspendapp-ktor:0.4.0")
 
-
+    // MONITOR
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.0")
+
+    // JSON
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.4")
+
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
+
     // SERVER KTOR
     implementation("io.ktor:ktor-server-core:2.3.7")
     implementation("io.ktor:ktor-server-netty:2.3.7")
@@ -48,25 +54,21 @@ dependencies {
     implementation(ktorServer("metrics-micrometer"))
     implementation(ktorServer("cors"))
     implementation(ktorServer("rate-limit"))
+
     // CLIENT KTOR
     implementation("io.ktor:ktor-client-resources:2.3.6")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
     implementation("io.ktor:ktor-client-core:2.3.6")
-    implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("io.ktor:ktor-client-okhttp:2.2.4")
 
-    // KATFA
-    implementation("io.github.nomisrev:kotlin-kafka:0.3.0")
-    implementation("org.apache.kafka:connect-runtime:3.6.1")
-    implementation("org.apache.kafka:kafka-clients:3.6.1")
-    implementation("org.apache.kafka:kafka-streams:3.6.1")
-    implementation("org.testcontainers:kafka:1.19.3")
+    // LOGGING
+    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
+    implementation("org.slf4j:slf4j-api:2.0.5")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+    implementation("org.apache.logging.log4j:log4j-core:2.20.0")
 
     // DOT ENV
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
-
-
-
 
     // COPYKAT
     val kopyKatVersion = "1.0.4"
@@ -75,11 +77,10 @@ dependencies {
 
     // FOR TEST
     testImplementation(kotlin("test"))
-}
 
-ksp {
+    // DEV CONTAINER
+    implementation("org.testcontainers:kafka:1.19.3")
 }
-
 
 tasks.withType<Wrapper> {
     gradleVersion = "8.1.1"
