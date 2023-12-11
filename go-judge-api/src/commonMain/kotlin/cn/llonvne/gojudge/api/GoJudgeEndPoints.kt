@@ -14,7 +14,7 @@ value class GoJudgeService(val httpClient: HttpClient)
 
 interface Sample {
     @GET("/version")
-    fun version(): String
+    suspend fun version(): String
 }
 
 @Resource("/version")

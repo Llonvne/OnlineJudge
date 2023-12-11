@@ -1,5 +1,7 @@
 package cn.llonvne
 
+import cn.llonvne.gojudge.api.Sample
+import de.jensklingenberg.ktorfit.Ktorfit
 import io.kvision.remote.getAllServiceManagers
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -17,6 +19,11 @@ import org.springframework.stereotype.Service
 class KVApplication {
     @Bean
     fun getManagers() = getAllServiceManagers()
+
+    @Bean
+    fun sample() = Ktorfit.Builder()
+        .baseUrl("http://localhost:8081/")
+        .build().create<Sample>()
 }
 
 fun main(args: Array<String>) {
@@ -27,11 +34,10 @@ fun main(args: Array<String>) {
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
-actual class PingService : IPingService {
+actual class PingService(private val sample: Sample) : IPingService {
 
     override suspend fun ping(message: String): String {
-        println(message)
-        return "Hello world from server!"
+        return sample.version()
     }
 }
 

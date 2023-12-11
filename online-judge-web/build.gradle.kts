@@ -94,6 +94,7 @@ kotlin {
             dependencies {
                 api("io.kvision:kvision-server-spring-boot:$kvisionVersion")
                 implementation(projects.goJudgeApi)
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
             }
         }
         val commonTest by getting {
