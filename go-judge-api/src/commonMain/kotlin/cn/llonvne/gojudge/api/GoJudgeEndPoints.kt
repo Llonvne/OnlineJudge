@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.api
 
+import de.jensklingenberg.ktorfit.http.GET
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
@@ -10,6 +11,11 @@ import kotlin.jvm.JvmInline
 
 @JvmInline
 value class GoJudgeService(val httpClient: HttpClient)
+
+interface Sample {
+    @GET("/version")
+    fun version(): String
+}
 
 @Resource("/version")
 class Version

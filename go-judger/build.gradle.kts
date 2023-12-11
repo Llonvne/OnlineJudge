@@ -3,6 +3,7 @@ plugins {
     id("io.ktor.plugin")
     id("com.google.devtools.ksp") version "1.9.21-1.0.15"
     kotlin("plugin.serialization")
+    id("de.jensklingenberg.ktorfit")
 }
 
 repositories {
@@ -19,6 +20,9 @@ fun ktor(name: String) = ("io.ktor:$name")
 fun ktorServer(name: String) = ktor("ktor-server-$name")
 
 dependencies {
+    // Ktorfit
+    implementation("de.jensklingenberg.ktorfit:ktorfit-lib-light:$ktorfitVersion")
+
     // API
     implementation(projects.goJudgeApi)
 
@@ -33,8 +37,6 @@ dependencies {
 
     // JSON
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.4")
-
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
 
     // SERVER KTOR
     implementation("io.ktor:ktor-server-core:2.3.7")
@@ -66,6 +68,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
     implementation("org.apache.logging.log4j:log4j-core:2.20.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
 
     // DOT ENV
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")

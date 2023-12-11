@@ -2,7 +2,7 @@
     "spec": {
         "httpAddr": {
             "url": "127.0.0.1",
-            "port": 10000
+            "port": 5050
         },
         "enableGrpc": false,
         "grpcAddr": {
@@ -57,5 +57,5 @@
             "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.FileTimeoutSetting.Disabled"
         }
     },
-    "id": "56f96bfccea94a8bf5c375d5de02a1346dc57039676a342d471870075a6d6177"
+    "id": "cf46e73c15e6e9f1250db014df35120b7f85838794a62b571524fc4de9dfaacc"
 }

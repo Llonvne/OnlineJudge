@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
+    id("de.jensklingenberg.ktorfit")
 }
 
 repositories {
@@ -10,6 +11,8 @@ repositories {
 
 group = "cn.llonvne"
 version = "unspecified"
+
+val ktorfitVersion = "1.10.2"
 
 kotlin {
     jvm {
@@ -29,6 +32,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-resources:2.3.2")
                 implementation("io.ktor:ktor-client-core:2.3.2")
                 implementation("com.benasher44:uuid:0.8.2")
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
             }
         }
         jvmMain {
@@ -45,10 +49,15 @@ kotlin {
 }
 
 val kopyKatVersion = "1.0.4"
+
 dependencies {
     add("kspCommonMainMetadata", "at.kopyk:kopykat-ksp:$kopyKatVersion")
     add("kspJs", "at.kopyk:kopykat-ksp:$kopyKatVersion")
     add("kspJvm", "at.kopyk:kopykat-ksp:$kopyKatVersion")
+
+    add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    add("kspJvm","de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
+    add("kspJs","de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
 }
 
 ksp {

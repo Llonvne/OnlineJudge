@@ -1,6 +1,7 @@
 package cn.llonvne
 
 import io.kvision.*
+import io.kvision.html.button
 import io.kvision.html.h1
 import io.kvision.panel.root
 import io.kvision.remote.getService
@@ -13,15 +14,25 @@ val AppScope = CoroutineScope(window.asCoroutineDispatcher())
 
 class App : Application() {
 
-    val pingService = getService<IPingService>()
+    private val pingService = getService<IPingService>()
 
     override fun start() {
         root("kvapp") {
             val h1 = h1 {
+                +"HelloWorld"
+            }
+
+            button("ClickMe") {
+                onClick {
+                    AppScope.launch {
+                        pingService.ping("Hello")
+                    }
+                }
             }
 
             AppScope.launch {
                 pingService.ping("Hello").let {
+                    println(it)
                     h1.content = it
                 }
             }
