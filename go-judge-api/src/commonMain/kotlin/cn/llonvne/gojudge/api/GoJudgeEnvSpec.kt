@@ -45,6 +45,7 @@ data class GoJudgePortMapping(
 }
 
 @Serializable
+
 sealed interface GoJudgePortMappings {
     val binds: List<GoJudgePortMapping>
 

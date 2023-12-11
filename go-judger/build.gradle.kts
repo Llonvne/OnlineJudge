@@ -75,11 +75,6 @@ dependencies {
     // DOT ENV
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
-    // COPYKAT
-    val kopyKatVersion = "1.0.4"
-    ksp("at.kopyk:kopykat-ksp:$kopyKatVersion")
-    compileOnly("at.kopyk:kopykat-annotations:$kopyKatVersion")
-
     // FOR TEST
     testImplementation(kotlin("test"))
 

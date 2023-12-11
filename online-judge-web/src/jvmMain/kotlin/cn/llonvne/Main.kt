@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
 actual class PingService(private val sample: Sample) : IPingService {
 
     override suspend fun ping(message: String): String {
-        return sample.version()
+        return sample.version("a")
     }
 }
 

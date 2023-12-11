@@ -1,15 +1,17 @@
 import arrow.continuations.SuspendApp
 import arrow.continuations.ktor.server
 import arrow.fx.coroutines.resourceScope
-import cn.llonvne.gojudge.api.Sample
+import cn.llonvne.gojudge.api.Person
+import cn.llonvne.gojudge.api.address
+import cn.llonvne.gojudge.api.name
 import cn.llonvne.gojudge.app.judging
 import cn.llonvne.gojudge.docker.GoJudgeResolver
 import cn.llonvne.gojudge.env.loadConfigFromEnv
-import de.jensklingenberg.ktorfit.Ktorfit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.netty.*
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
+
 
 fun main() = SuspendApp {
     val log = KotlinLogging.logger(name = "go-judger-main")

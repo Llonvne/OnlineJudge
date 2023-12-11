@@ -6,8 +6,6 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.raise.either
 import cn.llonvne.gojudge.api.GoJudgeEnvSpec
-import cn.llonvne.gojudge.api.`GoJudgeEnvSpec$Mutable`
-import cn.llonvne.gojudge.api.copy
 import cn.llonvne.gojudge.api.isValidPort
 import cn.llonvne.gojudge.docker.generateSecureKey
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.net.InetAddressUtils
@@ -28,10 +26,12 @@ private const val GO_JUDGE_PORT = "JUDGE_PORT"
 private annotation class RelayOnGeneratedCode
 
 @RelayOnGeneratedCode
-private fun GoJudgeEnvSpecRef.set(block: `GoJudgeEnvSpec$Mutable`.() -> Unit) {
-    inner = inner.copy {
-        block()
-    }
+private fun GoJudgeEnvSpecRef.set(block: GoJudgeEnvSpec.() -> Unit) {
+
+    TODO();
+//    inner = inner.copy {
+//        block()
+//    }
 }
 
 @Serializable
@@ -74,7 +74,8 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
     ifNotNull(this.get(GO_JUDGE_IP, "127.0.0.1")) { ipStr ->
         require(isValidIP(ipStr)) { "$ipStr is not a valid ip" }
         spec.set {
-            this.httpAddr.url = ipStr
+            TODO();
+//            this.httpAddr.url = ipStr
         }
     }
 
@@ -84,7 +85,8 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
             "$portStr is not valid port"
         }
         spec.set {
-            this.httpAddr.port = port
+            TODO();
+//            this.httpAddr.port = port
         }
     }
 
@@ -123,7 +125,8 @@ internal fun Dotenv.setToken(spec: GoJudgeEnvSpecRef) {
         log.info { "judge token is ${token.token}" }
 
         spec.set {
-            this.authToken = GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable(token.token)
+            TODO()
+//            this.authToken = GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable(token.token)
         }
     }
 }

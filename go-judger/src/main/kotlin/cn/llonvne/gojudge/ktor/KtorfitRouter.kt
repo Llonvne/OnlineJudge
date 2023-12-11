@@ -101,6 +101,11 @@ val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConf
     }
 }
 
+enum class ParameterType {
+    Body, FormData, Header, HeadersMap, Tag, RequestBuilder
+}
+
+data class TypeInfoPack(val typeInfo: TypeInfo)
 
 fun parseMethodArgTypes(targetMethod: KFunction<*>, service: Any): List<TypeInfo> {
     return targetMethod.parameters.map {
