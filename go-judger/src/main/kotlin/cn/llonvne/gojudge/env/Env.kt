@@ -5,13 +5,11 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.raise.either
-import cn.llonvne.gojudge.api.GoJudgeEnvSpec
-import cn.llonvne.gojudge.api.isValidPort
+import cn.llonvne.gojudge.api.gojudgespec.*
 import cn.llonvne.gojudge.docker.generateSecureKey
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.net.InetAddressUtils
 import io.github.cdimascio.dotenv.Dotenv
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -21,25 +19,6 @@ private const val JUDGE_TOKEN = "JUDGE_AUTH_KEY"
 private const val SECURE_TOKEN_LENGTH = 32
 private const val GO_JUDGE_IP = "JUDGE_IP"
 private const val GO_JUDGE_PORT = "JUDGE_PORT"
-
-@RequiresOptIn(message = "It relay on KopyKat Generated Code!")
-private annotation class RelayOnGeneratedCode
-
-@RelayOnGeneratedCode
-private fun GoJudgeEnvSpecRef.set(block: GoJudgeEnvSpec.() -> Unit) {
-
-    TODO();
-//    inner = inner.copy {
-//        block()
-//    }
-}
-
-@Serializable
-internal data class GoJudgeEnvSpecRef(var inner: GoJudgeEnvSpec = GoJudgeEnvSpec()) {
-    fun set(spec: GoJudgeEnvSpec) {
-        this.inner = spec
-    }
-}
 
 internal data class EnvConfig(val rawEnv: Dotenv, val judgeSpec: Option<GoJudgeEnvSpec>)
 
@@ -56,13 +35,9 @@ internal fun loadConfigFromEnv(): EnvConfig {
     return EnvConfig(env, spec)
 }
 
-
-private val json = Json { prettyPrint = true }
-
-@OptIn(RelayOnGeneratedCode::class)
 private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
 
-    val spec = GoJudgeEnvSpecRef()
+    val spec = GoJudgeEnvSpec()
 
     ifNull(this.get(ENABLE_JUDGE_KEY, "false").toBooleanStrictOrNull()) {
         log.error { "go-judge is disabled,please confirm your setting!" }
@@ -73,10 +48,7 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
 
     ifNotNull(this.get(GO_JUDGE_IP, "127.0.0.1")) { ipStr ->
         require(isValidIP(ipStr)) { "$ipStr is not a valid ip" }
-        spec.set {
-            TODO();
-//            this.httpAddr.url = ipStr
-        }
+        GoJudgeEnvSpec.httpAddr.url.modify(spec) { ipStr }
     }
 
     ifNotNull(this.get(GO_JUDGE_PORT, "5050")) { portStr ->
@@ -84,15 +56,12 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
         require(port != null && isValidPort(port)) {
             "$portStr is not valid port"
         }
-        spec.set {
-            TODO();
-//            this.httpAddr.port = port
+        GoJudgeEnvSpec.httpAddr.port.modify(spec) {
+            port
         }
     }
 
-    println(message = Json { prettyPrint = true }.encodeToString(spec.inner))
-
-    return Some(spec.inner)
+    return Some(spec)
 }
 
 internal class TokenIsTooWeak(value: String) : Exception(value)
@@ -113,8 +82,7 @@ fun Dotenv.getToken() = either {
     Token(token)
 }
 
-@OptIn(RelayOnGeneratedCode::class)
-internal fun Dotenv.setToken(spec: GoJudgeEnvSpecRef) {
+internal fun Dotenv.setToken(spec: GoJudgeEnvSpec) {
     val enableToken = isEnableJudgeAuthToken()
     if (enableToken) {
         val token = when (val token = getToken()) {
@@ -123,10 +91,8 @@ internal fun Dotenv.setToken(spec: GoJudgeEnvSpecRef) {
         }
 
         log.info { "judge token is ${token.token}" }
-
-        spec.set {
-            TODO()
-//            this.authToken = GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable(token.token)
+        GoJudgeEnvSpec.authToken.modify(spec) {
+            GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable(token.token)
         }
     }
 }

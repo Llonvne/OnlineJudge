@@ -31,7 +31,8 @@ dependencies {
     implementation("io.arrow-kt:arrow-fx-coroutines:1.2.0")
     implementation("io.arrow-kt:suspendapp:0.4.0")
     implementation("io.arrow-kt:suspendapp-ktor:0.4.0")
-
+    ksp("io.arrow-kt:arrow-optics-ksp-plugin:1.2.0")
+    implementation("io.arrow-kt:arrow-optics:1.2.0")
     // MONITOR
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.0")
 
@@ -80,6 +81,8 @@ dependencies {
 
     // DEV CONTAINER
     implementation("org.testcontainers:kafka:1.19.3")
+
+
 }
 
 tasks.withType<Wrapper> {

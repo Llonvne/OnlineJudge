@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.api
 
+
 import arrow.optics.optics
 
 @optics

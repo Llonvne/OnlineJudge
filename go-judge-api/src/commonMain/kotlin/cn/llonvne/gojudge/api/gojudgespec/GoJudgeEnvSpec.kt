@@ -1,5 +1,6 @@
-package cn.llonvne.gojudge.api
+package cn.llonvne.gojudge.api.gojudgespec
 
+import arrow.optics.optics
 import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -45,7 +46,6 @@ data class GoJudgePortMapping(
 }
 
 @Serializable
-
 sealed interface GoJudgePortMappings {
     val binds: List<GoJudgePortMapping>
 
@@ -73,6 +73,7 @@ sealed interface ContainerName {
 }
 
 @Serializable
+@optics
 data class HttpAddr(val url: String, val port: Int) {
     init {
         require(isValidPort(port))
@@ -81,6 +82,8 @@ data class HttpAddr(val url: String, val port: Int) {
     override fun toString(): String {
         return "$url:$port"
     }
+
+    companion object
 }
 
 interface IsDefaultSetting {
@@ -89,6 +92,7 @@ interface IsDefaultSetting {
 }
 
 @Serializable
+@optics
 data class GoJudgeEnvSpec(
     val httpAddr: HttpAddr = DEFAULT_HTTP_ADDR,
     val enableGrpc: Boolean = DEFAULT_ENABLE_GRPC,
@@ -130,7 +134,9 @@ data class GoJudgeEnvSpec(
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface GoJudgeLogLevel : IsDefaultSetting {
+        companion object {}
 
         override val isDefault get() = this is INFO
 
@@ -146,18 +152,25 @@ data class GoJudgeEnvSpec(
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface GoJudgeAuthTokenSetting : IsDefaultSetting {
+        companion object {}
+
         override val isDefault: Boolean get() = this is Disabled
 
         @Serializable
         data object Disabled : GoJudgeAuthTokenSetting
 
         @Serializable
-        data class Enable(val token: String) : GoJudgeAuthTokenSetting
+        @optics
+        data class Enable(val token: String) : GoJudgeAuthTokenSetting {
+            companion object
+        }
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface ConcurrencyNumberSetting : IsDefaultSetting {
         override val isDefault: Boolean get() = this is EqualCpuCore
 
@@ -165,11 +178,16 @@ data class GoJudgeEnvSpec(
         data object EqualCpuCore : ConcurrencyNumberSetting
 
         @Serializable
+        @optics
         data class Customized(val number: Int) : ConcurrencyNumberSetting {
             init {
                 require(number > 0)
             }
+
+            companion object
         }
+
+        companion object
     }
 
     @Suppress("unused")
@@ -186,6 +204,7 @@ data class GoJudgeEnvSpec(
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface CGroupPrefixSetting : IsDefaultSetting {
 
         val prefix: String
@@ -198,11 +217,17 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
-        data class Customized(override val prefix: String) : CGroupPrefixSetting {}
+        @optics
+        data class Customized(override val prefix: String) : CGroupPrefixSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface GoJudgeTimeInterval : IsDefaultSetting {
         val time: String
         override val isDefault: Boolean get() = this is Default
@@ -213,18 +238,27 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
+        @optics
         data class Ms(val ms: Int) : GoJudgeTimeInterval {
             override val time: String = "${ms}ms"
+
+            companion object
         }
 
         @Serializable
+        @optics
         data class Second(val second: Int) : GoJudgeTimeInterval {
             override val time: String = "${second}s"
+
+            companion object
         }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface OutputLimitSetting : IsDefaultSetting {
 
         val byte: Long
@@ -239,11 +273,17 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
-        data class Customize(override val byte: Long) : OutputLimitSetting
+        @optics
+        data class Customize(override val byte: Long) : OutputLimitSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface ExtraMemoryLimitSetting : IsDefaultSetting {
         val byte: Long
 
@@ -256,11 +296,17 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
-        data class Customized(override val byte: Long) : ExtraMemoryLimitSetting
+        @optics
+        data class Customized(override val byte: Long) : ExtraMemoryLimitSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface CopyOutLimitSetting : IsDefaultSetting {
         val byte: Long
         override val isDefault: Boolean
@@ -272,11 +318,17 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
-        data class Customized(override val byte: Long) : CopyOutLimitSetting
+        @optics
+        data class Customized(override val byte: Long) : CopyOutLimitSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface OpenFileLimitSetting : IsDefaultSetting {
         val limit: Long
         override val isDefault: Boolean
@@ -288,11 +340,17 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
-        data class Customized(override val limit: Long) : OpenFileLimitSetting
+        @optics
+        data class Customized(override val limit: Long) : OpenFileLimitSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface LinuxOnlySpec : IsDefaultSetting {
         @Serializable
         data object NotLinuxPlatform : LinuxOnlySpec {
@@ -305,6 +363,7 @@ data class GoJudgeEnvSpec(
         }
 
         @Serializable
+        @optics
         data class LinuxPlatformSpec(
             // specifies cpuset.cpus cgroup for each container (Linux only)
             val cpuSets: CpuSetting = CpuSetting.Default,
@@ -319,7 +378,10 @@ data class GoJudgeEnvSpec(
             override val isDefault: Boolean
                 get() = false
 
+            companion object {}
+
             @Serializable
+            @optics
             sealed interface CpuSetting : IsDefaultSetting {
 
                 override val isDefault: Boolean
@@ -329,10 +391,16 @@ data class GoJudgeEnvSpec(
                 data object Default : CpuSetting
 
                 @Serializable
-                data class Customized(val settings: String) : CpuSetting
+                @optics
+                data class Customized(val settings: String) : CpuSetting {
+                    companion object
+                }
+
+                companion object
             }
 
             @Serializable
+            @optics
             sealed interface ContainerCredStartSetting : IsDefaultSetting {
                 val start: Int
 
@@ -346,10 +414,16 @@ data class GoJudgeEnvSpec(
                 }
 
                 @Serializable
-                data class Customized(override val start: Int) : ContainerCredStartSetting
+                @optics
+                data class Customized(override val start: Int) : ContainerCredStartSetting {
+                    companion object
+                }
+
+                companion object
             }
 
             @Serializable
+            @optics
             sealed interface CpuRateSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Disable
@@ -359,9 +433,12 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 data object Enable : CpuRateSetting
+
+                companion object
             }
 
             @Serializable
+            @optics
             sealed interface SeccompConfSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Disable
@@ -370,10 +447,16 @@ data class GoJudgeEnvSpec(
                 data object Disable : SeccompConfSetting
 
                 @Serializable
-                data class Customized(val settings: String) : SeccompConfSetting
+                @optics
+                data class Customized(val settings: String) : SeccompConfSetting {
+                    companion object
+                }
+
+                companion object
             }
 
             @Serializable
+            @optics
             sealed interface TmsFsParamSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Default
@@ -382,10 +465,16 @@ data class GoJudgeEnvSpec(
                 data object Default : TmsFsParamSetting
 
                 @Serializable
-                data class Customized(val command: String) : TmsFsParamSetting
+                @optics
+                data class Customized(val command: String) : TmsFsParamSetting {
+                    companion object
+                }
+
+                companion object
             }
 
             @Serializable
+            @optics
             sealed interface MountConfSetting : IsDefaultSetting {
                 override val isDefault: Boolean
                     get() = this is Default
@@ -394,13 +483,19 @@ data class GoJudgeEnvSpec(
                 data object Default : MountConfSetting
 
                 @Serializable
-                data class Customized(val settings: String) : MountConfSetting
+                @optics
+                data class Customized(val settings: String) : MountConfSetting {
+                    companion object
+                }
+
+                companion object
             }
         }
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface PreForkSetting : IsDefaultSetting {
         override val isDefault: Boolean
             get() = this is Default
@@ -409,11 +504,17 @@ data class GoJudgeEnvSpec(
         data object Default : PreForkSetting
 
         @Serializable
-        data class Customized(val instance: Int) : PreForkSetting
+        @optics
+        data class Customized(val instance: Int) : PreForkSetting {
+            companion object
+        }
+
+        companion object
     }
 
     @Suppress("unused")
     @Serializable
+    @optics
     sealed interface FileTimeoutSetting : IsDefaultSetting {
         override val isDefault: Boolean
             get() = this is Disabled
@@ -422,8 +523,13 @@ data class GoJudgeEnvSpec(
         data object Disabled : FileTimeoutSetting
 
         @Serializable
+        @optics
         data class Timeout(val minutes: Int) : FileTimeoutSetting {
             val seconds = (minutes * 60).toString() + "s"
+
+            companion object
         }
+
+        companion object
     }
 }

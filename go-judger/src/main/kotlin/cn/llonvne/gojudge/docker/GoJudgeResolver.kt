@@ -2,7 +2,7 @@ package cn.llonvne.gojudge.docker
 
 import arrow.fx.coroutines.Resource
 import arrow.fx.coroutines.resource
-import cn.llonvne.gojudge.api.GoJudgeEnvSpec
+import cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -12,7 +12,6 @@ import org.testcontainers.DockerClientFactory
 import java.io.File
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
-import kotlin.math.log
 
 
 class GoJudgeResolver(private val spec: GoJudgeEnvSpec) {
