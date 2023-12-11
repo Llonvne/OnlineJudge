@@ -1,0 +1,61 @@
+{
+    "spec": {
+        "httpAddr": {
+            "url": "127.0.0.1",
+            "port": 10000
+        },
+        "enableGrpc": false,
+        "grpcAddr": {
+            "url": "localhost",
+            "port": 5051
+        },
+        "logLevel": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeLogLevel.INFO"
+        },
+        "authToken": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Disabled"
+        },
+        "goDebugEndPoint": false,
+        "prometheusMetrics": false,
+        "goDebugAndPrometheusMetricsAddr": {
+            "url": "localhost",
+            "port": 5052
+        },
+        "concurrencyNumber": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.ConcurrencyNumberSetting.EqualCpuCore"
+        },
+        "fileStore": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.FileStoreSetting.Memory"
+        },
+        "cGroupPrefix": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.CGroupPrefixSetting.Default"
+        },
+        "srcPrefix": [
+        ],
+        "timeLimitCheckerInterval": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeTimeInterval.Default"
+        },
+        "outputLimit": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.OutputLimitSetting.Default"
+        },
+        "extraMemoryLimit": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.ExtraMemoryLimitSetting.Default"
+        },
+        "copyOutLimit": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.CopyOutLimitSetting.Default"
+        },
+        "openFileLimit": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.OpenFileLimitSetting.Default"
+        },
+        "linuxOnlySpec": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.LinuxOnlySpec.NotLinuxPlatform"
+        },
+        "preFork": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.PreForkSetting.Default"
+        },
+        "fileTimeout": {
+            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.FileTimeoutSetting.Disabled"
+        }
+    },
+    "id": "c0fd2493359b68f452c7d61e0caf7ac9e94b79c22017a7a65b71a42b00f7ed9f"
+}

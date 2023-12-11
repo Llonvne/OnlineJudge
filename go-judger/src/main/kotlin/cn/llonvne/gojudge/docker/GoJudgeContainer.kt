@@ -6,6 +6,7 @@ import arrow.fx.coroutines.resource
 import cn.llonvne.gojudge.api.GoJudgeEnvSpec
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
@@ -74,6 +75,26 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+private val json = Json {
+    prettyPrint = true
+    encodeDefaults = true
+    explicitNulls = true
+}
+
+private val log = KotlinLogging.logger {}
+
+suspend fun persistInFile(spec: GoJudgeEnvSpec, id: String) = withContext(Dispatchers.IO) {
+    log.info { "Trying to persist file" }
+    val file = File("client.json")
+    if (file.exists()) {
+        file.delete()
+    }
+    file.createNewFile()
+    file.writeText(json.encodeToString(GoJudgeResolver.CachedJsonClient(spec, id)))
+}
+
+
 fun configureGoJudgeContainer(
     name: String = "go-judge",
     isPrivilegedMode: Boolean = true,
@@ -81,6 +102,8 @@ fun configureGoJudgeContainer(
     envs: MutableMap<String, String> = mutableMapOf(),
     spec: GoJudgeEnvSpec = GoJudgeEnvSpec()
 ): Resource<ContainerWrapper> {
+
+    log.info { "building new docker client" }
 
     envs["DEBIAN_FRONTEND"] = "noninteractive"
 
@@ -94,23 +117,14 @@ fun configureGoJudgeContainer(
     return resource({
         ContainerWrapper(container).also {
             it.start()
-
-            File("client.json").writeText(
-                Json.encodeToString(GoJudgeResolver.CachedJsonClient(spec, container.getContainerId()))
-            )
+            persistInFile(spec, container.getContainerId())
         }
     }) { wrapper, _ ->
         coroutineScope {
             launch {
                 wrapper.close()
             }
-            launch {
-                File("client.json").writeText(
-                    Json.encodeToString(GoJudgeResolver.CachedJsonClient(spec, container.getContainerId()))
-                )
-            }
         }
-
     }
 }
 

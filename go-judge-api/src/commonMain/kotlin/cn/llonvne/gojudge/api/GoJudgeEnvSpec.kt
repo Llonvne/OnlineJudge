@@ -275,6 +275,7 @@ data class GoJudgeEnvSpec(
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface OpenFileLimitSetting : IsDefaultSetting {
         val limit: Long
         override val isDefault: Boolean
@@ -290,6 +291,7 @@ data class GoJudgeEnvSpec(
     }
 
     @Suppress("unused")
+    @Serializable
     sealed interface LinuxOnlySpec : IsDefaultSetting {
         @Serializable
         data object NotLinuxPlatform : LinuxOnlySpec {
