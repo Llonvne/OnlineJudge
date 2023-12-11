@@ -26,7 +26,7 @@ class JudgerConfig {
 fun Application.judging(configuration: JudgerConfig.() -> Unit) {
 
     val logger = KotlinLogging.logger {}
-
+    install(Routing)
     install(Resources)
     install(AutoHeadResponse)
     install(RequestValidation)
@@ -47,6 +47,9 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     installMicrometer()
     installCORS()
     installManageWeb()
+    install(KtorfitRouter) {
+        this.services = listOf(SampleImpl())
+    }
 
 
     val config = JudgerConfig()
@@ -54,11 +57,12 @@ fun Application.judging(configuration: JudgerConfig.() -> Unit) {
     config.configuration()
 
     routing {
+        get("/version2") {
+            call.respondText("Hello")
+        }
         globalAuth {
             rateLimit(RACE_LIMIT_JUDGE_NAME) {
-                get("/version") {
-                    call.respondText("Hello")
-                }
+
             }
         }
     }

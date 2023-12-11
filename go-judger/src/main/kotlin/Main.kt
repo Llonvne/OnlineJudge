@@ -15,7 +15,6 @@ fun main() = SuspendApp {
     val log = KotlinLogging.logger(name = "go-judger-main")
     log.info { "Initialization Go Judger ...." }
 
-    val sample = Ktorfit.Builder().build().create<Sample>()
     val env = loadConfigFromEnv()
 
     resourceScope {

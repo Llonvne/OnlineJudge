@@ -68,6 +68,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
     implementation("org.apache.logging.log4j:log4j-core:2.20.0")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.7")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.21")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.6.4")
 
     // DOT ENV
