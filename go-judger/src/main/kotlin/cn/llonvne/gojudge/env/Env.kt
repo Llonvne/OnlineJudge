@@ -6,6 +6,8 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.raise.either
 import cn.llonvne.gojudge.api.gojudgespec.*
+import cn.llonvne.gojudge.api.spec.GoJudgeEnvSpec
+import cn.llonvne.gojudge.api.spec.isValidPort
 import cn.llonvne.gojudge.docker.generateSecureKey
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.net.InetAddressUtils
 import io.github.cdimascio.dotenv.Dotenv

@@ -1,7 +1,7 @@
 {
     "spec": {
         "httpAddr": {
-            "url": "127.0.0.1",
+            "url": "localhost",
             "port": 5050
         },
         "enableGrpc": false,
@@ -10,10 +10,10 @@
             "port": 5051
         },
         "logLevel": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeLogLevel.INFO"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.GoJudgeLogLevel.INFO"
         },
         "authToken": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Disabled"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Disabled"
         },
         "goDebugEndPoint": false,
         "prometheusMetrics": false,
@@ -22,40 +22,40 @@
             "port": 5052
         },
         "concurrencyNumber": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.ConcurrencyNumberSetting.EqualCpuCore"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.ConcurrencyNumberSetting.EqualCpuCore"
         },
         "fileStore": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.FileStoreSetting.Memory"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.FileStoreSetting.Memory"
         },
         "cGroupPrefix": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.CGroupPrefixSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.CGroupPrefixSetting.Default"
         },
         "srcPrefix": [
         ],
         "timeLimitCheckerInterval": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.GoJudgeTimeInterval.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.GoJudgeTimeInterval.Default"
         },
         "outputLimit": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.OutputLimitSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.OutputLimitSetting.Default"
         },
         "extraMemoryLimit": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.ExtraMemoryLimitSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.ExtraMemoryLimitSetting.Default"
         },
         "copyOutLimit": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.CopyOutLimitSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.CopyOutLimitSetting.Default"
         },
         "openFileLimit": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.OpenFileLimitSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.OpenFileLimitSetting.Default"
         },
         "linuxOnlySpec": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.LinuxOnlySpec.NotLinuxPlatform"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.LinuxOnlySpec.NotLinuxPlatform"
         },
         "preFork": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.PreForkSetting.Default"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.PreForkSetting.Default"
         },
         "fileTimeout": {
-            "type": "cn.llonvne.gojudge.api.GoJudgeEnvSpec.FileTimeoutSetting.Disabled"
+            "type": "cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec.FileTimeoutSetting.Disabled"
         }
     },
-    "id": "7a8c19fad278a74e80432e920a49c1880b79741a06d5b02563194c91b4a8bd41"
+    "id": "08d2ef5216ebb44f003d9ce67f1d433b668f3f5915a4a5498e6eb13237763c70"
 }

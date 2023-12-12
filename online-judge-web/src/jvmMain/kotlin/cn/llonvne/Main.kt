@@ -1,7 +1,8 @@
 package cn.llonvne
 
-import cn.llonvne.gojudge.api.Sample
-import de.jensklingenberg.ktorfit.Ktorfit
+import cn.llonvne.gojudge.api.GoJudgeService
+import cn.llonvne.gojudge.api.version
+import io.ktor.client.*
 import io.kvision.remote.getAllServiceManagers
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -21,23 +22,20 @@ class KVApplication {
     fun getManagers() = getAllServiceManagers()
 
     @Bean
-    fun sample() = Ktorfit.Builder()
-        .baseUrl("http://localhost:8081/")
-        .build().create<Sample>()
+    fun sample() = GoJudgeService(HttpClient())
 }
 
 fun main(args: Array<String>) {
     runApplication<KVApplication>(*args)
 }
 
-
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
-actual class PingService(private val sample: Sample) : IPingService {
+actual class PingService(private val sample: GoJudgeService) : IPingService {
 
     override suspend fun ping(message: String): String {
-        return sample.version("a")
+        return sample.version()
     }
 }
 

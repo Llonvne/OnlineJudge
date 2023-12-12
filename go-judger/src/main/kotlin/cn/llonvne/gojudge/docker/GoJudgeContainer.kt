@@ -3,7 +3,7 @@ package cn.llonvne.gojudge.docker
 import arrow.core.raise.either
 import arrow.fx.coroutines.Resource
 import arrow.fx.coroutines.resource
-import cn.llonvne.gojudge.api.gojudgespec.GoJudgeEnvSpec
+import cn.llonvne.gojudge.api.spec.GoJudgeEnvSpec
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import kotlinx.serialization.ExperimentalSerializationApi

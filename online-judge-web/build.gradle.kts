@@ -31,6 +31,7 @@ val ktorfitVersion = "1.10.2"
 
 dependencies {
     implementation("com.benasher44:uuid:0.7.0")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
@@ -116,6 +117,7 @@ kotlin {
                 implementation("pl.treksoft:r2dbc-e4k:$e4kVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
+                implementation("io.ktor:ktor-client-okhttp:2.2.4")
             }
         }
         val jvmTest by getting {

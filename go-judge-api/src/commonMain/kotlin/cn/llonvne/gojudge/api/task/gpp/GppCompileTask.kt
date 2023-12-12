@@ -1,12 +1,19 @@
-package cn.llonvne.gojudge.api
+package cn.llonvne.gojudge.api.task.gpp
 
+import cn.llonvne.gojudge.api.Task
+import cn.llonvne.gojudge.api.spec.*
+import cn.llonvne.gojudge.api.task.Output
+import cn.llonvne.gojudge.exposed.RuntimeService
+import cn.llonvne.gojudge.exposed.run
+import cn.llonvne.gojudge.services.runtime.request
+import cn.llonvne.gojudge.services.runtime.useUsrBinEnv
 import com.benasher44.uuid.uuid4
 
-class GppCompileTask : Task<GppInput, GppOutput> {
+class GppCompileTask : Task<GppInput, Output> {
     private val String.cpp: String
         get() = "$this.cpp"
 
-    override suspend fun run(input: GppInput, service: GoJudgeService): GppOutput {
+    override suspend fun run(input: GppInput, service: RuntimeService): Output {
         val sourceCodeFilename = uuid4().toString().cpp
         val outputCodeFilename = uuid4().toString()
 
@@ -23,16 +30,16 @@ class GppCompileTask : Task<GppInput, GppOutput> {
 
 
         val compileResult =
-            service.run(compileRequest).getOrNull(0) ?: return GppOutput.Failure.CompileResultIsNull(
+            service.run(compileRequest).getOrNull(0) ?: return Output.Failure.CompileResultIsNull(
                 compileRequest
             )
 
         if (compileResult.status != Status.Accepted) {
-            return GppOutput.Failure.CompileError(compileRequest, compileResult)
+            return Output.Failure.CompileError(compileRequest, compileResult)
         }
 
         val fileId =
-            compileResult.fileIds?.get(outputCodeFilename) ?: return GppOutput.Failure.TargetFileNotExist(
+            compileResult.fileIds?.get(outputCodeFilename) ?: return Output.Failure.TargetFileNotExist(
                 compileRequest,
                 compileResult
             )
@@ -48,13 +55,13 @@ class GppCompileTask : Task<GppInput, GppOutput> {
             }
         }
 
-        val runResult = service.run(runRequest).getOrNull(0) ?: return GppOutput.Failure.RunResultIsNull(
+        val runResult = service.run(runRequest).getOrNull(0) ?: return Output.Failure.RunResultIsNull(
             compileRequest,
             compileResult,
             runRequest
         )
 
-        return GppOutput.Success(
+        return Output.Success(
             compileRequest,
             compileResult,
             runRequest,

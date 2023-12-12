@@ -1,8 +1,8 @@
 package cn.llonvne.gojudge.ktor
 
-import cn.llonvne.gojudge.api.KtorfitRouterService
+import cn.llonvne.gojudge.exposed.KtorfitRouterService
 import cn.llonvne.gojudge.api.ReflectionApi
-import cn.llonvne.gojudge.api.Sample
+import cn.llonvne.gojudge.exposed.Sample
 import cn.llonvne.gojudge.docker.shouldHappen
 import de.jensklingenberg.ktorfit.http.*
 import io.github.oshai.kotlinlogging.KLogger

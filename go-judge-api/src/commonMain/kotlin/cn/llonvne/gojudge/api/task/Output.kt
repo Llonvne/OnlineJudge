@@ -1,10 +1,11 @@
-package cn.llonvne.gojudge.api
+package cn.llonvne.gojudge.api.task
 
-data class GppInput(val code: String, val stdin: String)
+import cn.llonvne.gojudge.api.spec.RequestType
+import cn.llonvne.gojudge.api.spec.Result
 
-sealed interface GppOutput {
+sealed interface Output {
 
-    sealed interface Failure : GppOutput {
+    sealed interface Failure : Output {
         data class CompileResultIsNull(val compileRequest: RequestType.Request) : Failure
 
         data class CompileError(val compileRequest: RequestType.Request, val compileResult: Result) : Failure
@@ -23,5 +24,5 @@ sealed interface GppOutput {
         val compileResult: Result,
         val runRequest: RequestType.Request,
         val runResult: Result
-    ) : GppOutput
+    ) : Output
 }

@@ -1,19 +1,9 @@
-package cn.llonvne.gojudge.api.gojudgespec
+package cn.llonvne.gojudge.api.spec
 
 import arrow.optics.optics
 import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-
-fun isValidPort(port: Int) = port in 1..65535
-
-const val LATEST = "latest"
-
-const val LOCALHOST = "localhost"
-
-val Long.Kib get() = this * 1024
-
-val Long.Mib get() = this.Kib * 1024
 
 @Suppress("unused")
 sealed interface GoJudgeVersion {
