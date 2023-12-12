@@ -1,6 +1,5 @@
 package cn.llonvne.gojudge.api
 
-
 fun request(
     requestId: String? = null,
     pipeMap: List<PipeMap>? = null,

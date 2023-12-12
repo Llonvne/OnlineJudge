@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.app
 
+import cn.llonvne.gojudge.api.ReflectionApi
 import cn.llonvne.gojudge.ktor.*
 import cn.llonvne.gojudge.web.installManageWeb
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -23,6 +24,7 @@ class JudgerConfig {
 }
 
 
+@OptIn(ReflectionApi::class)
 fun Application.judging(configuration: JudgerConfig.() -> Unit) {
 
     val logger = KotlinLogging.logger {}

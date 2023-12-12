@@ -27,7 +27,7 @@ fun main() = SuspendApp {
         launch {
             env.judgeSpec.map { GoJudgeResolver(it).resolve().bind() }
         }
-        
+
         awaitCancellation()
     }
 }

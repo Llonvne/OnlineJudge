@@ -1,6 +1,7 @@
 package cn.llonvne.gojudge.ktor
 
 import cn.llonvne.gojudge.api.KtorfitRouterService
+import cn.llonvne.gojudge.api.ReflectionApi
 import cn.llonvne.gojudge.api.Sample
 import cn.llonvne.gojudge.docker.shouldHappen
 import de.jensklingenberg.ktorfit.http.*
@@ -35,6 +36,7 @@ class SampleImpl : Sample {
     }
 }
 
+@ReflectionApi
 val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
 
     val log = KotlinLogging.logger { }

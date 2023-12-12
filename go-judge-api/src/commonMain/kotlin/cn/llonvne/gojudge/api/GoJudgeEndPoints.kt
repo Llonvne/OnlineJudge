@@ -1,7 +1,6 @@
 package cn.llonvne.gojudge.api
 
 import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -13,6 +12,10 @@ import kotlin.jvm.JvmInline
 
 @JvmInline
 value class GoJudgeService(val httpClient: HttpClient)
+
+@RequiresOptIn("ReflectionApi", RequiresOptIn.Level.ERROR)
+annotation class ReflectionApi
+
 annotation class KtorfitRouterService
 
 @KtorfitRouterService
