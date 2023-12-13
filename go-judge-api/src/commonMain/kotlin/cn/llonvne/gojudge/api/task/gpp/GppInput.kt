@@ -1,7 +1,6 @@
 package cn.llonvne.gojudge.api.task.gpp
 
-import cn.llonvne.gojudge.api.spec.RequestType
-import cn.llonvne.gojudge.api.spec.Result
+import cn.llonvne.gojudge.api.task.Input
 
-data class GppInput(val code: String, val stdin: String)
+data class GppInput(override val code: String, override val stdin: String) : Input
 

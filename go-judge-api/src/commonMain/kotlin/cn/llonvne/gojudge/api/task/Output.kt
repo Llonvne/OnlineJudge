@@ -25,4 +25,9 @@ sealed interface Output {
         val runRequest: RequestType.Request,
         val runResult: Result
     ) : Output
+
+    data class SuccessWithoutCompile(
+        val runRequest: RequestType.Request,
+        val runResult: Result
+    ) : Output
 }

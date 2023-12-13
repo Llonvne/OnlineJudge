@@ -1,8 +1,5 @@
 package cn.llonvne.gojudge.ktor
 
-import cn.llonvne.gojudge.exposed.KtorfitRouterService
-import cn.llonvne.gojudge.api.ReflectionApi
-import cn.llonvne.gojudge.exposed.Sample
 import cn.llonvne.gojudge.docker.shouldHappen
 import de.jensklingenberg.ktorfit.http.*
 import io.github.oshai.kotlinlogging.KLogger
@@ -13,7 +10,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
-import io.ktor.util.pipeline.*
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
@@ -22,21 +18,12 @@ import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.superclasses
 
+annotation class KtorfitRouterService
 
 class KtorfitRouterConfig {
     var services: List<Any> = listOf<Any>()
 }
 
-typealias PIPE = PipelineInterceptor<Unit, ApplicationCall>
-
-class SampleImpl : Sample {
-    override suspend fun version(a: String): String {
-        print("HelloWorld")
-        return "Hello"
-    }
-}
-
-@ReflectionApi
 val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
 
     val log = KotlinLogging.logger { }

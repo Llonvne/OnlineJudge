@@ -5,34 +5,26 @@ import arrow.fx.coroutines.Resource
 import arrow.fx.coroutines.resource
 import cn.llonvne.gojudge.api.spec.GoJudgeEnvSpec
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.*
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.testcontainers.DockerClientFactory
 import org.testcontainers.containers.Container
 import org.testcontainers.containers.ExecInContainerPattern
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
-import java.io.File
-import java.math.BigInteger
-import java.security.SecureRandom
+import java.util.*
 
 
 private const val GO_JUDGE_DOCKER_NAME = "criyle/go-judge"
 
-val isLinux by lazy {
+private val isLinux by lazy {
     val dockerHost = System.getenv("DOCKER_HOST")
     dockerHost != null && dockerHost.startsWith("unix://")
 }
 
-fun generateSecureKey(length: Int): String {
-    val secureRandom = SecureRandom()
-    val randomBytes = ByteArray(length)
-    secureRandom.nextBytes(randomBytes)
-    return BigInteger(1, randomBytes).toString(16)
-}
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 val dockerCoroutinesContext = newSingleThreadContext("DockerThread")
@@ -49,7 +41,7 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
         }
     }
 
-    suspend fun start() = either {
+    internal suspend fun start() = either {
         on {
             container.start()
 
@@ -67,7 +59,7 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
         on { container.close() }
     }
 
-    private suspend fun exec(command: String): Container.ExecResult {
+    suspend fun exec(command: String): Container.ExecResult {
         return withContext(dockerCoroutinesContext) {
             ExecInContainerPattern
                 .execInContainer(dockerClient, container.containerInfo, "/bin/sh", "-c", command)
@@ -75,25 +67,7 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
     }
 }
 
-@OptIn(ExperimentalSerializationApi::class)
-private val json = Json {
-    prettyPrint = true
-    encodeDefaults = true
-    explicitNulls = true
-}
-
 private val log = KotlinLogging.logger {}
-
-suspend fun persistInFile(spec: GoJudgeEnvSpec, id: String) = withContext(Dispatchers.IO) {
-    log.info { "Trying to persist file" }
-    val file = File("client.json")
-    if (file.exists()) {
-        file.delete()
-    }
-    file.createNewFile()
-    file.writeText(json.encodeToString(GoJudgeResolver.CachedJsonClient(spec, id)))
-}
-
 
 fun configureGoJudgeContainer(
     name: String = "go-judge",
@@ -117,14 +91,9 @@ fun configureGoJudgeContainer(
     return resource({
         ContainerWrapper(container).also {
             it.start()
-            persistInFile(spec, container.getContainerId())
         }
     }) { wrapper, _ ->
-        coroutineScope {
-            launch {
-                wrapper.close()
-            }
-        }
+        wrapper.close()
     }
 }
 
@@ -169,17 +138,13 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
             GoJudgeEnvSpec.GoJudgeLogLevel.INFO -> shouldHappen()
         }
     }
-
-    if (!spec.authToken.isDefault) {
-        when (spec.authToken) {
-            GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Disabled -> shouldHappen()
-            is GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable -> {
-                @Suppress("SMARTCAST_IMPOSSIBLE")
-                container.withCommand("-auth-token=${spec.authToken.token}")
-            }
+    when (spec.authToken) {
+        GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Disabled -> Unit
+        is GoJudgeEnvSpec.GoJudgeAuthTokenSetting.Enable -> {
+            @Suppress("SMARTCAST_IMPOSSIBLE")
+            container.withCommand("-auth-token=${spec.authToken.token}")
         }
     }
-
     if (spec.goDebugEndPoint != GoJudgeEnvSpec.DEFAULT_GO_DEBUG_ENDPOINT_ENABLE) {
         withCommand("-enable-debug")
     }

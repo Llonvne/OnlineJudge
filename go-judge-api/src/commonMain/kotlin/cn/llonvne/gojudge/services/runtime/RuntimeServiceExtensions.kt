@@ -39,6 +39,13 @@ fun request(
     return RequestType.Request(requestId, cmd = cmd.build(), pipeMapping = pipeMap)
 }
 
+fun cmd(build: Cmd.() -> Unit): Cmd {
+    val cmd = Cmd(emptyList())
+    cmd.default()
+    cmd.build()
+    return cmd
+}
+
 suspend fun RuntimeService.run(
     requestId: String? = null,
     pipeMap: List<PipeMap>? = null,

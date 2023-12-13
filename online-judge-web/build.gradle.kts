@@ -114,7 +114,7 @@ kotlin {
 
                 implementation("org.komapper:komapper-spring-boot-starter-r2dbc:$komapperVersion")
                 implementation("org.komapper:komapper-dialect-h2-r2dbc:$komapperVersion")
-                
+
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-okhttp:2.2.4")

@@ -1,8 +1,17 @@
 package cn.llonvne.gojudge.api.spec
 
+import cn.llonvne.gojudge.api.task.AbstractTask
+
 fun useGpp(source: String, output: String): List<String> {
     return listOf("/usr/bin/g++", source, "-o", output)
 }
+
+fun useGpp(filenames: AbstractTask.Filenames) =
+    useGpp(
+        filenames.source.asString(),
+        filenames.compiled.asString()
+    )
+
 
 fun useStdOutErrForFiles(stdin: String = "", max: Int = 10240) = mutableListOf(
     GoJudgeFile.MemoryFile(

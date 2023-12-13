@@ -31,6 +31,7 @@ dependencies {
     implementation("io.arrow-kt:arrow-fx-coroutines:1.2.0")
     implementation("io.arrow-kt:suspendapp:0.4.0")
     implementation("io.arrow-kt:suspendapp-ktor:0.4.0")
+    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.7")
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:1.2.0")
     implementation("io.arrow-kt:arrow-optics:1.2.0")
     // MONITOR
@@ -63,6 +64,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
     implementation("io.ktor:ktor-client-core:2.3.6")
     implementation("io.ktor:ktor-client-okhttp:2.2.4")
+    implementation("io.ktor:ktor-client-logging:2.3.6")
 
     // LOGGING
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")

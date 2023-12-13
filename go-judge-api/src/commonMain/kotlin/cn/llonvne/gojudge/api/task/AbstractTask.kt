@@ -1,5 +1,8 @@
 package cn.llonvne.gojudge.api.task
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import cn.llonvne.gojudge.api.spec.Cmd
 import cn.llonvne.gojudge.api.spec.RequestType
 import cn.llonvne.gojudge.api.spec.Result
@@ -8,15 +11,14 @@ import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.run
 import cn.llonvne.gojudge.services.runtime.request
 import com.benasher44.uuid.uuid4
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
-fun <T : Any, R> T?.map(transform: (T) -> R?): R? = this?.let(transform)
-
 abstract class AbstractTask<I : Input> {
-    abstract val sourceCodeExtension: String
-    abstract val compiledFileExtension: String
+    abstract val sourceCodeExtension: Option<String>
+    abstract val compiledFileExtension: Option<String>
     abstract fun getCompileCmd(input: I, filenames: Filenames): Cmd
-    abstract fun getRunCmd(compileResult: Result, runFilename: Filename, runFileId: String): Cmd
+    abstract fun getRunCmd(input: I, compileResult: Result, runFilename: Filename, runFileId: String): Cmd
 
     @Serializable
     sealed interface HookError<E, R> {
@@ -28,11 +30,25 @@ abstract class AbstractTask<I : Input> {
     }
 
     @Serializable
-    data class Filenames(val sourceCodeFilename: Filename, val compileFilename: Filename)
+    data class Filenames(val source: Filename, val compiled: Filename)
 
     @Serializable
-    data class Filename(val name: String, val extension: String) {
-        fun asString() = "$name.$extension"
+    data class Filename(val name: String, @Contextual val extension: Option<String>) {
+        fun asString() = when (extension) {
+            None -> name
+            is Some -> "$name.${extension.value}"
+        }
+
+        override fun toString(): String {
+            return asString()
+        }
+    }
+
+    open fun beforeAll() {
+    }
+
+    open suspend fun installDependency() {
+
     }
 
     /**
@@ -51,43 +67,76 @@ abstract class AbstractTask<I : Input> {
      */
     open fun hookOnBeforeCompile(request: RequestType.Request) {}
 
-    // 该钩子函数只会处理存在结果的时候，如果不存在该函数不会被调用
+    /**
+     * 如果编译存在结果（不为 null）则会调用该函数
+     */
     open fun hookOnCompileResult(result: Result) {}
-    open fun transformCompileResultError(
+
+    /**
+     * 编译结果是null,调用该函数
+     */
+    open fun transformCompileResultNull(
         request: RequestType.Request, expectOutput: Output
     ): HookError<Output, Result> {
         return HookError.Error(expectOutput)
     }
 
+    /**
+     * 尝试改变编译状态
+     */
     open fun transformCompileStatus(compileStatus: Status, compileResult: Result): Status {
         return compileStatus
     }
 
+    /**
+     * 预期的正常编译状态
+     * 正常为返回 Accepted
+     */
     open fun expectCompileStatus(): Status {
         return Status.Accepted
     }
 
+    /**
+     * 改变 RunFilename
+     */
     open fun transformRunFilename(filename: Filename) = filename
 
+    /**
+     * 改变运行要求
+     */
     open fun transformRunRequest(request: RequestType.Request): RequestType.Request {
         return request
     }
 
+    /**
+     * 改变运行结果
+     */
     open fun transformRunResult(request: RequestType.Request, result: Result) = result
 
+    /**
+     * 改变运行错误的结果
+     */
     open fun transformRunError(request: RequestType.Request, expect: Output): Output {
         return expect
     }
 
+    /**
+     * 改变运行成功的结果
+     */
     open fun transformRunSuccess(result: Result, expectOutput: Output): Output {
         return expectOutput
     }
 
+    /**
+     * 在即将返回结果的时候做一些事
+     */
     open fun hookOnReturnRunOutput(expectOutput: Output) {
 
     }
 
     suspend fun run(input: I, service: RuntimeService): Output {
+
+        beforeAll()
 
         val filenames = hookOnFilenames(
             Filenames(
@@ -104,7 +153,7 @@ abstract class AbstractTask<I : Input> {
 
         val compileResult = service.run(compileRequest).getOrNull(0)
             ?: when (val result =
-                transformCompileResultError(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
+                transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
                 is HookError.Error -> return result.output
                 is HookError.Resume -> result.result
             }
@@ -115,23 +164,18 @@ abstract class AbstractTask<I : Input> {
             return Output.Failure.CompileError(compileRequest, compileResult)
         }
 
-
         val fileId =
-            compileResult.fileIds?.get(filenames.compileFilename.asString())
+            compileResult.fileIds?.get(filenames.compiled.asString())
                 ?: return Output.Failure.TargetFileNotExist(
                     compileRequest,
                     compileResult
                 )
 
-
-        val runFilename = transformRunFilename(Filename(uuid4().toString(), ""))
+        val runFilename = transformRunFilename(Filename(uuid4().toString(), None))
 
         val runRequest = transformRunRequest(request {
-            getRunCmd(compileResult, runFilename, fileId)
+            getRunCmd(input, compileResult, runFilename, fileId)
         })
-
-        val a: String? = null
-        val b = a?.map { it.length }
 
         return when (val result = service.run(runRequest).getOrNull(0)) {
             null -> transformRunError(

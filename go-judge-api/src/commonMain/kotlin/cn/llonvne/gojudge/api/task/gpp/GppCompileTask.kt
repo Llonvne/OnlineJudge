@@ -1,71 +1,36 @@
 package cn.llonvne.gojudge.api.task.gpp
 
-import cn.llonvne.gojudge.api.Task
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.some
 import cn.llonvne.gojudge.api.spec.*
-import cn.llonvne.gojudge.api.task.Output
-import cn.llonvne.gojudge.exposed.RuntimeService
-import cn.llonvne.gojudge.exposed.run
-import cn.llonvne.gojudge.services.runtime.request
+import cn.llonvne.gojudge.api.task.AbstractTask
+import cn.llonvne.gojudge.services.runtime.cmd
 import cn.llonvne.gojudge.services.runtime.useUsrBinEnv
-import com.benasher44.uuid.uuid4
 
-class GppCompileTask : Task<GppInput, Output> {
-    private val String.cpp: String
-        get() = "$this.cpp"
+class GppCompileTask : AbstractTask<GppInput>() {
+    override val sourceCodeExtension: Option<String>
+        get() = "cpp".some()
+    override val compiledFileExtension: Option<String>
+        get() = None
 
-    override suspend fun run(input: GppInput, service: RuntimeService): Output {
-        val sourceCodeFilename = uuid4().toString().cpp
-        val outputCodeFilename = uuid4().toString()
-
-        val compileRequest = request {
-            cmd {
-                args = useGpp(sourceCodeFilename, outputCodeFilename)
-                env = useUsrBinEnv
-                files = useStdOutErrForFiles()
-                copyIn = useMemoryCodeCopyIn(sourceCodeFilename, input.code)
-                copyOut = useStdOutErrForCopyOut()
-                copyOutCached = listOf(sourceCodeFilename, outputCodeFilename)
-            }
+    override fun getCompileCmd(input: GppInput, filenames: Filenames): Cmd {
+        return cmd {
+            args = useGpp(filenames)
+            env = useUsrBinEnv
+            files = useStdOutErrForFiles()
+            copyIn = useMemoryCodeCopyIn(filenames.source.asString(), input.code)
+            copyOut = useStdOutErrForCopyOut()
+            copyOutCached = listOf(filenames.source.asString(), filenames.compiled.asString())
         }
+    }
 
-
-        val compileResult =
-            service.run(compileRequest).getOrNull(0) ?: return Output.Failure.CompileResultIsNull(
-                compileRequest
-            )
-
-        if (compileResult.status != Status.Accepted) {
-            return Output.Failure.CompileError(compileRequest, compileResult)
+    override fun getRunCmd(input: GppInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
+        return cmd {
+            args = listOf(runFilename.asString())
+            env = useUsrBinEnv
+            files = useStdOutErrForFiles(input.stdin)
+            copyIn = useFileIdCopyIn(fileId = runFileId, newName = runFilename.asString())
         }
-
-        val fileId =
-            compileResult.fileIds?.get(outputCodeFilename) ?: return Output.Failure.TargetFileNotExist(
-                compileRequest,
-                compileResult
-            )
-
-        val runFilename = uuid4().toString()
-
-        val runRequest = request {
-            cmd {
-                args = listOf(runFilename)
-                env = useUsrBinEnv
-                files = useStdOutErrForFiles(input.stdin)
-                copyIn = useFileIdCopyIn(fileId = fileId, newName = runFilename)
-            }
-        }
-
-        val runResult = service.run(runRequest).getOrNull(0) ?: return Output.Failure.RunResultIsNull(
-            compileRequest,
-            compileResult,
-            runRequest
-        )
-
-        return Output.Success(
-            compileRequest,
-            compileResult,
-            runRequest,
-            runResult
-        )
     }
 }

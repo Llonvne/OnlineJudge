@@ -5,15 +5,12 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.raise.either
-import cn.llonvne.gojudge.api.gojudgespec.*
-import cn.llonvne.gojudge.api.spec.GoJudgeEnvSpec
-import cn.llonvne.gojudge.api.spec.isValidPort
-import cn.llonvne.gojudge.docker.generateSecureKey
+import cn.llonvne.gojudge.api.spec.*
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.net.InetAddressUtils
 import io.github.cdimascio.dotenv.Dotenv
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import java.math.BigInteger
+import java.security.SecureRandom
 
 private const val ENABLE_JUDGE_KEY = "JUDGE"
 private const val ENABLE_JUDGE_TOKEN_AUTH = "JUDGE_AUTH_KEY_ENABLE"
@@ -23,8 +20,18 @@ private const val GO_JUDGE_IP = "JUDGE_IP"
 private const val GO_JUDGE_PORT = "JUDGE_PORT"
 
 internal data class EnvConfig(val rawEnv: Dotenv, val judgeSpec: Option<GoJudgeEnvSpec>)
+internal class TokenIsTooWeak(value: String) : Exception(value)
+
+@JvmInline
+value class Token(val token: String)
 
 private val log = KotlinLogging.logger {}
+private fun generateSecureKey(length: Int): String {
+    val secureRandom = SecureRandom()
+    val randomBytes = ByteArray(length)
+    secureRandom.nextBytes(randomBytes)
+    return BigInteger(1, randomBytes).toString(16)
+}
 
 internal fun loadConfigFromEnv(): EnvConfig {
 
@@ -39,7 +46,7 @@ internal fun loadConfigFromEnv(): EnvConfig {
 
 private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
 
-    val spec = GoJudgeEnvSpec()
+    var spec = GoJudgeEnvSpec()
 
     ifNull(this.get(ENABLE_JUDGE_KEY, "false").toBooleanStrictOrNull()) {
         log.error { "go-judge is disabled,please confirm your setting!" }
@@ -48,17 +55,17 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
 
     setToken(spec)
 
-    ifNotNull(this.get(GO_JUDGE_IP, "127.0.0.1")) { ipStr ->
+    ifNotNull(this.get(GO_JUDGE_IP)) { ipStr ->
         require(isValidIP(ipStr)) { "$ipStr is not a valid ip" }
-        GoJudgeEnvSpec.httpAddr.url.modify(spec) { ipStr }
+        spec = GoJudgeEnvSpec.httpAddr.url.modify(spec) { ipStr }
     }
 
-    ifNotNull(this.get(GO_JUDGE_PORT, "5050")) { portStr ->
+    ifNotNull(this.get(GO_JUDGE_PORT)) { portStr ->
         val port = portStr.toIntOrNull()
         require(port != null && isValidPort(port)) {
             "$portStr is not valid port"
         }
-        GoJudgeEnvSpec.httpAddr.port.modify(spec) {
+        spec = GoJudgeEnvSpec.httpAddr.port.modify(spec) {
             port
         }
     }
@@ -66,16 +73,11 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
     return Some(spec)
 }
 
-internal class TokenIsTooWeak(value: String) : Exception(value)
-
-fun Dotenv.isEnableJudgeAuthToken(): Boolean {
+private fun Dotenv.isEnableJudgeAuthToken(): Boolean {
     return this.get(ENABLE_JUDGE_TOKEN_AUTH, "false").toBooleanStrictOrNull() ?: false
 }
 
-@JvmInline
-value class Token(val token: String)
-
-fun Dotenv.getToken() = either {
+private fun Dotenv.getToken() = either {
     val token = this@getToken.get(JUDGE_TOKEN, generateSecureKey(SECURE_TOKEN_LENGTH * 2))
     if (token.length < SECURE_TOKEN_LENGTH) {
         log.error { "token is too weak" }
@@ -84,7 +86,7 @@ fun Dotenv.getToken() = either {
     Token(token)
 }
 
-internal fun Dotenv.setToken(spec: GoJudgeEnvSpec) {
+private fun Dotenv.setToken(spec: GoJudgeEnvSpec) {
     val enableToken = isEnableJudgeAuthToken()
     if (enableToken) {
         val token = when (val token = getToken()) {
@@ -103,13 +105,13 @@ private fun isValidIP(ip: String): Boolean {
     return InetAddressUtils.isIPv4Address(ip) || InetAddressUtils.isIPv4Address(ip)
 }
 
-inline fun <reified T> ifNotNull(value: T?, then: (T) -> Unit) {
+private inline fun <reified T> ifNotNull(value: T?, then: (T) -> Unit) {
     if (value != null) {
         then(value)
     }
 }
 
-inline fun <reified T> ifNull(value: T?, then: () -> Unit) {
+private inline fun <reified T> ifNull(value: T?, then: () -> Unit) {
     if (value == null) {
         then()
     }
