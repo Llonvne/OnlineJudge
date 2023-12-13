@@ -26,7 +26,7 @@ fun useMemoryCodeCopyIn(sourceFilename: String, content: String) = mutableMapOf(
 
 fun useFileIdCopyIn(fileId: String, newName: String) = mapOf(newName to GoJudgeFile.PreparedFile(fileId))
 
-private fun Cmd.default() {
+fun Cmd.default() {
     procLimit = 50
     memoryLimit = 104857600
     cpuLimit = 10000000000

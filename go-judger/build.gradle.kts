@@ -81,8 +81,6 @@ dependencies {
 
     // DEV CONTAINER
     implementation("org.testcontainers:kafka:1.19.3")
-
-
 }
 
 tasks.withType<Wrapper> {

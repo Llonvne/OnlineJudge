@@ -1,24 +1,28 @@
 package cn.llonvne.gojudge.services.runtime
 
 import cn.llonvne.gojudge.api.spec.Cmd
-import cn.llonvne.gojudge.api.spec.GoJudgeFile
 import cn.llonvne.gojudge.api.spec.PipeMap
 import cn.llonvne.gojudge.api.spec.RequestType
+import cn.llonvne.gojudge.api.spec.default
 import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.run
 
 class CmdListBuilder {
-    private val cmds = mutableListOf<Cmd>()
+    private val commands = mutableListOf<Cmd>()
 
     fun cmd(builder: Cmd.() -> Unit) {
         val cmd = Cmd(emptyList())
         cmd.default()
         cmd.builder()
-        cmds.add(cmd)
+        commands.add(cmd)
     }
 
     internal fun build(): List<Cmd> {
-        return cmds
+        return commands
+    }
+
+    fun add(cmd: Cmd) {
+        this.commands.add(cmd)
     }
 }
 

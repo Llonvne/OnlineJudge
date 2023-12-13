@@ -28,10 +28,10 @@ val r2dbcPostgresqlVersion: String by project
 val r2dbcH2Version: String by project
 val e4kVersion: String by project
 val ktorfitVersion = "1.10.2"
+val komapperVersion = "1.15.0"
 
 dependencies {
     implementation("com.benasher44:uuid:0.7.0")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
@@ -111,10 +111,10 @@ kotlin {
                 implementation("org.springframework.boot:spring-boot-devtools")
                 implementation("org.springframework.boot:spring-boot-starter-webflux")
                 implementation("org.springframework.boot:spring-boot-starter-security")
-                implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-                implementation("org.postgresql:r2dbc-postgresql:$r2dbcPostgresqlVersion")
-                implementation("io.r2dbc:r2dbc-h2:$r2dbcH2Version")
-                implementation("pl.treksoft:r2dbc-e4k:$e4kVersion")
+
+                implementation("org.komapper:komapper-spring-boot-starter-r2dbc:$komapperVersion")
+                implementation("org.komapper:komapper-dialect-h2-r2dbc:$komapperVersion")
+                
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-okhttp:2.2.4")
@@ -142,5 +142,15 @@ kotlin {
                 implementation("io.kvision:kvision-testutils:$kvisionVersion")
             }
         }
+    }
+}
+dependencies {
+    add("kspCommonMainMetadata", "org.komapper:komapper-processor:$komapperVersion")
+    add("kspJvm", "org.komapper:komapper-processor:$komapperVersion")
+}
+
+tasks.configureEach {
+    if (name == "kspKotlinJvm") {
+        mustRunAfter(tasks.getByName("kspCommonMainKotlinMetadata"))
     }
 }

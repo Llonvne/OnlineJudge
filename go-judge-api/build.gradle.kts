@@ -55,10 +55,6 @@ kotlin {
 
 
 dependencies {
-//    add("kspCommonMainMetadata", "at.kopyk:kopykat-ksp:$kopyKatVersion")
-//    add("kspJs", "at.kopyk:kopykat-ksp:$kopyKatVersion")
-//    add("kspJvm", "at.kopyk:kopykat-ksp:$kopyKatVersion")
-
     add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspJvm", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
     add("kspJs", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")

@@ -2,7 +2,9 @@ package cn.llonvne.gojudge.exposed
 
 import cn.llonvne.gojudge.api.spec.RequestType
 import cn.llonvne.gojudge.api.spec.Result
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Headers
 import de.jensklingenberg.ktorfit.http.POST
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
@@ -29,7 +31,8 @@ interface Sample {
     suspend fun config(): String
 
     @POST("/run")
-    suspend fun run(request: RequestType.Request): List<RequestType.Request>
+    @Headers("Context-Type:Application/Json")
+    suspend fun run(@Body request: RequestType.Request): List<RequestType.Request>
 }
 
 suspend fun RuntimeService.version(): String = httpClient.get(JudgeController.Version()).body()
