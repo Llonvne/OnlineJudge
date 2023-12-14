@@ -7,10 +7,17 @@ import cn.llonvne.gojudge.api.spec.Cmd
 import cn.llonvne.gojudge.api.spec.RequestType
 import cn.llonvne.gojudge.api.spec.Result
 import cn.llonvne.gojudge.api.spec.Status
+import cn.llonvne.gojudge.api.task.gpp.GppCompileTask
+import cn.llonvne.gojudge.api.task.gpp.GppInput
 import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.run
 import cn.llonvne.gojudge.services.runtime.request
 import com.benasher44.uuid.uuid4
+import io.ktor.client.*
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
@@ -132,6 +139,62 @@ abstract class AbstractTask<I : Input> {
      */
     open fun hookOnReturnRunOutput(expectOutput: Output) {
 
+    }
+
+    suspend fun main1() {
+        val gppTask = GppCompileTask()
+        val flow = gppTask.runFlow(GppInput("", ""), RuntimeService(HttpClient { }))
+
+        flow
+            .buffer(0, BufferOverflow.SUSPEND)
+            .collect {
+            }
+    }
+
+    suspend fun runFlow(input: I, service: RuntimeService): Flow<Output> = flow {
+        beforeAll()
+
+        val filenames = hookOnFilenames(
+            Filenames(
+                Filename(uuid4().toString(), sourceCodeExtension),
+                Filename(uuid4().toString(), compiledFileExtension)
+            )
+        )
+
+        val compileRequest = request {
+            add(getCompileCmd(input, filenames))
+        }
+
+
+        hookOnBeforeCompile(compileRequest)
+
+        val compileResult = service.run(compileRequest).getOrNull(0)
+            ?: when (val result =
+                transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
+                is HookError.Error -> {
+                    emit(result.output)
+                    return@flow
+                }
+
+                is HookError.Resume -> {
+                    result.result
+                }
+            }
+
+        emit(Output.SuccessCompile(compileRequest, compileResult))
+
+        if (transformCompileStatus(compileResult.status, compileResult) != expectCompileStatus()) {
+            emit(Output.Failure.CompileError(compileRequest, compileResult))
+        }
+
+        val fileId =
+            compileResult.fileIds?.get(filenames.compiled.asString())
+                ?: emit(
+                    Output.Failure.TargetFileNotExist(
+                        compileRequest,
+                        compileResult
+                    )
+                )
     }
 
     suspend fun run(input: I, service: RuntimeService): Output {

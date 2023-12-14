@@ -30,4 +30,9 @@ sealed interface Output {
         val runRequest: RequestType.Request,
         val runResult: Result
     ) : Output
+
+    data class SuccessCompile(
+        val compileRequest: RequestType.Request,
+        val compileResult: Result,
+    ) : Output
 }
