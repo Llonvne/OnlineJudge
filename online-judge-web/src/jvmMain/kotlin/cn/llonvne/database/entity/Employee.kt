@@ -14,4 +14,6 @@ data class Employee(
     val createdAt: LocalDateTime = LocalDateTime.MIN,
     @KomapperUpdatedAt
     val updatedAt: LocalDateTime = LocalDateTime.MIN,
+
+    val account: String
 )

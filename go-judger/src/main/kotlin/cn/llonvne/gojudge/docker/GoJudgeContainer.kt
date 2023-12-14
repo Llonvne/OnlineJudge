@@ -18,7 +18,7 @@ import org.testcontainers.utility.DockerImageName
 import java.util.*
 
 
-private const val GO_JUDGE_DOCKER_NAME = "criyle/go-judge"
+internal const val GO_JUDGE_DOCKER_NAME = "criyle/go-judge"
 
 private val isLinux by lazy {
     val dockerHost = System.getenv("DOCKER_HOST")
@@ -87,6 +87,7 @@ fun configureGoJudgeContainer(
         .withReuse(reuseContainer)
         .withCreateContainerCmdModifier { it.withName(name) }
         .withEnv(envs)
+
     applySpec(spec, container)
     return resource({
         ContainerWrapper(container).also {
@@ -109,11 +110,11 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
 
     val logger = LoggerFactory.getLogger(GenericContainer::class.java)
 
-    withCommand("-http-addr=${spec.httpAddr}")
+//    withCommand("-http-addr=${spec.httpAddr}")
 
     logger.info("go-judge http endpoint on ${spec.httpAddr},port ${spec.httpAddr.port} is exposed")
 
-    portBindings.add("${spec.httpAddr.port}:${spec.httpAddr.port}")
+    portBindings.add("5050:5050")
 
     if (spec.enableGrpc != GoJudgeEnvSpec.DEFAULT_ENABLE_GRPC) {
         withCommand("-enable-grpc=${spec.enableGrpc}")
@@ -265,6 +266,6 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
         is GoJudgeEnvSpec.FileTimeoutSetting.Timeout -> withCommand("-file-timeout=${(spec.fileTimeout as GoJudgeEnvSpec.FileTimeoutSetting.Timeout).seconds}")
     }
 
-    container.portBindings = portBindings
     container.withCommand(*commands.toTypedArray())
+    container.portBindings = portBindings
 }
