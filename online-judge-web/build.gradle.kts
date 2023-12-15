@@ -34,14 +34,14 @@ dependencies {
     implementation("com.benasher44:uuid:0.7.0")
 }
 
-rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
-    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().download = false
-}
-
-rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
-    rootProject.the<YarnRootExtension>().download = false
-}
-
+//rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
+//    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().download = false
+//}
+//
+//rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
+//    rootProject.the<YarnRootExtension>().download = false
+//}
+//
 rootProject.plugins.withType(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin::class.java) {
     rootProject.the<YarnRootExtension>().yarnLockMismatchReport =
         YarnLockMismatchReport.WARNING // NONE | FAIL
@@ -96,6 +96,7 @@ kotlin {
                 api("io.kvision:kvision-server-spring-boot:$kvisionVersion")
                 implementation(projects.goJudgeApi)
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:$ktorfitVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
             }
         }
         val commonTest by getting {

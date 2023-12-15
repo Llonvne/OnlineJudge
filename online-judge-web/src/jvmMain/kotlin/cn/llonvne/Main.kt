@@ -1,15 +1,15 @@
 package cn.llonvne
 
-import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.version
-import io.ktor.client.*
 import io.kvision.remote.getAllServiceManagers
+import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootApplication(
     exclude = [
@@ -20,9 +20,6 @@ import org.springframework.stereotype.Service
 class KVApplication {
     @Bean
     fun getManagers() = getAllServiceManagers()
-
-    @Bean
-    fun sample() = RuntimeService(HttpClient())
 }
 
 fun main(args: Array<String>) {
@@ -30,12 +27,10 @@ fun main(args: Array<String>) {
 }
 
 @Service
+@Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
-actual class PingService(private val sample: RuntimeService) : IPingService {
-
-    override suspend fun ping(message: String): String {
-        return sample.version()
-    }
+actual class PingService : IPingService {
+    override suspend fun ping(message: String): String = "Hello From Backend"
 }
 
