@@ -1,9 +1,9 @@
 package cn.llonvne.gojudge.services.runtime
 
-import cn.llonvne.gojudge.api.spec.Cmd
-import cn.llonvne.gojudge.api.spec.PipeMap
-import cn.llonvne.gojudge.api.spec.RequestType
-import cn.llonvne.gojudge.api.spec.default
+import cn.llonvne.gojudge.api.spec.runtime.Cmd
+import cn.llonvne.gojudge.api.spec.runtime.PipeMap
+import cn.llonvne.gojudge.api.spec.runtime.RequestType
+import cn.llonvne.gojudge.api.spec.runtime.default
 import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.run
 

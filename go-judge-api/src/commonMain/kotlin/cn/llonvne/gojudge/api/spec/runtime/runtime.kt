@@ -1,6 +1,6 @@
 @file:Suppress("UNUSED")
 
-package cn.llonvne.gojudge.api.spec
+package cn.llonvne.gojudge.api.spec.runtime
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

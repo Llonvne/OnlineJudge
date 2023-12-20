@@ -1,6 +1,8 @@
-package cn.llonvne.gojudge.api.spec
+package cn.llonvne.gojudge.api.spec.bootstrap
 
 import arrow.optics.optics
+import cn.llonvne.gojudge.api.spec.LATEST
+import cn.llonvne.gojudge.api.spec.LOCALHOST
 import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

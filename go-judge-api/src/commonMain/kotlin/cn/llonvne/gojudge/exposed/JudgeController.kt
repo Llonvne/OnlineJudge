@@ -1,7 +1,7 @@
 package cn.llonvne.gojudge.exposed
 
-import cn.llonvne.gojudge.api.spec.RequestType
-import cn.llonvne.gojudge.api.spec.Result
+import cn.llonvne.gojudge.api.spec.runtime.RequestType
+import cn.llonvne.gojudge.api.spec.runtime.Result
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 

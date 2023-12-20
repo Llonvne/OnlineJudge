@@ -3,7 +3,7 @@ package cn.llonvne.gojudge.api.task.gpp
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.some
-import cn.llonvne.gojudge.api.spec.*
+import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
 import cn.llonvne.gojudge.services.runtime.cmd
 import cn.llonvne.gojudge.services.runtime.useUsrBinEnv
@@ -25,7 +25,7 @@ class GppCompileTask : AbstractTask<GppInput>() {
         }
     }
 
-    override fun getRunCmd(input: GppInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
+    override fun getRunCmd(input: GppInput, compileResult: cn.llonvne.gojudge.api.spec.runtime.Result, runFilename: Filename, runFileId: String): Cmd {
         return cmd {
             args = listOf(runFilename.asString())
             env = useUsrBinEnv

@@ -16,6 +16,7 @@ private val json = Json {
 }
 
 fun main() = SuspendApp {
+
     val log = KotlinLogging.logger(name = "go-judger-main")
     log.info { "Initialization Go Judger ...." }
 

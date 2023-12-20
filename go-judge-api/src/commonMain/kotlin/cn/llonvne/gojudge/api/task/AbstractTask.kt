@@ -3,20 +3,15 @@ package cn.llonvne.gojudge.api.task
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
-import cn.llonvne.gojudge.api.spec.Cmd
-import cn.llonvne.gojudge.api.spec.RequestType
-import cn.llonvne.gojudge.api.spec.Result
-import cn.llonvne.gojudge.api.spec.Status
-import cn.llonvne.gojudge.api.task.gpp.GppCompileTask
-import cn.llonvne.gojudge.api.task.gpp.GppInput
+import cn.llonvne.gojudge.api.spec.runtime.Cmd
+import cn.llonvne.gojudge.api.spec.runtime.RequestType
+import cn.llonvne.gojudge.api.spec.runtime.Result
+import cn.llonvne.gojudge.api.spec.runtime.Status
 import cn.llonvne.gojudge.exposed.RuntimeService
 import cn.llonvne.gojudge.exposed.run
 import cn.llonvne.gojudge.services.runtime.request
 import com.benasher44.uuid.uuid4
-import io.ktor.client.*
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
@@ -141,60 +136,85 @@ abstract class AbstractTask<I : Input> {
 
     }
 
-    suspend fun main1() {
-        val gppTask = GppCompileTask()
-        val flow = gppTask.runFlow(GppInput("", ""), RuntimeService(HttpClient { }))
+    sealed interface FlowOutputStatus {
+        data class BeforeAll(val input: Input, val service: RuntimeService) : FlowOutputStatus
 
-        flow
-            .buffer(0, BufferOverflow.SUSPEND)
-            .collect {
-            }
+        data class BeforeCompile(val request: RequestType.Request) : FlowOutputStatus
+
+        // 包装 Output 类型
+        data class Output(val output: cn.llonvne.gojudge.api.task.Output) : FlowOutputStatus
+
+        // 文件名
+        data class FilenamesFlowOutput(val filenames: Filenames) : FlowOutputStatus
+
+        // 完成编译
+        data class CompileSuccess(val result: Result) : FlowOutputStatus
+
+        data class RunFilename(val filename: Filename) : FlowOutputStatus
+
+        data class RunRequest(val request: RequestType.Request) : FlowOutputStatus
     }
 
-    suspend fun runFlow(input: I, service: RuntimeService): Flow<Output> = flow {
-        beforeAll()
+    /**
+     * runFlow 不支持HOOK函数的形式
+     */
+    suspend fun runFlow(input: I, service: RuntimeService): Flow<FlowOutputStatus> = flow {
+
+        emit(FlowOutputStatus.BeforeAll(input, service))
 
         val filenames = hookOnFilenames(
             Filenames(
-                Filename(uuid4().toString(), sourceCodeExtension),
-                Filename(uuid4().toString(), compiledFileExtension)
+                source = Filename(uuid4().toString(), sourceCodeExtension),
+                compiled = Filename(uuid4().toString(), compiledFileExtension)
             )
         )
+
+        emit(FlowOutputStatus.FilenamesFlowOutput(filenames))
 
         val compileRequest = request {
             add(getCompileCmd(input, filenames))
         }
 
-
-        hookOnBeforeCompile(compileRequest)
+        emit(FlowOutputStatus.BeforeCompile(compileRequest))
 
         val compileResult = service.run(compileRequest).getOrNull(0)
-            ?: when (val result =
-                transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
-                is HookError.Error -> {
-                    emit(result.output)
-                    return@flow
-                }
+            ?: return@flow emit(FlowOutputStatus.Output(Output.Failure.CompileResultIsNull(compileRequest)))
 
-                is HookError.Resume -> {
-                    result.result
-                }
-            }
-
-        emit(Output.SuccessCompile(compileRequest, compileResult))
+        emit(FlowOutputStatus.CompileSuccess(compileResult))
 
         if (transformCompileStatus(compileResult.status, compileResult) != expectCompileStatus()) {
-            emit(Output.Failure.CompileError(compileRequest, compileResult))
+            return@flow emit(FlowOutputStatus.Output(Output.Failure.CompileError(compileRequest, compileResult)))
         }
 
-        val fileId =
-            compileResult.fileIds?.get(filenames.compiled.asString())
-                ?: emit(
-                    Output.Failure.TargetFileNotExist(
-                        compileRequest,
-                        compileResult
-                    )
+        val fileId = compileResult.fileIds?.get(filenames.compiled.asString()) ?: return@flow emit(
+            FlowOutputStatus.Output(
+                Output.Failure.TargetFileNotExist(
+                    compileRequest, compileResult
                 )
+            )
+        )
+
+        val runFilename = Filename(uuid4().toString(), None)
+        emit(FlowOutputStatus.RunFilename(runFilename))
+
+        val runRequest = request {
+            getRunCmd(input, compileResult, runFilename, fileId)
+        }
+        emit(FlowOutputStatus.RunRequest(runRequest))
+
+        val result = service.run(runRequest).firstOrNull() ?: return@flow emit(
+            FlowOutputStatus.Output(
+                Output.Failure.RunResultIsNull(
+                    compileRequest, compileResult, runRequest
+                )
+            )
+        )
+
+        emit(
+            FlowOutputStatus.Output(
+                Output.Success(compileRequest, compileResult, runRequest, result)
+            )
+        )
     }
 
     suspend fun run(input: I, service: RuntimeService): Output {
@@ -203,8 +223,7 @@ abstract class AbstractTask<I : Input> {
 
         val filenames = hookOnFilenames(
             Filenames(
-                Filename(uuid4().toString(), sourceCodeExtension),
-                Filename(uuid4().toString(), compiledFileExtension)
+                Filename(uuid4().toString(), sourceCodeExtension), Filename(uuid4().toString(), compiledFileExtension)
             )
         )
 
@@ -214,12 +233,11 @@ abstract class AbstractTask<I : Input> {
 
         hookOnBeforeCompile(compileRequest)
 
-        val compileResult = service.run(compileRequest).getOrNull(0)
-            ?: when (val result =
-                transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
-                is HookError.Error -> return result.output
-                is HookError.Resume -> result.result
-            }
+        val compileResult = service.run(compileRequest).getOrNull(0) ?: when (val result =
+            transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
+            is HookError.Error -> return result.output
+            is HookError.Resume -> result.result
+        }
 
         hookOnCompileResult(compileResult)
 
@@ -228,11 +246,9 @@ abstract class AbstractTask<I : Input> {
         }
 
         val fileId =
-            compileResult.fileIds?.get(filenames.compiled.asString())
-                ?: return Output.Failure.TargetFileNotExist(
-                    compileRequest,
-                    compileResult
-                )
+            compileResult.fileIds?.get(filenames.compiled.asString()) ?: return Output.Failure.TargetFileNotExist(
+                compileRequest, compileResult
+            )
 
         val runFilename = transformRunFilename(Filename(uuid4().toString(), None))
 
@@ -243,19 +259,13 @@ abstract class AbstractTask<I : Input> {
         return when (val result = service.run(runRequest).getOrNull(0)) {
             null -> transformRunError(
                 compileRequest, Output.Failure.RunResultIsNull(
-                    compileRequest,
-                    compileResult,
-                    runRequest
+                    compileRequest, compileResult, runRequest
                 )
             )
 
             else -> transformRunSuccess(
-                result,
-                Output.Success(
-                    compileRequest,
-                    compileResult,
-                    runRequest,
-                    transformRunResult(runRequest, result)
+                result, Output.Success(
+                    compileRequest, compileResult, runRequest, transformRunResult(runRequest, result)
                 )
             )
         }.also {

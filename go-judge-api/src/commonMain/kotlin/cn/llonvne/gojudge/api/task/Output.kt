@@ -1,7 +1,7 @@
 package cn.llonvne.gojudge.api.task
 
-import cn.llonvne.gojudge.api.spec.RequestType
-import cn.llonvne.gojudge.api.spec.Result
+import cn.llonvne.gojudge.api.spec.runtime.RequestType
+import cn.llonvne.gojudge.api.spec.runtime.Result
 
 sealed interface Output {
 
@@ -24,15 +24,5 @@ sealed interface Output {
         val compileResult: Result,
         val runRequest: RequestType.Request,
         val runResult: Result
-    ) : Output
-
-    data class SuccessWithoutCompile(
-        val runRequest: RequestType.Request,
-        val runResult: Result
-    ) : Output
-
-    data class SuccessCompile(
-        val compileRequest: RequestType.Request,
-        val compileResult: Result,
     ) : Output
 }

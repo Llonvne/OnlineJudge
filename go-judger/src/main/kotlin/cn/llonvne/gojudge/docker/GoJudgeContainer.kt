@@ -3,7 +3,7 @@ package cn.llonvne.gojudge.docker
 import arrow.core.raise.either
 import arrow.fx.coroutines.Resource
 import arrow.fx.coroutines.resource
-import cn.llonvne.gojudge.api.spec.GoJudgeEnvSpec
+import cn.llonvne.gojudge.api.spec.bootstrap.GoJudgeEnvSpec
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,7 +15,7 @@ import org.testcontainers.containers.Container
 import org.testcontainers.containers.ExecInContainerPattern
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
+import java.util.UUID
 
 
 internal const val GO_JUDGE_DOCKER_NAME = "criyle/go-judge"
@@ -70,7 +70,7 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
 private val log = KotlinLogging.logger {}
 
 fun configureGoJudgeContainer(
-    name: String = "go-judge",
+    name: String = UUID.randomUUID().toString().substring(0..6),
     isPrivilegedMode: Boolean = true,
     reuseContainer: Boolean = false,
     envs: MutableMap<String, String> = mutableMapOf(),

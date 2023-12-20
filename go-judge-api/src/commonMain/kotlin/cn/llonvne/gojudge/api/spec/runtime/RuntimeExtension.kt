@@ -1,4 +1,4 @@
-package cn.llonvne.gojudge.api.spec
+package cn.llonvne.gojudge.api.spec.runtime
 
 import cn.llonvne.gojudge.api.task.AbstractTask
 
