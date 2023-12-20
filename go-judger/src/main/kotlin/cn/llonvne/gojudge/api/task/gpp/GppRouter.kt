@@ -1,7 +1,6 @@
 package cn.llonvne.gojudge.api.task.gpp
 
-import cn.llonvne.gojudge.docker.ContainerWrapper
-import cn.llonvne.gojudge.exposed.version
+import cn.llonvne.gojudge.internal.version
 import cn.llonvne.gojudge.service.runtimeService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -9,12 +8,14 @@ import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.body
-import kotlinx.html.h1
-import kotlinx.html.p
+import kotlinx.html.*
 
-fun Route.installGpp(containerWrapper: ContainerWrapper) {
+fun Route.installGpp() {
     val gppCompileTask = GppCompileTask()
+
+    post("/gpp") {
+        println(call.receiveText())
+    }
 
     get("/version") {
         val version = runtimeService.version()
@@ -26,6 +27,15 @@ fun Route.installGpp(containerWrapper: ContainerWrapper) {
 
                 p {
                     +version
+                }
+
+                form {
+                    method = FormMethod.post
+                    action = "/gpp"
+
+                    textArea {
+
+                    }
                 }
             }
         }

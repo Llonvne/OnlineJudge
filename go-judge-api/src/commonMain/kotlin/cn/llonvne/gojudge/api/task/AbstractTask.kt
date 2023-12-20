@@ -7,8 +7,8 @@ import cn.llonvne.gojudge.api.spec.runtime.Cmd
 import cn.llonvne.gojudge.api.spec.runtime.RequestType
 import cn.llonvne.gojudge.api.spec.runtime.Result
 import cn.llonvne.gojudge.api.spec.runtime.Status
-import cn.llonvne.gojudge.exposed.RuntimeService
-import cn.llonvne.gojudge.exposed.run
+import cn.llonvne.gojudge.internal.GoJudgeClient
+import cn.llonvne.gojudge.internal.run
 import cn.llonvne.gojudge.services.runtime.request
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.flow.Flow
@@ -137,7 +137,7 @@ abstract class AbstractTask<I : Input> {
     }
 
     sealed interface FlowOutputStatus {
-        data class BeforeAll(val input: Input, val service: RuntimeService) : FlowOutputStatus
+        data class BeforeAll(val input: Input, val service: GoJudgeClient) : FlowOutputStatus
 
         data class BeforeCompile(val request: RequestType.Request) : FlowOutputStatus
 
@@ -158,7 +158,7 @@ abstract class AbstractTask<I : Input> {
     /**
      * runFlow 不支持HOOK函数的形式
      */
-    suspend fun runFlow(input: I, service: RuntimeService): Flow<FlowOutputStatus> = flow {
+    suspend fun runFlow(input: I, service: GoJudgeClient): Flow<FlowOutputStatus> = flow {
 
         emit(FlowOutputStatus.BeforeAll(input, service))
 
@@ -217,7 +217,7 @@ abstract class AbstractTask<I : Input> {
         )
     }
 
-    suspend fun run(input: I, service: RuntimeService): Output {
+    suspend fun run(input: I, service: GoJudgeClient): Output {
 
         beforeAll()
 

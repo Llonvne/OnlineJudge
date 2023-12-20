@@ -1,8 +1,6 @@
 package cn.llonvne
 
-import cn.llonvne.gojudge.exposed.version
 import io.kvision.remote.getAllServiceManagers
-import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

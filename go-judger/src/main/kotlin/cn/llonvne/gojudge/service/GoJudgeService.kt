@@ -1,7 +1,6 @@
 package cn.llonvne.gojudge.service
 
-import cn.llonvne.gojudge.exposed.RuntimeService
-import io.github.oshai.kotlinlogging.KotlinLogging
+import cn.llonvne.gojudge.internal.GoJudgeClient
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
@@ -29,4 +28,4 @@ internal val ktorClient = HttpClient(OkHttp) {
     }
 }
 
-val runtimeService = RuntimeService(ktorClient)
+val runtimeService = GoJudgeClient(ktorClient)
