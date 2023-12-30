@@ -5,16 +5,17 @@ import arrow.core.Option
 import arrow.core.some
 import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
+import cn.llonvne.gojudge.api.task.CodeInput
 import cn.llonvne.gojudge.services.runtime.cmd
 import cn.llonvne.gojudge.services.runtime.useUsrBinEnv
 
-class GppCompileTask : AbstractTask<GppInput>() {
+class GppCompileTask : AbstractTask<CodeInput>() {
     override val sourceCodeExtension: Option<String>
         get() = "cpp".some()
     override val compiledFileExtension: Option<String>
         get() = None
 
-    override fun getCompileCmd(input: GppInput, filenames: Filenames): Cmd {
+    override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
         return cmd {
             args = useGpp(filenames)
             env = useUsrBinEnv
@@ -25,7 +26,7 @@ class GppCompileTask : AbstractTask<GppInput>() {
         }
     }
 
-    override fun getRunCmd(input: GppInput, compileResult: cn.llonvne.gojudge.api.spec.runtime.Result, runFilename: Filename, runFileId: String): Cmd {
+    override fun getRunCmd(input: CodeInput, compileResult: cn.llonvne.gojudge.api.spec.runtime.Result, runFilename: Filename, runFileId: String): Cmd {
         return cmd {
             args = listOf(runFilename.asString())
             env = useUsrBinEnv

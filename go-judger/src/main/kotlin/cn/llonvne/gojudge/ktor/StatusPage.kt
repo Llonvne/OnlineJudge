@@ -13,9 +13,9 @@ import kotlinx.html.p
 
 fun Application.installJudgeStatusPage() {
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
-        }
+//        exception<Throwable> { call, cause ->
+//            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+//        }
 
         status(HttpStatusCode.BadRequest) { call, cause ->
             call.respondHtml {

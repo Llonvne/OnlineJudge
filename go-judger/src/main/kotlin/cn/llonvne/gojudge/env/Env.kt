@@ -5,7 +5,6 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.raise.either
-import cn.llonvne.gojudge.api.spec.*
 import cn.llonvne.gojudge.api.spec.bootstrap.*
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.net.InetAddressUtils
 import io.github.cdimascio.dotenv.Dotenv

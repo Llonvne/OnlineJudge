@@ -28,4 +28,4 @@ internal val ktorClient = HttpClient(OkHttp) {
     }
 }
 
-val runtimeService = GoJudgeClient(ktorClient)
+internal val runtimeService = GoJudgeClient(ktorClient)

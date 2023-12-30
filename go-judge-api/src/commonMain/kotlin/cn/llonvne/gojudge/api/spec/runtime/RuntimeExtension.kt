@@ -12,7 +12,6 @@ fun useGpp(filenames: AbstractTask.Filenames) =
         filenames.compiled.asString()
     )
 
-
 fun useStdOutErrForFiles(stdin: String = "", max: Int = 10240) = mutableListOf(
     GoJudgeFile.MemoryFile(
         content = stdin

@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Suppress("unused")
+@Serializable
 sealed interface GoJudgeVersion {
 
     val tag: String

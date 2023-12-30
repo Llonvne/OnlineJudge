@@ -1,4 +1,4 @@
-package cn.llonvne.gojudge.api.task.gpp
+package cn.llonvne.gojudge.api.router.gpp
 
 import kotlinx.html.*
 @HtmlTagMarker

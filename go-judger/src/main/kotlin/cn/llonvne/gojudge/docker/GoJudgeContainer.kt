@@ -15,10 +15,10 @@ import org.testcontainers.containers.Container
 import org.testcontainers.containers.ExecInContainerPattern
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.UUID
+import java.util.*
 
-
-internal const val GO_JUDGE_DOCKER_NAME = "criyle/go-judge"
+//"criyle/go-judge"
+internal const val GO_JUDGE_DOCKER_NAME = "judger"
 
 private val isLinux by lazy {
     val dockerHost = System.getenv("DOCKER_HOST")
@@ -45,12 +45,26 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
         on {
             container.start()
 
-            GoJudgeInitializer.commands.forEach { command ->
-                if (exec(command.command).exitCode == 0) {
-                    log.info { "${command.decr} successful" }
-                } else {
-                    raise("${command.decr} failed!")
-                }
+            if (false) {
+                raise("1")
+            }
+        }
+    }
+
+    internal suspend fun resolveDependencies() = either {
+        GoJudgeInitializer.commands.forEach { command ->
+
+            val result = exec(command.build)
+
+            if (result.exitCode == 0) {
+                log.error { "${command.decr} successful" }
+            } else {
+
+                log.error { result }
+
+                throw RuntimeException("Failed to install ${command.decr}")
+
+                raise("${command.decr} failed!")
             }
         }
     }
@@ -59,10 +73,12 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
         on { container.close() }
     }
 
-    suspend fun exec(command: String): Container.ExecResult {
+    private suspend fun exec(command: String): Container.ExecResult {
+
         return withContext(dockerCoroutinesContext) {
-            ExecInContainerPattern
+            val result = ExecInContainerPattern
                 .execInContainer(dockerClient, container.containerInfo, "/bin/sh", "-c", command)
+            result
         }
     }
 }

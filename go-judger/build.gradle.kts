@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
     id("io.ktor.plugin")
@@ -93,4 +95,10 @@ tasks.withType<Wrapper> {
 application {
     mainClass = "MainKt"
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+    }
 }

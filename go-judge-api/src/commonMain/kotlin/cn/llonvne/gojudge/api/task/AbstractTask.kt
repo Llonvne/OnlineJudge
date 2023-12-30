@@ -198,7 +198,7 @@ abstract class AbstractTask<I : Input> {
         emit(FlowOutputStatus.RunFilename(runFilename))
 
         val runRequest = request {
-            getRunCmd(input, compileResult, runFilename, fileId)
+            add(getRunCmd(input, compileResult, runFilename, fileId))
         }
         emit(FlowOutputStatus.RunRequest(runRequest))
 
@@ -253,7 +253,7 @@ abstract class AbstractTask<I : Input> {
         val runFilename = transformRunFilename(Filename(uuid4().toString(), None))
 
         val runRequest = transformRunRequest(request {
-            getRunCmd(input, compileResult, runFilename, fileId)
+            add(getRunCmd(input, compileResult, runFilename, fileId))
         })
 
         return when (val result = service.run(runRequest).getOrNull(0)) {
