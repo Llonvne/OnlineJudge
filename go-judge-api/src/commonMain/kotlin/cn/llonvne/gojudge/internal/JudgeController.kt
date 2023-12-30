@@ -13,7 +13,6 @@ suspend fun GoJudgeClient.run(request: RequestType.Request): List<Result> {
         setBody(request)
         setContextTypeApplicationJson()
     }.body()
-    println(resp)
     return resp
 }
 

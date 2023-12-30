@@ -41,39 +41,18 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
         }
     }
 
-    internal suspend fun start() = either {
+    internal suspend fun start() {
         on {
             container.start()
-
-            if (false) {
-                raise("1")
-            }
         }
     }
 
-    internal suspend fun resolveDependencies() = either {
-        GoJudgeInitializer.commands.forEach { command ->
-
-            val result = exec(command.build)
-
-            if (result.exitCode == 0) {
-                log.error { "${command.decr} successful" }
-            } else {
-
-                log.error { result }
-
-                throw RuntimeException("Failed to install ${command.decr}")
-
-                raise("${command.decr} failed!")
-            }
-        }
-    }
 
     suspend fun close() {
         on { container.close() }
     }
 
-    private suspend fun exec(command: String): Container.ExecResult {
+    suspend fun exec(command: String): Container.ExecResult {
 
         return withContext(dockerCoroutinesContext) {
             val result = ExecInContainerPattern

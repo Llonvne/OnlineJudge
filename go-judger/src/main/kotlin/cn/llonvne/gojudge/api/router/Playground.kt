@@ -26,6 +26,8 @@ internal fun BODY.playground(languageName: String, judgePath: String = languageN
             name = "code"
         }
 
+        br {}
+
         label {
             htmlFor = "stdin"
             +"Your stdin here"

@@ -4,6 +4,7 @@ import cn.llonvne.gojudge.api.router.LanguageRouter
 import cn.llonvne.gojudge.api.router.playground
 import cn.llonvne.gojudge.api.task.CodeInput
 import cn.llonvne.gojudge.api.task.java.JavaCompileTask
+import cn.llonvne.gojudge.docker.JudgeContext
 import cn.llonvne.gojudge.internal.version
 import cn.llonvne.gojudge.service.runtimeService
 import io.ktor.http.*
@@ -12,13 +13,13 @@ import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import kotlinx.html.body
-
+context(JudgeContext)
 internal fun java() = object : LanguageRouter {
 
     val javaCompileTask = JavaCompileTask()
 
     context(PipelineContext<Unit, ApplicationCall>)  override suspend fun version() {
-        val version = runtimeService.version()
+        val version = exec("java -version").stderr
         call.respondText(version, contentType = ContentType.Application.Json)
     }
 
@@ -27,10 +28,13 @@ internal fun java() = object : LanguageRouter {
         call.respond(result)
     }
 
-    context(PipelineContext<Unit, ApplicationCall>) override suspend fun playground() {
+    context(PipelineContext<Unit, ApplicationCall>) override suspend fun playground(
+        languageName: String,
+        judgePath: String
+    ) {
         call.respondHtml {
             body {
-                this.playground("java", "/java")
+                this.playground(languageName, judgePath)
             }
         }
     }
