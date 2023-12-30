@@ -59,7 +59,7 @@ abstract class AbstractTask<I : Input> {
      * [sourceCodeExtension]
      * [compiledFileExtension]
      */
-    open fun hookOnFilenames(filenames: Filenames): Filenames {
+    open fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
         return filenames
     }
 
@@ -162,7 +162,7 @@ abstract class AbstractTask<I : Input> {
 
         emit(FlowOutputStatus.BeforeAll(input, service))
 
-        val filenames = hookOnFilenames(
+        val filenames = transformSourceOrCompiledFilename(
             Filenames(
                 source = Filename(uuid4().toString(), sourceCodeExtension),
                 compiled = Filename(uuid4().toString(), compiledFileExtension)
@@ -221,7 +221,7 @@ abstract class AbstractTask<I : Input> {
 
         beforeAll()
 
-        val filenames = hookOnFilenames(
+        val filenames = transformSourceOrCompiledFilename(
             Filenames(
                 Filename(uuid4().toString(), sourceCodeExtension), Filename(uuid4().toString(), compiledFileExtension)
             )

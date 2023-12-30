@@ -2,6 +2,7 @@ package cn.llonvne.gojudge.api.task.java
 
 import arrow.core.Option
 import arrow.core.some
+import arrow.optics.copy
 import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
 import cn.llonvne.gojudge.api.task.CodeInput
@@ -23,8 +24,19 @@ class JavaCompileTask : AbstractTask<CodeInput>() {
         copyOutCached = listOf(filenames.source.asString(), filenames.compiled.asString())
     }
 
+    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
+        return filenames.copy(
+            source = filenames.source.copy(name = "Main"),
+            compiled = filenames.compiled.copy(name = "Main")
+        )
+    }
+
+    override fun transformRunFilename(filename: Filename): Filename {
+        return filename.copy(name = "Main", extension = "class".some())
+    }
+
     override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String) = cmd {
-        args = listOf("java", runFilename.asString())
+        args = listOf("java", runFilename.name)
         env = useUsrBinEnv
         files = useStdOutErrForFiles(input.stdin)
         copyIn = useFileIdCopyIn(fileId = runFileId, newName = runFilename.asString())

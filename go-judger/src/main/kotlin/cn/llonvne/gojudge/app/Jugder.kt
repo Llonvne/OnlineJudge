@@ -1,6 +1,8 @@
 package cn.llonvne.gojudge.app
 
-import cn.llonvne.gojudge.api.router.gpp.installGpp
+import cn.llonvne.gojudge.api.router.gpp.gpp
+import cn.llonvne.gojudge.api.router.installLanguageRouter
+import cn.llonvne.gojudge.api.router.java.java
 import cn.llonvne.gojudge.ktor.RACE_LIMIT_JUDGE_NAME
 import cn.llonvne.gojudge.ktor.globalAuth
 import cn.llonvne.gojudge.ktor.installKtorOfficialPlugins
@@ -15,9 +17,12 @@ fun Application.judging() {
     installKtorOfficialPlugins()
     installManageWeb()
 
+
     routing {
+        installLanguageRouter("gpp", "/gpp", "", gpp())
+        installLanguageRouter("java", "/java", "", java())
         linkTr("/link") {
-            installGpp()
+
             globalAuth {
                 rateLimit(RACE_LIMIT_JUDGE_NAME) {}
             }

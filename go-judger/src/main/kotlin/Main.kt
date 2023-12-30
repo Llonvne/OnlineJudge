@@ -10,13 +10,13 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 
 private val json = Json {
     prettyPrint = true
 }
 
 fun main() = SuspendApp {
-
     val log = KotlinLogging.logger(name = "go-judger-main")
     log.info { "Initialization Go Judger ...." }
 

@@ -14,7 +14,6 @@ class TC {
 
     @Test
     fun a() = runBlocking {
-        newVir
 
         suspendCoroutine<Unit> { continuation ->
             println("start!")
