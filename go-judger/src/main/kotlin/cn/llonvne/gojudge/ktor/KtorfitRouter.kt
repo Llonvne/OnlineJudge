@@ -18,13 +18,13 @@ import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.superclasses
 
-annotation class KtorfitRouterService
+private annotation class KtorfitRouterService
 
-class KtorfitRouterConfig {
+private class KtorfitRouterConfig {
     var services: List<Any> = listOf<Any>()
 }
 
-val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
+private val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
 
     val log = KotlinLogging.logger { }
 
@@ -90,13 +90,13 @@ val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConf
     }
 }
 
-enum class ParameterType {
+private enum class ParameterType {
     Body, FormData, Header, HeadersMap, Tag, RequestBuilder
 }
 
-data class TypeInfoPack(val typeInfo: TypeInfo)
+private data class TypeInfoPack(val typeInfo: TypeInfo)
 
-fun parseMethodArgTypes(targetMethod: KFunction<*>, service: Any): List<TypeInfo> {
+private fun parseMethodArgTypes(targetMethod: KFunction<*>, service: Any): List<TypeInfo> {
     return targetMethod.parameters.map {
         TypeInfo(it.type.classifier as KClass<*>, it.type.platformType, it.type)
     }.filter {
@@ -158,9 +158,9 @@ private fun isAnnotatedByKtorfit(kFunction: KFunction<*>) = kFunction.annotation
 private fun Collection<Annotation>.filterKtorfitAnnotations() =
     filter { it.annotationClass.qualifiedName in ktorfitAnnotationsFqNameSet }
 
-data class HttpMethodUrl(val url: String, val method: HttpMethod)
+private data class HttpMethodUrl(val url: String, val method: HttpMethod)
 
-data class HttpMethodDescriptor(val method: KFunction<*>, val httpMethodUrls: List<HttpMethodUrl>)
+private data class HttpMethodDescriptor(val method: KFunction<*>, val httpMethodUrls: List<HttpMethodUrl>)
 
 private fun parseAnnotation(annotation: Annotation): HttpMethodUrl {
     return when (annotation) {

@@ -12,29 +12,22 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-private val json = Json {
-    prettyPrint = true
-}
-
-fun main() = SuspendApp {
+private fun main() = SuspendApp {
     val log = KotlinLogging.logger(name = "go-judger-main")
-    log.info { "Initialization Go Judger ...." }
+    log.info { "Initialization Go Judge ...." }
 
     val env = loadConfigFromEnv()
 
     resourceScope {
         val judgeContext = env.judgeSpec.map {
-            log.info { json.encodeToString(it) }
             GoJudgeResolver(it).resolve().bind()
         }.getOrElse {
             throw RuntimeException("Failed to init judge")
         }.toJudgeContext()
 
-
         server(Netty, port = 8081) {
             judging(judgeContext)
         }
-
 
         awaitCancellation()
     }

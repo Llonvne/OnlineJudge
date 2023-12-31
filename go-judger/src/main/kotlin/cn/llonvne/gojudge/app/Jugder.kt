@@ -8,8 +8,7 @@ import cn.llonvne.gojudge.internal.config
 import cn.llonvne.gojudge.ktor.RACE_LIMIT_JUDGE_NAME
 import cn.llonvne.gojudge.ktor.globalAuth
 import cn.llonvne.gojudge.ktor.installKtorOfficialPlugins
-import cn.llonvne.gojudge.service.runtimeService
-import cn.llonvne.gojudge.web.installManageWeb
+import cn.llonvne.gojudge.judgeClient
 import cn.llonvne.gojudge.web.links.get
 import cn.llonvne.gojudge.web.links.linkTr
 import io.ktor.http.*
@@ -21,7 +20,6 @@ import io.ktor.server.routing.*
 
 fun Application.judging(judgeContext: JudgeContext) {
     installKtorOfficialPlugins()
-    installManageWeb()
 
     routing {
 
@@ -32,7 +30,7 @@ fun Application.judging(judgeContext: JudgeContext) {
                 installLanguageRouter("gpp", "/gpp", "", gpp())
                 installLanguageRouter("java", "/java", "", java())
                 get("config", "config") {
-                    call.respondText(runtimeService.config(), ContentType.Application.Json)
+                    call.respondText(judgeClient.config(), ContentType.Application.Json)
                 }
             }
 
