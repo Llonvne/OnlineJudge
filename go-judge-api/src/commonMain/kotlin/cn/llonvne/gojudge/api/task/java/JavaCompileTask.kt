@@ -2,14 +2,16 @@ package cn.llonvne.gojudge.api.task.java
 
 import arrow.core.Option
 import arrow.core.some
-import arrow.optics.copy
+import cn.llonvne.gojudge.api.Task
 import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
 import cn.llonvne.gojudge.api.task.CodeInput
-import cn.llonvne.gojudge.services.runtime.cmd
-import cn.llonvne.gojudge.services.runtime.useUsrBinEnv
+import cn.llonvne.gojudge.api.task.Output
+import cn.llonvne.gojudge.internal.cmd
 
-class JavaCompileTask : AbstractTask<CodeInput>() {
+fun javaCompileTask(): Task<CodeInput, Output> = JavaCompileTask()
+
+private class JavaCompileTask : AbstractTask<CodeInput>() {
     override val sourceCodeExtension: Option<String>
         get() = "java".some()
     override val compiledFileExtension: Option<String>

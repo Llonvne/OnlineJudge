@@ -1,6 +1,5 @@
 package cn.llonvne.gojudge.api.router
 
-import cn.llonvne.gojudge.docker.ContainerWrapper
 import cn.llonvne.gojudge.web.links.LinkTreeConfigurer
 import cn.llonvne.gojudge.web.links.get
 import cn.llonvne.gojudge.web.links.linkIn
@@ -12,8 +11,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 
-context(Routing, LinkTreeConfigurer)
-internal fun installLanguageRouter(
+context(Routing)
+internal fun LinkTreeConfigurer.installLanguageRouter(
     name: String,
     path: String,
     decr: String = name,

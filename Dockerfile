@@ -14,7 +14,10 @@ RUN echo "deb https://mirrors.aliyun.com/ubuntu/ focal main restricted universe 
 
 RUN apt-get update && \
     apt-get install -y g++ --fix-missing && \
-    apt-get install -y openjdk-17-jdk --fix-missing && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y openjdk-17-jdk --fix-missing
+
+RUN apt-get install python3.11 --fix-missing
+
+RUN rm -rf /var/lib/apt/lists/*
 
 # 其他必要的设置或命令

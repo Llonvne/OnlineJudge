@@ -1,6 +1,5 @@
 package cn.llonvne.gojudge.docker
 
-import arrow.core.raise.either
 import arrow.fx.coroutines.Resource
 import arrow.fx.coroutines.resource
 import cn.llonvne.gojudge.api.spec.bootstrap.GoJudgeEnvSpec
@@ -20,20 +19,30 @@ import java.util.*
 //"criyle/go-judge"
 internal const val GO_JUDGE_DOCKER_NAME = "judger"
 
+/**
+ * 判断当前是否为Liunx主机
+ */
 private val isLinux by lazy {
     val dockerHost = System.getenv("DOCKER_HOST")
     dockerHost != null && dockerHost.startsWith("unix://")
 }
 
+/**
+ * Docker Container 的协程包装器
+ */
+class CoroutineContainer(private val container: GenericContainer<*>) {
+    companion object {
+        /**
+         * 建立独立的线程为Docker协程服务
+         */
+        @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+        private val dockerCoroutinesContext = newSingleThreadContext("DockerThread")
+    }
 
-@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-val dockerCoroutinesContext = newSingleThreadContext("DockerThread")
-
-class ContainerWrapper(private val container: GenericContainer<*>) {
-
+    /**
+     * 获得Docker客户端
+     */
     private val dockerClient = DockerClientFactory.lazyClient()
-    private val containerId = container.containerId
-    private val log = KotlinLogging.logger { }
 
     private suspend fun on(block: suspend (container: GenericContainer<*>) -> Unit) {
         withContext(dockerCoroutinesContext) {
@@ -53,7 +62,6 @@ class ContainerWrapper(private val container: GenericContainer<*>) {
     }
 
     suspend fun exec(command: String): Container.ExecResult {
-
         return withContext(dockerCoroutinesContext) {
             val result = ExecInContainerPattern
                 .execInContainer(dockerClient, container.containerInfo, "/bin/sh", "-c", command)
@@ -70,7 +78,7 @@ fun configureGoJudgeContainer(
     reuseContainer: Boolean = false,
     envs: MutableMap<String, String> = mutableMapOf(),
     spec: GoJudgeEnvSpec = GoJudgeEnvSpec()
-): Resource<ContainerWrapper> {
+): Resource<CoroutineContainer> {
 
     log.info { "building new docker client" }
 
@@ -85,7 +93,7 @@ fun configureGoJudgeContainer(
 
     applySpec(spec, container)
     return resource({
-        ContainerWrapper(container).also {
+        CoroutineContainer(container).also {
             it.start()
         }
     }) { wrapper, _ ->
@@ -93,7 +101,7 @@ fun configureGoJudgeContainer(
     }
 }
 
-fun shouldHappen(): Nothing =
+fun shouldNotHappen(): Nothing =
     throw IllegalStateException("it shouldn't be info please report me on Github:Llonvne/OnlineJudge")
 
 fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
@@ -131,7 +139,7 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
         when (spec.logLevel) {
             GoJudgeEnvSpec.GoJudgeLogLevel.RELEASE -> withCommand("-release")
             GoJudgeEnvSpec.GoJudgeLogLevel.SILENT -> withCommand("-silent")
-            GoJudgeEnvSpec.GoJudgeLogLevel.INFO -> shouldHappen()
+            GoJudgeEnvSpec.GoJudgeLogLevel.INFO -> shouldNotHappen()
         }
     }
     when (spec.authToken) {

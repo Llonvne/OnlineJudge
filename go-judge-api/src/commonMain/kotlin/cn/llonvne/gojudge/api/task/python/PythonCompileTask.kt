@@ -1,26 +1,34 @@
-package cn.llonvne.gojudge.api.task.gpp
+package cn.llonvne.gojudge.api.task.python
 
-import arrow.core.None
 import arrow.core.Option
 import arrow.core.some
-import cn.llonvne.gojudge.api.Task
 import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
 import cn.llonvne.gojudge.api.task.CodeInput
-import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.internal.cmd
 
-fun gppCompileTask(): Task<CodeInput, Output> = GppCompileTask()
-
-private class GppCompileTask : AbstractTask<CodeInput>() {
+private class PythonCompileTask : AbstractTask<CodeInput>() {
+    /**
+     * 源代码拓展名
+     * 返回 None 时将没有后缀
+     */
     override val sourceCodeExtension: Option<String>
-        get() = "cpp".some()
+        get() = "py".some()
+
+    /**
+     * 编译后源代码拓展名
+     * 返回 None 时将没有后缀
+     */
     override val compiledFileExtension: Option<String>
-        get() = None
+        get() = "py".some()
+
+    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
+        return Filenames(filenames.source, filenames.source)
+    }
 
     override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
         return cmd {
-            args = buildGppCompileCommand(filenames)
+            args = listOf()
             env = useUsrBinEnv
             files = useStdOutErrForFiles()
             copyIn = useMemoryCodeCopyIn(filenames.source.asString(), input.code)
@@ -29,14 +37,9 @@ private class GppCompileTask : AbstractTask<CodeInput>() {
         }
     }
 
-    override fun getRunCmd(
-        input: CodeInput,
-        compileResult: cn.llonvne.gojudge.api.spec.runtime.Result,
-        runFilename: Filename,
-        runFileId: String
-    ): Cmd {
+    override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
         return cmd {
-            args = listOf(runFilename.asString())
+            args = listOf("python3.11", runFilename.name)
             env = useUsrBinEnv
             files = useStdOutErrForFiles(input.stdin)
             copyIn = useFileIdCopyIn(fileId = runFileId, newName = runFilename.asString())

@@ -3,9 +3,8 @@ package cn.llonvne.gojudge.api.router.gpp
 import cn.llonvne.gojudge.api.router.LanguageRouter
 import cn.llonvne.gojudge.api.router.playground
 import cn.llonvne.gojudge.api.task.CodeInput
-import cn.llonvne.gojudge.api.task.gpp.GppCompileTask
+import cn.llonvne.gojudge.api.task.gpp.gppCompileTask
 import cn.llonvne.gojudge.docker.JudgeContext
-import cn.llonvne.gojudge.internal.version
 import cn.llonvne.gojudge.service.runtimeService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,7 +16,7 @@ import kotlinx.html.*
 context(JudgeContext)
 internal fun gpp() = object : LanguageRouter {
 
-    val gppCompileTask = GppCompileTask()
+    val gppCompileTask = gppCompileTask()
 
     context(PipelineContext<Unit, ApplicationCall>)
     override suspend fun version() {

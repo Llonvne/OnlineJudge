@@ -3,9 +3,8 @@ package cn.llonvne.gojudge.api.router.java
 import cn.llonvne.gojudge.api.router.LanguageRouter
 import cn.llonvne.gojudge.api.router.playground
 import cn.llonvne.gojudge.api.task.CodeInput
-import cn.llonvne.gojudge.api.task.java.JavaCompileTask
+import cn.llonvne.gojudge.api.task.java.javaCompileTask
 import cn.llonvne.gojudge.docker.JudgeContext
-import cn.llonvne.gojudge.internal.version
 import cn.llonvne.gojudge.service.runtimeService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,10 +12,11 @@ import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 import kotlinx.html.body
+
 context(JudgeContext)
 internal fun java() = object : LanguageRouter {
 
-    val javaCompileTask = JavaCompileTask()
+    val javaCompileTask = javaCompileTask()
 
     context(PipelineContext<Unit, ApplicationCall>)  override suspend fun version() {
         val version = exec("java -version").stderr

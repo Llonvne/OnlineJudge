@@ -1,6 +1,6 @@
 package cn.llonvne.gojudge.ktor
 
-import cn.llonvne.gojudge.docker.shouldHappen
+import cn.llonvne.gojudge.docker.shouldNotHappen
 import de.jensklingenberg.ktorfit.http.*
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -171,7 +171,7 @@ private fun parseAnnotation(annotation: Annotation): HttpMethodUrl {
         is HEAD -> HttpMethodUrl(annotation.value, HttpMethod.Head)
         is OPTIONS -> HttpMethodUrl(annotation.value, HttpMethod.Options)
         is PATCH -> HttpMethodUrl(annotation.value, HttpMethod.Patch)
-        else -> shouldHappen()
+        else -> shouldNotHappen()
     }
 }
 

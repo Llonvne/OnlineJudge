@@ -3,21 +3,35 @@ package cn.llonvne.gojudge.api.task
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
+import cn.llonvne.gojudge.api.Task
 import cn.llonvne.gojudge.api.spec.runtime.Cmd
 import cn.llonvne.gojudge.api.spec.runtime.RequestType
 import cn.llonvne.gojudge.api.spec.runtime.Result
 import cn.llonvne.gojudge.api.spec.runtime.Status
 import cn.llonvne.gojudge.internal.GoJudgeClient
 import cn.llonvne.gojudge.internal.run
-import cn.llonvne.gojudge.services.runtime.request
+import cn.llonvne.gojudge.internal.request
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
-abstract class AbstractTask<I : Input> {
+/**
+ * 通过评测机执行评测任务的基类
+ */
+internal abstract class AbstractTask<I : Input> : Task<I, Output> {
+
+    /**
+     * 源代码拓展名
+     * 返回 None 时将没有后缀
+     */
     abstract val sourceCodeExtension: Option<String>
+
+    /**
+     * 编译后源代码拓展名
+     * 返回 None 时将没有后缀
+     */
     abstract val compiledFileExtension: Option<String>
     abstract fun getCompileCmd(input: I, filenames: Filenames): Cmd
     abstract fun getRunCmd(input: I, compileResult: Result, runFilename: Filename, runFileId: String): Cmd
@@ -56,6 +70,12 @@ abstract class AbstractTask<I : Input> {
     /**
      * 在生成完文件名，可以调用该函数进行修改
      * 生成文件名依赖的下列拓展名已被包含在文件中
+     *
+     * 默认生成的源代码名称为
+     * 随机UUID.sourceCodeExtension
+     * 默认生成的编译后代码名称为
+     * 随机UUID.compiledFileExtension
+     *
      * [sourceCodeExtension]
      * [compiledFileExtension]
      */
@@ -217,7 +237,7 @@ abstract class AbstractTask<I : Input> {
         )
     }
 
-    suspend fun run(input: I, service: GoJudgeClient): Output {
+    override suspend fun run(input: I, service: GoJudgeClient): Output {
 
         beforeAll()
 

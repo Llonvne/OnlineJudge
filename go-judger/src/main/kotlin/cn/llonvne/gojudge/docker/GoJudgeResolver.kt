@@ -6,12 +6,12 @@ import org.testcontainers.containers.Container
 
 
 class GoJudgeResolver(private val spec: GoJudgeEnvSpec) {
-    fun resolve(): Resource<ContainerWrapper> {
+    fun resolve(): Resource<CoroutineContainer> {
         return configureGoJudgeContainer(spec = spec)
     }
 }
 
-fun ContainerWrapper.toJudgeContext() = object : JudgeContext {
+fun CoroutineContainer.toJudgeContext() = object : JudgeContext {
     override suspend fun exec(command: String): Container.ExecResult {
         return this@toJudgeContext.exec(command)
     }
