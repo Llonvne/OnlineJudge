@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cn.llonvne.gojudge.api.spec.bootstrap
 
 import arrow.optics.optics
@@ -7,10 +9,9 @@ import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-@Suppress("unused")
+
 @Serializable
 sealed interface GoJudgeVersion {
-
     val tag: String
 
     @Serializable
@@ -47,7 +48,6 @@ sealed interface GoJudgePortMappings {
         override val binds: List<GoJudgePortMapping> = listOf(GoJudgePortMapping())
     }
 
-    @Suppress("unused")
     @Serializable
     data class Customized(override val binds: List<GoJudgePortMapping>) : GoJudgePortMappings
 }
@@ -61,12 +61,15 @@ sealed interface ContainerName {
         override val name: String = "$prefix:${uuid4().toString().subSequence(0..randomLatterLength)}"
     }
 
-    @Suppress("unused")
     data class Customized(override val name: String) : ContainerName
 }
 
 @Serializable
 @optics
+/**
+ * 表示一个网络地址
+ * 会对 [port] 正确性检查，不会对 [url] 进行任何检查
+ */
 data class HttpAddr(val url: String, val port: Int) {
     init {
         require(isValidPort(port))
@@ -79,6 +82,9 @@ data class HttpAddr(val url: String, val port: Int) {
     companion object
 }
 
+/**
+ * 指示是否为默认值，该变量不会在序列化时被表示
+ */
 interface IsDefaultSetting {
     @Transient
     val isDefault: Boolean
@@ -86,6 +92,9 @@ interface IsDefaultSetting {
 
 @Serializable
 @optics
+/**
+ * 表示 Go-Judge 启动时
+ */
 data class GoJudgeEnvSpec(
     val httpAddr: HttpAddr = DEFAULT_HTTP_ADDR,
     val enableGrpc: Boolean = DEFAULT_ENABLE_GRPC,
@@ -125,7 +134,6 @@ data class GoJudgeEnvSpec(
         val DEFAULT_MONITOR_ADDR = HttpAddr(LOCALHOST, 5052)
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface GoJudgeLogLevel : IsDefaultSetting {
@@ -143,7 +151,6 @@ data class GoJudgeEnvSpec(
         data object RELEASE : GoJudgeLogLevel
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface GoJudgeAuthTokenSetting : IsDefaultSetting {
@@ -161,7 +168,6 @@ data class GoJudgeEnvSpec(
         }
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface ConcurrencyNumberSetting : IsDefaultSetting {
@@ -183,7 +189,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     sealed interface FileStoreSetting : IsDefaultSetting {
         override val isDefault: Boolean get() = this is Memory
@@ -195,7 +200,6 @@ data class GoJudgeEnvSpec(
         data object Dir : FileStoreSetting
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface CGroupPrefixSetting : IsDefaultSetting {
@@ -218,7 +222,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface GoJudgeTimeInterval : IsDefaultSetting {
@@ -249,7 +252,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface OutputLimitSetting : IsDefaultSetting {
@@ -274,7 +276,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface ExtraMemoryLimitSetting : IsDefaultSetting {
@@ -297,7 +298,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface CopyOutLimitSetting : IsDefaultSetting {
@@ -319,7 +319,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface OpenFileLimitSetting : IsDefaultSetting {
@@ -341,7 +340,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface LinuxOnlySpec : IsDefaultSetting {
@@ -505,7 +503,6 @@ data class GoJudgeEnvSpec(
         companion object
     }
 
-    @Suppress("unused")
     @Serializable
     @optics
     sealed interface FileTimeoutSetting : IsDefaultSetting {

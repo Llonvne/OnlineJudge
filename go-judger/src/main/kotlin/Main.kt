@@ -9,8 +9,6 @@ import cn.llonvne.gojudge.env.loadConfigFromEnv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.netty.*
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 private fun main() = SuspendApp {
     val log = KotlinLogging.logger(name = "go-judger-main")

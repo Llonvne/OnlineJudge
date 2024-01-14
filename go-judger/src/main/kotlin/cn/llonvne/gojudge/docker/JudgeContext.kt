@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.docker
 
+import jdk.dynalink.Operation
 import org.testcontainers.containers.Container.ExecResult
 
 /**
@@ -9,4 +10,11 @@ import org.testcontainers.containers.Container.ExecResult
  */
 interface JudgeContext {
     suspend fun exec(command: String): ExecResult
+}
+
+/**
+ * 将 [JudgeContext] 作为上下文接收器传入
+ */
+operator fun JudgeContext.invoke(operation: context(JudgeContext) () -> Unit) {
+    operation(this)
 }

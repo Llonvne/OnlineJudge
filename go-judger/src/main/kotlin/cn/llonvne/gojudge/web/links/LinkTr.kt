@@ -43,6 +43,16 @@ internal interface LinkTreeConfigurer {
     fun link(): A.() -> Unit = {}
 }
 
+context(LinkTreeAware)
+internal fun Route.linkTr(
+    name: String = "Links",
+    decr: String = "LinkTree",
+    configurer: LinkTreeConfigurer = LinkTreeConfigurerImpl(),
+    build: LinkTreeConfigurer.() -> Unit,
+) {
+    linkTr(linkTreeUri, name, decr, configurer, build)
+}
+
 /**
  * @param url 链接树的地址
  * @param decr 链接树的描述
