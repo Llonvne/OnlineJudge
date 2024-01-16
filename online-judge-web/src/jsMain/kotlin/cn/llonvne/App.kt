@@ -1,11 +1,13 @@
 package cn.llonvne
 
+import cn.llonvne.panel.loginPanel
+import cn.llonvne.panel.registerPanel
 import io.kvision.*
-import io.kvision.html.Div
 import io.kvision.html.button
-import io.kvision.html.label
+import io.kvision.html.h1
 import io.kvision.panel.root
-import io.kvision.remote.getService
+import io.kvision.routing.Routing
+import io.kvision.routing.Strategy
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -15,22 +17,34 @@ val AppScope = CoroutineScope(window.asCoroutineDispatcher())
 
 class App : Application() {
     override fun start() {
-        val pingService = getService<IPingService>()
+        val routing = Routing.init(strategy = Strategy.ALL)
 
-        val root = root("kvapp") {
-        }
-
-        AppScope.launch {
-            root.add(Div {
-                val label = label { }
-
-                button("Click Me to Ping!!!") {
-                    AppScope.launch {
-                        label.content += pingService.ping("Hello")
+        routing
+            .on("/", {
+                root("kvapp") {
+                    h1 {
+                        +"Online Judge"
+                    }
+                    button("a") {
+                        onClick {
+                            AppScope.launch {
+                                routing.navigate("/a")
+                            }
+                        }
                     }
                 }
             })
-        }
+            .on("/register", {
+                root("kvapp") {
+                    registerPanel()
+                }
+            })
+            .on("/login", {
+                root("kvapp") {
+                    loginPanel(routing)
+                }
+            })
+            .resolve()
     }
 }
 

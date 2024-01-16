@@ -114,7 +114,10 @@ kotlin {
                 implementation("org.springframework.boot:spring-boot-starter-security")
 
                 implementation("org.komapper:komapper-spring-boot-starter-r2dbc:$komapperVersion")
-                implementation("org.komapper:komapper-dialect-h2-r2dbc:$komapperVersion")
+                runtimeOnly("org.postgresql:postgresql")
+                runtimeOnly("org.postgresql:r2dbc-postgresql")
+                implementation("org.komapper:komapper-dialect-postgresql-r2dbc:$komapperVersion")
+                implementation("org.springframework.boot:spring-boot-docker-compose")
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
@@ -135,6 +138,7 @@ kotlin {
                 implementation("io.kvision:kvision-state:$kvisionVersion")
                 implementation("io.kvision:kvision-fontawesome:$kvisionVersion")
                 implementation("io.kvision:kvision-i18n:$kvisionVersion")
+                implementation("io.kvision:kvision-routing-navigo-ng:$kvisionVersion")
             }
         }
         val jsTest by getting {
@@ -150,8 +154,25 @@ dependencies {
     add("kspJvm", "org.komapper:komapper-processor:$komapperVersion")
 }
 
+springBoot {
+    mainClass = "cn.llonvne.MainKt"
+}
+
 tasks.configureEach {
     if (name == "kspKotlinJvm") {
         mustRunAfter(tasks.getByName("kspCommonMainKotlinMetadata"))
     }
+}
+
+tasks {
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.freeCompilerArgs += listOf(
+            "-opt-in=org.komapper.annotation.KomapperExperimentalAssociation",
+            "-Xcontext-receivers"
+        )
+    }
+}
+
+ksp {
+    arg("komapper.enableEntityMetamodelListing", "true")
 }

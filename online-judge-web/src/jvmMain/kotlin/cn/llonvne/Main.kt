@@ -1,6 +1,8 @@
 package cn.llonvne
 
 import io.kvision.remote.getAllServiceManagers
+import org.komapper.r2dbc.R2dbcDatabase
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -10,10 +12,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootApplication(
-    exclude = [
-        org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class,
-        org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration::class
-    ]
+    exclude = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class, org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration::class]
 )
 class KVApplication {
     @Bean
@@ -31,4 +30,6 @@ fun main(args: Array<String>) {
 actual class PingService : IPingService {
     override suspend fun ping(message: String): String = "Hello From Backend"
 }
+
+
 
