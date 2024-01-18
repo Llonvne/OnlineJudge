@@ -48,4 +48,5 @@ interface IProblemService {
     }
 
     suspend fun getById(id: Int): ProblemGetByIdResult
+    suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto>
 }

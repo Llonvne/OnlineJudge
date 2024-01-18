@@ -23,7 +23,7 @@ class AuthorRepository(
     suspend fun create(author: Author): Author {
 
         // 检查 authenticationUserId 是否有效
-        isAuthenticationUserIdVaild(author)
+        isAuthenticationUserIdValid(author)
 
         return db.runQuery {
             QueryDsl.insert(authorMeta).single(author)
@@ -40,6 +40,7 @@ class AuthorRepository(
                 }
         }
     }
+
     @Throws(AuthorNotExist::class)
     suspend fun getByIdOrThrow(id: Int): Author {
         return db.runQuery {
@@ -52,7 +53,21 @@ class AuthorRepository(
         }
     }
 
-    private suspend fun isAuthenticationUserIdVaild(author: Author) {
+    suspend fun getByIdOrNull(id: Int?): Author? {
+
+        if (id == null) {
+            return null
+        }
+
+        return db.runQuery {
+            QueryDsl.from(authorMeta)
+                .where {
+                    authorMeta.authorId eq id
+                }.singleOrNull()
+        }
+    }
+
+    private suspend fun isAuthenticationUserIdValid(author: Author) {
         val id = author.authenticationUserId
 
         // 如果 ID 为空，则不做检查

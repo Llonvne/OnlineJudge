@@ -1,11 +1,9 @@
 package cn.llonvne.site
 
 import cn.llonvne.model.AuthenticationModel
-import io.kvision.Application
 import io.kvision.core.Container
 import io.kvision.html.div
 import io.kvision.html.h1
-import io.kvision.panel.root
 import io.kvision.state.bind
 
 fun Container.mine() {

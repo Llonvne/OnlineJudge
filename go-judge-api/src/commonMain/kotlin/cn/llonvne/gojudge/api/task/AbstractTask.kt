@@ -9,8 +9,8 @@ import cn.llonvne.gojudge.api.spec.runtime.RequestType
 import cn.llonvne.gojudge.api.spec.runtime.Result
 import cn.llonvne.gojudge.api.spec.runtime.Status
 import cn.llonvne.gojudge.internal.GoJudgeClient
-import cn.llonvne.gojudge.internal.run
 import cn.llonvne.gojudge.internal.request
+import cn.llonvne.gojudge.internal.run
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

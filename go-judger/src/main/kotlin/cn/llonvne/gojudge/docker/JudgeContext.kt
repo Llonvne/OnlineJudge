@@ -1,6 +1,5 @@
 package cn.llonvne.gojudge.docker
 
-import jdk.dynalink.Operation
 import org.testcontainers.containers.Container.ExecResult
 
 /**

@@ -1,4 +1,4 @@
-package cn.llonvne.database.entity.def
+package cn.llonvne.database.entity.def.problem
 
 import cn.llonvne.entity.problem.Problem
 import org.komapper.annotation.*

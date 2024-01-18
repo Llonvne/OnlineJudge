@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthenticationToken(
-    val username:String,
-    private val token: String
+    val username: String,
+    val token: String
 )
