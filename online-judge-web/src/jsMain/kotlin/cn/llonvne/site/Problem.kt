@@ -32,18 +32,18 @@ data class ProblemSearch(
 )
 
 internal fun Container.problems(routing: Routing) {
-    tabPanel(tabPosition = TabPosition.TOP) {
-        tab("题目列表") {
-            div {
-                problemsList(routing) { title, component ->
-                    addTab(title, component, closable = true)
-                }
-            }
+    div(className = "row") {
+        div(className = "col-8") {
+            problemsList(routing)
+        }
+        div(className = "col") {
+            h1 { +"HelloWorld" }
         }
     }
+
 }
 
-private fun Container.problemsList(routing: Routing, tabAdder: ((String, Component) -> Unit)? = null) {
+private fun Container.problemsList(routing: Routing) {
     val problems: ObservableList<ProblemListDto> = ObservableListWrapper()
     AppScope.launch {
         problems.addAll(
@@ -103,14 +103,7 @@ private fun Container.problemsList(routing: Routing, tabAdder: ((String, Compone
                     ColumnDefinition("题目ID", "problem.problemId"),
                     ColumnDefinition("题目名称", "problem.problemName", cellClick = { _, cell ->
                         val id = cell.getData.invoke().asDynamic().problem.problemId as Int?
-                        val name = cell.getData.invoke().asDynamic().problem.problemName as String
-                        if (tabAdder == null) {
-                            routing.navigate("/problems/${id}")
-                        } else {
-                            tabAdder(name, Div {
-                                detail(routing, id ?: -1)
-                            })
-                        }
+                        routing.navigate("/problems/${id}")
                     }),
                     ColumnDefinition("状态", "status", formatterComponentFunction = { _, _, e: ProblemListDto ->
                         span {
