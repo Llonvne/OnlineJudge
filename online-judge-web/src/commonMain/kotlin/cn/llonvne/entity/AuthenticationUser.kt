@@ -2,6 +2,7 @@ package cn.llonvne.entity
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.Int
 
 
 /**
@@ -13,10 +14,12 @@ data class AuthenticationUser(
     val id: Int = 0,
     val username: String,
     val encryptedPassword: String,
-    val version: Int = 0,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val version: Int? = null,
+    val createdAt: LocalDateTime? = null,
+    val updatedAt: LocalDateTime? = null
 ) {
     companion object
 }
+
+
 

@@ -173,3 +173,4 @@ client.json
 .env
 .env
 go-judger/.env
+/.idea/

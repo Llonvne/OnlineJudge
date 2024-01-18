@@ -33,15 +33,6 @@ val komapperVersion = "1.15.0"
 dependencies {
     implementation("com.benasher44:uuid:0.7.0")
 }
-
-//rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
-//    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().download = false
-//}
-//
-//rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
-//    rootProject.the<YarnRootExtension>().download = false
-//}
-//
 rootProject.plugins.withType(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin::class.java) {
     rootProject.the<YarnRootExtension>().yarnLockMismatchReport =
         YarnLockMismatchReport.WARNING // NONE | FAIL
@@ -133,12 +124,16 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+                implementation("io.kvision:kvision-toastify:$kvisionVersion")
                 implementation("io.kvision:kvision:$kvisionVersion")
                 implementation("io.kvision:kvision-bootstrap:$kvisionVersion")
                 implementation("io.kvision:kvision-state:$kvisionVersion")
                 implementation("io.kvision:kvision-fontawesome:$kvisionVersion")
                 implementation("io.kvision:kvision-i18n:$kvisionVersion")
                 implementation("io.kvision:kvision-routing-navigo-ng:$kvisionVersion")
+                implementation("io.kvision:kvision-richtext:$kvisionVersion")
+                implementation("io.kvision:kvision-chart:$kvisionVersion")
+                implementation("io.kvision:kvision-tabulator:$kvisionVersion")
             }
         }
         val jsTest by getting {

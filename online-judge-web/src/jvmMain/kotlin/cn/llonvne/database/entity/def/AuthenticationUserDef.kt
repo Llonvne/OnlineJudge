@@ -10,7 +10,7 @@ import java.io.IOException
 
 
 @KomapperEntityDef(AuthenticationUser::class)
-data class AuthenticationUserDef(
+private data class AuthenticationUserDef(
     @KomapperId @KomapperAutoIncrement
     val id: Nothing,
     val username: Nothing,

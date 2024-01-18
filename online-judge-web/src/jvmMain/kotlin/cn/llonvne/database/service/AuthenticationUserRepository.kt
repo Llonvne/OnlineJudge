@@ -3,12 +3,14 @@ package cn.llonvne.database.service
 import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
+import cn.llonvne.kvision.service.IAuthenticationService
+import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
+import org.komapper.core.dsl.query.Query
 import org.komapper.core.dsl.query.map
-import org.komapper.core.dsl.query.single
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Service
 @Service
 class AuthenticationUserRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
 ) {
 
     private val userMeta = Meta.authenticationUser
@@ -28,16 +30,19 @@ class AuthenticationUserRepository(
         }
     }
 
-    suspend fun login(name: String, rawPassword: String): Boolean = passwordEncoder {
+    suspend fun login(username: String, rawPassword: String): IAuthenticationService.LoginResult = passwordEncoder {
         val user = db.runQuery {
             QueryDsl.from(userMeta).where {
-                userMeta.username eq name
+                userMeta.username eq username
             }.singleOrNull()
         }
-        if (user == null) {
-            return@passwordEncoder false
+        return@passwordEncoder if (user == null) {
+            IAuthenticationService.LoginResult.UserDoNotExist
+        } else if (matches(rawPassword, user.encryptedPassword)) {
+            IAuthenticationService.LoginResult.SuccessfulLogin(AuthenticationToken(username, username))
+        } else {
+            IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
         }
-        matches(rawPassword, user.encryptedPassword)
     }
 
     internal suspend fun usernameAvailable(username: String): Boolean {
@@ -47,5 +52,15 @@ class AuthenticationUserRepository(
             }.selectNotNull(count())
         }
         return count == 0.toLong()
+    }
+
+    internal suspend fun isIdExist(authenticationUserId: Int): Boolean {
+        return db.runQuery {
+            QueryDsl.from(userMeta).where {
+                userMeta.id eq authenticationUserId
+            }.map {
+                it.isNotEmpty()
+            }
+        }
     }
 }
