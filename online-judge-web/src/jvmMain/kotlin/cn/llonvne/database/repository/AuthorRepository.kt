@@ -1,4 +1,4 @@
-package cn.llonvne.database.service
+package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.author
 import cn.llonvne.entity.Author

@@ -28,4 +28,8 @@ object Messager {
             MessageLevel.Info, message
         )
     )
+
+    fun toastError(message: String) = send(
+        Message.ToastMessage(MessageLevel.Danger, message)
+    )
 }

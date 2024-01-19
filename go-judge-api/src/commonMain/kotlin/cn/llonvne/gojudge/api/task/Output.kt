@@ -10,10 +10,13 @@ sealed interface Output {
     sealed interface Failure : Output {
         @Serializable
         data class CompileResultIsNull(val compileRequest: RequestType.Request) : Failure
+
         @Serializable
         data class CompileError(val compileRequest: RequestType.Request, val compileResult: Result) : Failure
+
         @Serializable
         data class TargetFileNotExist(val compileRequest: RequestType.Request, val compileResult: Result) : Failure
+
         @Serializable
         data class RunResultIsNull(
             val compileRequest: RequestType.Request,
@@ -21,6 +24,7 @@ sealed interface Output {
             val runRequest: RequestType.Request
         ) : Failure
     }
+
     @Serializable
     data class Success(
         val compileRequest: RequestType.Request,
@@ -28,4 +32,13 @@ sealed interface Output {
         val runRequest: RequestType.Request,
         val runResult: Result
     ) : Output
+
+    companion object {
+        fun Output.formatOnSuccess(notSuccess: String, onSuccess: (Success) -> String): String {
+            return when (this) {
+                is Success -> onSuccess(this)
+                else -> notSuccess
+            }
+        }
+    }
 }

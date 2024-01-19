@@ -1,8 +1,7 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
-import cn.llonvne.compoent.badgeGroup
-import cn.llonvne.compoent.problemStatus
+import cn.llonvne.compoent.*
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ProblemModel
@@ -16,6 +15,7 @@ import io.kvision.panel.*
 import io.kvision.routing.Routing
 import io.kvision.state.ObservableList
 import io.kvision.state.ObservableListWrapper
+import io.kvision.state.ObservableValue
 import io.kvision.state.bind
 import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
@@ -40,15 +40,28 @@ internal fun Container.problems(routing: Routing) {
             h1 { +"HelloWorld" }
         }
     }
-
 }
 
 private fun Container.problemsList(routing: Routing) {
+
     val problems: ObservableList<ProblemListDto> = ObservableListWrapper()
+
+    val alert = div { }
+
+    add(alert)
+
     AppScope.launch {
-        problems.addAll(
-            ProblemModel.listProblem()
-        )
+        runCatching {
+            problems.addAll(
+                ProblemModel.listProblem()
+            )
+        }.onFailure {
+            alert.alert(AlertType.Danger) {
+                h4 {
+                    +"请检查你的网络设置"
+                }
+            }
+        }
     }
 
     formPanel<ProblemSearch> {

@@ -1,17 +1,13 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.entity.def.problem.create
-import cn.llonvne.database.entity.def.problem.problem
-import cn.llonvne.database.service.AuthorRepository
-import cn.llonvne.database.service.ProblemRepository
+import cn.llonvne.database.entity.def.problem.fromCreateReq
+import cn.llonvne.database.repository.AuthorRepository
+import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.Problem
 import cn.llonvne.entity.types.ProblemStatus
 import cn.llonvne.kvision.service.exception.ProblemIdDoNotExistAfterCreation
 import cn.llonvne.security.AuthenticationToken
-import org.komapper.core.dsl.Meta
-import org.komapper.core.dsl.QueryDsl
-import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -22,20 +18,13 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class ProblemService(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
     private val authorRepository: AuthorRepository,
     private val problemRepository: ProblemRepository
 ) :
     IProblemService {
-    private val problemMeta = Meta.problem
 
     override suspend fun list(authenticationToken: AuthenticationToken?): List<ProblemListDto> {
-        return db.runQuery {
-            QueryDsl.from(problemMeta)
-        }
-            .map {
-                it.toProblemListDto(authenticationToken)
-            }
+        return problemRepository.list().mapNotNull { it.toProblemListDto(authenticationToken) }
     }
 
     override suspend fun create(
@@ -51,13 +40,7 @@ actual class ProblemService(
             return IProblemService.CreateProblemResp.AuthorIdNotExist(createProblemReq.authorId)
         }
 
-        val problem = db.runQuery {
-            QueryDsl.insert(problemMeta).single(
-                Problem.create(
-                    createProblemReq
-                )
-            )
-        }
+        val problem = problemRepository.create(Problem.fromCreateReq(createProblemReq))
 
         if (problem.problemId == null) {
             throw ProblemIdDoNotExistAfterCreation()
@@ -77,25 +60,27 @@ actual class ProblemService(
 
     override suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto> {
         return problemRepository.search(text)
-            .map {
+            .mapNotNull {
                 it.toProblemListDto(token)
             }
     }
 
-    private suspend fun Problem.toProblemListDto(token: AuthenticationToken?): ProblemListDto {
+    private suspend fun Problem.toProblemListDto(token: AuthenticationToken?): ProblemListDto? {
         return if (token == null) {
             ProblemListDto(
                 this,
+                this.problemId ?: return null,
                 authorRepository.getByIdOrThrow(authorId),
                 ProblemStatus.NotLogin,
-                problemRepository.getProblemTags(problemId!!)
+                problemRepository.getProblemTags(problemId)
             )
         } else {
             ProblemListDto(
                 this,
+                this.problemId ?: return null,
                 authorRepository.getByIdOrThrow(authorId),
                 ProblemStatus.NotBegin,
-                problemRepository.getProblemTags(problemId!!)
+                problemRepository.getProblemTags(problemId)
             )
         }
     }

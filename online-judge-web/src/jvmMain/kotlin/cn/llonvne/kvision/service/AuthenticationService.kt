@@ -1,11 +1,9 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.service.AuthenticationUserRepository
+import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.message.Message
 import cn.llonvne.message.MessageLevel
 import cn.llonvne.security.AuthenticationToken
-import org.komapper.core.dsl.QueryDsl
-import org.komapper.core.dsl.query.Query
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service

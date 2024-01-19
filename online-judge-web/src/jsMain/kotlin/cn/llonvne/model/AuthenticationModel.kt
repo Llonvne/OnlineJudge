@@ -36,6 +36,7 @@ object AuthenticationModel {
     }
 
     fun logout() {
+        clear()
         userToken.value = null
     }
 

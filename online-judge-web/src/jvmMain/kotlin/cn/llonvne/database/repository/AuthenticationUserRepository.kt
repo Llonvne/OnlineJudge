@@ -1,4 +1,4 @@
-package cn.llonvne.database.service
+package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.database.entity.def.createAtNow
@@ -9,7 +9,6 @@ import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
-import org.komapper.core.dsl.query.Query
 import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
@@ -62,5 +61,11 @@ class AuthenticationUserRepository(
                 it.isNotEmpty()
             }
         }
+    }
+
+    internal suspend fun getByIdOrNull(authenticationUserId: Int) = db.runQuery {
+        QueryDsl.from(userMeta).where {
+            userMeta.id eq authenticationUserId
+        }.singleOrNull()
     }
 }

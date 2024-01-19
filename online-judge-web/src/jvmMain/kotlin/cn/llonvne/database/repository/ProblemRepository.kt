@@ -1,4 +1,4 @@
-package cn.llonvne.database.service
+package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.problem.problem
 import cn.llonvne.database.entity.def.problem.tag.problemTag
@@ -8,7 +8,6 @@ import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.lower
 import org.komapper.core.dsl.query.singleOrNull
-import org.komapper.core.dsl.query.zip
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Service
 
@@ -19,6 +18,11 @@ class ProblemRepository(
 ) {
     private val problemMeta = Meta.problem
     private val problemTagMeta = Meta.problemTag
+
+    suspend fun list(limit: Int = 500): List<Problem> = db.runQuery {
+        QueryDsl.from(problemMeta)
+            .limit(limit)
+    }
 
     suspend fun getById(id: Int): Problem? = db.runQuery {
         QueryDsl.from(problemMeta)
@@ -57,5 +61,9 @@ class ProblemRepository(
                     }
                 }
         }
+    }
+
+    suspend fun create(problem: Problem) = db.runQuery {
+        QueryDsl.insert(problemMeta).single(problem)
     }
 }

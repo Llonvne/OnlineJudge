@@ -24,7 +24,11 @@ fun Container.header(routing: Routing) {
                     routing.navigate(Frontend.Problems.uri)
                 }
             }
-            navLink("Edit", icon = "fas fa-bars")
+            navLink("提交", icon = "fas fa-bars") {
+                onClick {
+                    routing.navigate(Frontend.Submission.uri)
+                }
+            }
             dropDown(
                 "Favourites",
                 listOf("HTML" to "#!/basic", "Forms" to "#!/forms"),

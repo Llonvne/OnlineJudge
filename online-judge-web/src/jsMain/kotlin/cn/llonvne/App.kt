@@ -49,11 +49,19 @@ class App : Application() {
             layout(routing) {
                 mine()
             }
-        }).resolve()
+        }).on(Frontend.Submission.uri, {
+            layout(routing) {
+                submission(routing)
+            }
+        }).on(RegExp("^code/(.*)"), { match: Match ->
+            layout(routing) {
+                code(routing, (match.data[0] as String).toInt())
+            }
+        })
+            .resolve()
         Unit
     }
 }
-
 
 
 fun main() {

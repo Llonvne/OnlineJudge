@@ -3,7 +3,7 @@ package cn.llonvne.database.entity.def.problem
 import cn.llonvne.entity.problem.Problem
 import cn.llonvne.kvision.service.IProblemService
 
-fun Problem.Companion.create(createProblemReq: IProblemService.CreateProblemReq) = Problem(
+fun Problem.Companion.fromCreateReq(createProblemReq: IProblemService.CreateProblemReq) = Problem(
     authorId = createProblemReq.authorId,
     problemName = createProblemReq.problemName,
     memoryLimit = createProblemReq.memoryLimit,

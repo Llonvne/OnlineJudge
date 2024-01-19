@@ -35,6 +35,11 @@ object Frontend {
         override val uri: String = "/me"
         override val name: String = "我的"
     }
+
+    object Submission : Site {
+        override val uri: String = "/submissions"
+        override val name: String = "提交"
+    }
 }
 
 

@@ -1,7 +1,9 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
+import cn.llonvne.compoent.NotFoundAble
 import cn.llonvne.compoent.navigateButton
+import cn.llonvne.compoent.notFound
 import cn.llonvne.constants.Frontend
 import cn.llonvne.kvision.service.IProblemService
 import cn.llonvne.message.Messager
@@ -43,9 +45,13 @@ fun Container.detail(routing: Routing, id: Int) {
                 }
 
                 IProblemService.ProblemGetByIdResult.ProblemNotFound -> {
-                    h1 {
-                        +"Problem NotFound"
-                    }
+                    notFound(object :NotFoundAble{
+                        override val header: String
+                            get() = "题目未找到"
+                        override val notice: String
+                            get() = "请确认题目ID正确，如果确认题目ID正确，请联系我们 ^_^"
+                        override val errorCode: String = "$it-$id"
+                    })
                 }
             }
         }
