@@ -1,5 +1,7 @@
 package cn.llonvne
 
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
 import cn.llonvne.constants.Frontend
 import cn.llonvne.site.*
 import io.kvision.*
@@ -16,6 +18,10 @@ val AppScope = CoroutineScope(window.asCoroutineDispatcher())
 class App : Application() {
     init {
         ThemeManager.init()
+    }
+
+    fun failTo404(routing: Routing, block: () -> Unit) = kotlin.runCatching { block() }.onFailure {
+        routing.navigate("/404")
     }
 
     override fun start() {
@@ -42,8 +48,10 @@ class App : Application() {
                 createProblem(routing)
             }
         }).on(RegExp("^problems/(.*)"), { match: Match ->
-            layout(routing) {
-                detail(routing, (match.data[0] as String).toInt())
+            failTo404(routing) {
+                layout(routing) {
+                    detail(routing, (match.data[0] as String).toInt())
+                }
             }
         }).on(Frontend.Mine.uri, {
             layout(routing) {
@@ -54,11 +62,24 @@ class App : Application() {
                 submission(routing)
             }
         }).on(RegExp("^code/(.*)"), { match: Match ->
-            layout(routing) {
-                code(routing, (match.data[0] as String).toInt())
+            failTo404(routing) {
+                layout(routing) {
+                    submissionDetail(routing, (match.data[0] as String).toInt())
+                }
             }
-        })
-            .resolve()
+        }).on(RegExp("^share/(.*)"), {
+            failTo404(routing) {
+                layout(routing) {
+                    share((it.data[0] as String).toInt())
+                }
+            }
+        }).on("/404", {
+            layout(routing) {
+                alert(AlertType.Danger) {
+                    +"解析失败了"
+                }
+            }
+        }).resolve()
         Unit
     }
 }
@@ -72,7 +93,10 @@ fun main() {
         BootstrapCssModule,
         CoreModule,
         TabulatorModule,
+        TabulatorCssBootstrapModule,
         ChartModule,
-        TabulatorCssBootstrapModule
+        FontAwesomeModule,
+        ToastifyModule,
+        TomSelectModule,
     )
 }

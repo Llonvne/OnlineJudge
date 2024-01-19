@@ -3,7 +3,6 @@ package cn.llonvne.kvision.service.exception
 import cn.llonvne.JvmMainException
 import io.kvision.annotations.KVServiceException
 import io.kvision.remote.AbstractServiceException
-import io.kvision.remote.ServiceException
 
 @KVServiceException
 class AuthorAuthenticationUserIdNotExist : AbstractServiceException() {

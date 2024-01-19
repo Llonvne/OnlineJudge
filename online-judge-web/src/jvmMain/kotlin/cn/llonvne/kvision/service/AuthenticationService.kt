@@ -34,10 +34,10 @@ actual class AuthenticationService(
 
         // 检查用户名是否可用
         return if (authenticationUserRepository.usernameAvailable(username)) {
-
+            val user = authenticationUserRepository.new(username, password)
             // 返回成功注册
             IAuthenticationService.RegisterResult.SuccessfulRegistration(
-                AuthenticationToken(username, authenticationUserRepository.new(username, password).encryptedPassword)
+                AuthenticationToken(username, user.encryptedPassword, user.id)
             )
 
         } else {

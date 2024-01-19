@@ -1,19 +1,16 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.SubmissionListDto
-import cn.llonvne.gojudge.api.task.Output
-import cn.llonvne.gojudge.api.task.Output.Companion.formatOnSuccess
-import cn.llonvne.gojudge.api.task.format
-import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.core.onClick
-import io.kvision.html.div
-import io.kvision.html.link
-import io.kvision.html.span
+import io.kvision.html.*
 import io.kvision.routing.Routing
-import io.kvision.state.*
+import io.kvision.state.ObservableListWrapper
+import io.kvision.state.bind
 import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
 import io.kvision.tabulator.TabulatorOptions
@@ -25,17 +22,27 @@ import kotlinx.serialization.serializer
 
 fun Container.submission(routing: Routing) {
     val submissions = ObservableListWrapper<SubmissionListDto>()
-
+    val alert = div { }.also { add(it) }
     AppScope.launch {
-        val result = SubmissionModel.list()
-        submissions.addAll(result)
+        runCatching {
+            SubmissionModel.list()
+        }.onSuccess { result ->
+            submissions.addAll(result)
+        }.onFailure {
+            alert.alert(AlertType.Danger) {
+                h4 { +"请检查你的网络设置" }
+                p {
+                    +(it.message ?: "")
+                }
+            }
+        }
     }
 
     div(className = "p-1") { }.bind(submissions) {
         tabulator(
             it,
             options = TabulatorOptions(
-                layout = Layout.FITDATAFILL,
+                layout = Layout.FITDATASTRETCH,
                 columns = listOf(
                     ColumnDefinition("提交ID", formatterComponentFunction = { _, _, e: SubmissionListDto ->
                         span {

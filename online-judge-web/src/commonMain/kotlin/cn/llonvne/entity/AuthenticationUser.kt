@@ -2,7 +2,6 @@ package cn.llonvne.entity
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import kotlin.Int
 
 
 /**

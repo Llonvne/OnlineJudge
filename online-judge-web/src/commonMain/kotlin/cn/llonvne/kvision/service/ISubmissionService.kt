@@ -2,7 +2,7 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.Submission
+import cn.llonvne.entity.problem.Language
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -35,13 +35,23 @@ interface ISubmissionService {
     suspend fun getViewCode(id: Int): ViewCodeGetByIdResp
 
     @Serializable
+    sealed interface GetSupportLanguageByProblemIdResp {
+        @Serializable
+        data class SuccessfulGetSupportLanguage(val languages: List<Language>) : GetSupportLanguageByProblemIdResp
+    }
+
+    suspend fun getSupportLanguageId(
+        authenticationToken: AuthenticationToken?,
+        problemId: Int
+    ): GetSupportLanguageByProblemIdResp
+
+    @Serializable
     data object SubmissionNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
 
-    @Serializable
-    data object LanguageNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
+
 
     @Serializable
-    data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
+    data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp
 
     @Serializable
     data object UserNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp

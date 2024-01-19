@@ -1,10 +1,6 @@
 package cn.llonvne.model
 
-import io.kvision.state.MutableState
-import io.kvision.state.ObservableState
-import io.kvision.state.ObservableValue
 import kotlinx.browser.localStorage
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.w3c.dom.get

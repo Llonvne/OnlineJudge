@@ -28,9 +28,6 @@ interface IProblemService {
 
         @Serializable
         data class AuthorIdNotExist(val authorId: Int) : CreateProblemResp
-
-        @Serializable
-        data object PermissionDenied : CreateProblemResp
     }
 
 

@@ -1,11 +1,7 @@
 package cn.llonvne.dtos
 
-import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.problem.Language
-import cn.llonvne.entity.problem.Problem
-import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.SubmissionStatus
-import cn.llonvne.gojudge.api.task.Output
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 

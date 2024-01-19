@@ -3,6 +3,7 @@ package cn.llonvne.model
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.kvision.service.IProblemService
+import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Message
 import cn.llonvne.message.MessageLevel
 import cn.llonvne.message.Messager
@@ -18,7 +19,7 @@ object ProblemModel {
 
         if (AuthenticationModel.userToken.value == null) {
             Messager.send(Message.ToastMessage(MessageLevel.Warning, "必须要登入才能发送消息哦"))
-            return IProblemService.CreateProblemResp.PermissionDenied
+            return PermissionDenied
         }
 
         return problemService.create(

@@ -3,7 +3,6 @@ package cn.llonvne.compoent
 import io.kvision.core.Container
 import io.kvision.html.I
 import io.kvision.html.i
-import io.kvision.html.icon
 
 private fun fa(name: String) = "fa-$name"
 

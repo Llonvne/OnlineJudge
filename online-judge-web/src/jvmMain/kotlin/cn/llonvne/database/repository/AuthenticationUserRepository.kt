@@ -38,7 +38,7 @@ class AuthenticationUserRepository(
         return@passwordEncoder if (user == null) {
             IAuthenticationService.LoginResult.UserDoNotExist
         } else if (matches(rawPassword, user.encryptedPassword)) {
-            IAuthenticationService.LoginResult.SuccessfulLogin(AuthenticationToken(username, username))
+            IAuthenticationService.LoginResult.SuccessfulLogin(AuthenticationToken(username, username, user.id))
         } else {
             IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
         }

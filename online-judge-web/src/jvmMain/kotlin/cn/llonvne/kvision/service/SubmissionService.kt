@@ -13,10 +13,10 @@ import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.api.task.Output.Companion.formatOnSuccess
 import cn.llonvne.gojudge.api.task.format
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp
-import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.*
+import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
+import cn.llonvne.security.AuthenticationToken
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
-import org.komapper.core.dsl.operator.text
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -57,13 +57,13 @@ actual class SubmissionService(
             Json.decodeFromString(submission.judgeResult)
         }
 
-        val problem = problemRepository.getById(submission.problemId) ?: return ISubmissionService.LanguageNotFound
+        val problem = problemRepository.getById(submission.problemId) ?: return LanguageNotFound
 
         return ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById(
             ViewCodeDto(
                 rawCode = submission.rowCode,
                 language = languageRepository.getByIdOrNull(submission.languageId)
-                    ?: return ISubmissionService.LanguageNotFound,
+                    ?: return LanguageNotFound,
                 problemName = problem.problemName,
                 problemId = problem.problemId ?: return ISubmissionService.ProblemNotFound,
                 output = result.getOrNull(),
@@ -82,7 +82,7 @@ actual class SubmissionService(
 
         return SuccessfulGetById(
             SubmissionListDto(
-                language = languageRepository.getByIdOrNull(languageId) ?: return ISubmissionService.LanguageNotFound,
+                language = languageRepository.getByIdOrNull(languageId) ?: return LanguageNotFound,
                 user = AuthenticationUserDto(
                     authenticationUserRepository.getByIdOrNull(authenticationUserId)?.username
                         ?: return ISubmissionService.UserNotFound,
@@ -104,6 +104,19 @@ actual class SubmissionService(
                 codeLength = this.rowCode.length.toLong(),
                 submitTime = this.createdAt ?: LocalDateTime.now()
             )
+        )
+    }
+
+    override suspend fun getSupportLanguageId(
+        authenticationToken: AuthenticationToken?,
+        problemId: Int
+    ): ISubmissionService.GetSupportLanguageByProblemIdResp {
+        if (!problemRepository.isIdExist(problemId)) {
+            return ISubmissionService.ProblemNotFound
+        }
+
+        return ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage(
+            problemRepository.getSupportLanguage(problemId)
         )
     }
 }

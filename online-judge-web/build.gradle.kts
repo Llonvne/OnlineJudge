@@ -134,6 +134,8 @@ kotlin {
                 implementation("io.kvision:kvision-richtext:$kvisionVersion")
                 implementation("io.kvision:kvision-chart:$kvisionVersion")
                 implementation("io.kvision:kvision-tabulator:$kvisionVersion")
+                implementation("io.kvision:kvision-tom-select:$kvisionVersion")
+                implementation("io.kvision:kvision-jquery:$kvisionVersion")
             }
         }
         val jsTest by getting {

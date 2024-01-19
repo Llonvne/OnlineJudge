@@ -33,7 +33,7 @@ actual class ProblemService(
     ): IProblemService.CreateProblemResp {
 
         if (authenticationToken == null) {
-            return IProblemService.CreateProblemResp.PermissionDenied
+            return PermissionDenied
         }
 
         if (!authorRepository.isAuthorIdExist(createProblemReq.authorId)) {

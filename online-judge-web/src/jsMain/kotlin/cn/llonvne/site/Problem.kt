@@ -1,21 +1,22 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
-import cn.llonvne.compoent.*
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
+import cn.llonvne.compoent.badgeGroup
+import cn.llonvne.compoent.problemStatus
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ProblemModel
 import cn.llonvne.model.Storage
-import io.ktor.client.request.forms.*
-import io.kvision.core.*
+import io.kvision.core.Container
+import io.kvision.core.onInput
 import io.kvision.form.formPanel
 import io.kvision.form.text.Text
 import io.kvision.html.*
-import io.kvision.panel.*
 import io.kvision.routing.Routing
 import io.kvision.state.ObservableList
 import io.kvision.state.ObservableListWrapper
-import io.kvision.state.ObservableValue
 import io.kvision.state.bind
 import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
@@ -109,7 +110,7 @@ private fun Container.problemsList(routing: Routing) {
         }
     }
 
-    div().bind(problems) {
+    div(className = "py-2").bind(problems) {
         tabulator(
             it, options = TabulatorOptions(
                 layout = Layout.FITCOLUMNS, columns = listOf(

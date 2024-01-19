@@ -1,10 +1,6 @@
 package cn.llonvne.database.entity.def.problem
 
 import cn.llonvne.entity.problem.Submission
-import cn.llonvne.entity.problem.SubmissionStatus
-import cn.llonvne.entity.problem.SubmissionVisibilityType
-import com.fasterxml.jackson.databind.JsonSerializer.None
-import kotlinx.datetime.LocalDateTime
 import org.komapper.annotation.*
 
 @KomapperEntityDef(entity = Submission::class)

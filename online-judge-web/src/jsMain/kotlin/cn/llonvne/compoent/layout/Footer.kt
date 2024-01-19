@@ -1,10 +1,10 @@
 package cn.llonvne.compoent.layout
 
-import io.kvision.core.*
-import io.kvision.form.text.text
-import io.kvision.html.div
-import io.kvision.html.link
-import io.kvision.navbar.*
+import io.kvision.core.Container
+import io.kvision.navbar.NavbarType
+import io.kvision.navbar.nav
+import io.kvision.navbar.navLink
+import io.kvision.navbar.navbar
 import io.kvision.theme.Theme
 import io.kvision.theme.ThemeManager
 

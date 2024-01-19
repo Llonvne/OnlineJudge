@@ -1,33 +1,36 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
-import cn.llonvne.compoent.NotFoundAble
-import cn.llonvne.compoent.circleCheck
-import cn.llonvne.compoent.loading
-import cn.llonvne.compoent.notFound
-import cn.llonvne.dtos.SubmissionListDto
+import cn.llonvne.compoent.*
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.kvision.service.ISubmissionService
-import cn.llonvne.message.Messager
+import cn.llonvne.kvision.service.LanguageNotFound
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
-import io.kvision.html.*
-import io.kvision.navigo.Handler
+import io.kvision.html.code
+import io.kvision.html.div
+import io.kvision.html.h4
 import io.kvision.routing.Routing
 import io.kvision.state.ObservableValue
 import io.kvision.state.bind
-import io.kvision.utils.obj
 import kotlinx.coroutines.launch
 
-fun Container.code(routing: Routing, submissionId: Int) {
+fun Container.submissionDetail(routing: Routing, submissionId: Int) {
     val submissionObservableValue = ObservableValue<ISubmissionService.ViewCodeGetByIdResp?>(null)
 
+    val alert = div {}
+    add(alert)
+
     AppScope.launch {
-        val result = SubmissionModel.codeGetById(submissionId)
-        Messager.toastInfo(result.toString())
-        submissionObservableValue.value = result
+        val result = runCatching {
+            SubmissionModel.codeGetById(submissionId)
+        }.onFailure {
+            alert.alert(AlertType.Danger) {
+                h4 { +"请检查你的网络设置" }
+            }
+        }
+        submissionObservableValue.value = result.getOrNull()
     }
 
     div().bind(submissionObservableValue) { submission ->
@@ -35,7 +38,7 @@ fun Container.code(routing: Routing, submissionId: Int) {
             loading()
         } else {
             when (submission) {
-                ISubmissionService.LanguageNotFound -> {
+                LanguageNotFound -> {
                     codeNotfound(submission, submissionId)
                 }
 
@@ -63,6 +66,8 @@ fun Container.showStatus(submission: ViewCodeDto) {
     when (submission.status) {
         SubmissionStatus.Received -> circleCheck()
     }
+
+    code(submission.rawCode)
 }
 
 fun Container.codeNotfound(type: ISubmissionService.ViewCodeGetByIdResp, id: Int) {

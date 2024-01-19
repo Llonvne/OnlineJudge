@@ -1,6 +1,5 @@
 package cn.llonvne.constants
 
-import cn.llonvne.message.Message
 import kotlinx.serialization.Serializable
 
 object _Password {
