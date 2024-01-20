@@ -6,6 +6,7 @@ import io.kvision.core.Container
 import io.kvision.dropdown.dropDown
 import io.kvision.form.check.checkBox
 import io.kvision.form.text.text
+import io.kvision.html.button
 import io.kvision.html.div
 import io.kvision.navbar.*
 import io.kvision.routing.Routing
@@ -14,12 +15,12 @@ import io.kvision.state.bind
 fun Container.header(routing: Routing) {
     navbar("OnlineJudge", type = NavbarType.STICKYTOP) {
         nav {
-            navLink("主页", icon = "fas fa-file") {
+            navLink("主页", icon = "fas fa-house fa-solid") {
                 onClick {
                     routing.navigate(Frontend.Index.uri)
                 }
             }
-            navLink("题库", icon = "fas fa-file") {
+            navLink("题库", icon = "fas fa-code fa-solid") {
                 onClick {
                     routing.navigate(Frontend.Problems.uri)
                 }
@@ -35,12 +36,6 @@ fun Container.header(routing: Routing) {
                 icon = "fas fa-star",
                 forNavbar = true
             )
-        }
-        navForm {
-            text(label = "Search:")
-            checkBox(label = "Search") {
-                inline = true
-            }
         }
 
         div().bind(AuthenticationModel.userToken) { token ->
@@ -61,7 +56,7 @@ fun Container.header(routing: Routing) {
                 nav(rightAlign = true) {
                     dropDown(
                         token.username,
-                        listOf("HTML" to "#!/basic", "Forms" to "#!/forms"),
+                        listOf("我的主页" to "#/me", "Forms" to "#!/forms"),
                         icon = "fas fa-star",
                         forNavbar = true
                     )

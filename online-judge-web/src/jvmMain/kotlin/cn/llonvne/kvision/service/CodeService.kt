@@ -3,7 +3,10 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.LanguageRepository
+import cn.llonvne.dtos.CodeDto
+import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.Code
+import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.security.AuthenticationToken
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -37,7 +40,7 @@ actual class CodeService(
     }
 
     override suspend fun getCode(value: AuthenticationToken?, shareId: Int): ICodeService.GetCodeResp {
-        val code = codeRepository.get(shareId) ?: return ICodeService.GetCodeResp.CodeNotFound
+        val code = codeRepository.get(shareId) ?: return ICodeService.CodeNotFound
 
         return ICodeService.GetCodeResp.SuccessfulGetCode(
             CodeDto(
@@ -58,4 +61,63 @@ actual class CodeService(
             languageId = languageId
         )
     }
+
+    override suspend fun commit(commitOnCodeReq: ICodeService.CommitOnCodeReq): ICodeService.CommitOnCodeResp {
+
+        if (commitOnCodeReq.token == null) {
+            return PermissionDenied
+        }
+
+        val result = codeRepository.comment(
+            ShareCodeComment(
+                committerAuthenticationUserId = commitOnCodeReq.token.authenticationUserId,
+                content = commitOnCodeReq.content,
+                shareCodeId = commitOnCodeReq.codeId
+            )
+        )
+
+        if (result.commentId == null) {
+            return InternalError("CommitId 在插入后仍不存在...")
+        }
+
+        if (result.createdAt == null) {
+            return InternalError("ShareCodeComment.CreateAt 在插入后仍不存在")
+        }
+
+        return ICodeService.CommitOnCodeResp.SuccessfulCommit(
+            CreateCommentDto(
+                result.commentId,
+                commitOnCodeReq.token.username,
+                commitOnCodeReq.codeId,
+                commitOnCodeReq.content,
+                createdAt = result.createdAt
+            )
+        )
+    }
+
+    override suspend fun getComments(
+        authenticationToken: AuthenticationToken?,
+        sharCodeId: Int
+    ): ICodeService.GetCommitsOnCodeResp {
+        if (!codeRepository.isIdExist(sharCodeId)) {
+            return ICodeService.CodeNotFound
+        } else {
+            return codeRepository.getComments(sharCodeId).mapNotNull {
+
+                val committerUsername = authenticationUserRepository.getByIdOrNull(it.committerAuthenticationUserId)
+                    ?: return@mapNotNull null
+
+                CreateCommentDto(
+                    it.commentId ?: return@mapNotNull null,
+                    committerUsername.username,
+                    sharCodeId,
+                    it.content,
+                    createdAt = it.createdAt ?: return@mapNotNull null
+                )
+            }.let {
+                ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits(it)
+            }
+        }
+    }
+
 }

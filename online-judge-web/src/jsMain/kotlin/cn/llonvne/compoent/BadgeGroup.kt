@@ -3,6 +3,7 @@ package cn.llonvne.compoent
 import cn.llonvne.entity.types.BadgeColor
 import cn.llonvne.entity.types.BadgeColorGetter
 import io.kvision.core.Container
+import io.kvision.html.Div
 import io.kvision.html.Span
 import io.kvision.html.span
 
@@ -30,4 +31,20 @@ fun <E : BadgeColorGetter> Container.badgeGroup(
             }
         }
     }
+}
+
+fun Container.badge(badgeColor: BadgeColor, display: Span.() -> Unit) = span {
+    display()
+
+    addCssClass("badge")
+    addCssClass("p-2")
+    addCssClass("border")
+
+    addCssClass(
+        when (badgeColor) {
+            BadgeColor.Green -> "bg-success"
+            BadgeColor.Red -> "bg-danger"
+            BadgeColor.Blue -> "bg-primary"
+        }
+    )
 }

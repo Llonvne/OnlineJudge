@@ -1,8 +1,9 @@
 package cn.llonvne.kvision.service
 
+import cn.llonvne.dtos.CodeDto
+import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.Code
 import cn.llonvne.entity.problem.CodeVisibilityType
-import cn.llonvne.entity.problem.Language
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -30,21 +31,39 @@ interface ICodeService {
     sealed interface GetCodeResp {
         @Serializable
         data class SuccessfulGetCode(val codeDto: CodeDto) : GetCodeResp
-
-        @Serializable
-        data object CodeNotFound : GetCodeResp
     }
 
     suspend fun getCode(value: AuthenticationToken?, shareId: Int): GetCodeResp
+
+    @Serializable
+    data class CommitOnCodeReq(
+        val token: AuthenticationToken?,
+        val content: String,
+        val codeId: Int,
+    )
+
+    @Serializable
+    sealed interface CommitOnCodeResp {
+        @Serializable
+        data class SuccessfulCommit(val shareCodeCommitDto: CreateCommentDto) : CommitOnCodeResp
+    }
+
+    suspend fun commit(commitOnCodeReq: CommitOnCodeReq): CommitOnCodeResp
+
+    @Serializable
+    sealed interface GetCommitsOnCodeResp {
+        @Serializable
+        data class SuccessfulGetCommits(val commits: List<CreateCommentDto>) : GetCommitsOnCodeResp
+    }
+
+    @Serializable
+    data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp
+
+    suspend fun getComments(authenticationToken: AuthenticationToken?, sharCodeId: Int): GetCommitsOnCodeResp
 }
 
-@Serializable
-data class CodeDto(
-    val rawCode: String,
-    val language: Language?,
-    val shareUserId: Int,
-    val shareUsername: String,
-    val visibilityType: CodeVisibilityType,
-)
+
+
+
 
 
