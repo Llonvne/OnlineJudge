@@ -1,9 +1,8 @@
 package cn.llonvne.compoent
 
-import cn.llonvne.entity.types.BadgeColor
-import cn.llonvne.entity.types.BadgeColorGetter
+import cn.llonvne.entity.types.badge.BadgeColor
+import cn.llonvne.entity.types.badge.BadgeColorGetter
 import io.kvision.core.Container
-import io.kvision.html.Div
 import io.kvision.html.Span
 import io.kvision.html.span
 

@@ -13,9 +13,23 @@ data class ShareCodeComment(
     val shareCodeId: Int,
 
     val content: String,
+    val type: ShareCodeCommentType = ShareCodeCommentType.Public,
 
     //--- 数据库信息区 ---//
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
-)
+) {
+    companion object {
+        enum class ShareCodeCommentType {
+            Deleted,
+            Public,
+            Private
+        }
+
+        enum class SelectCodeCommentType {
+            Public,
+            Private
+        }
+    }
+}

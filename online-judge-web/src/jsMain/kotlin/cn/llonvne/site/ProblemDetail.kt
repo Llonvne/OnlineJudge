@@ -15,8 +15,6 @@ import io.kvision.form.formPanel
 import io.kvision.form.select.TomSelect
 import io.kvision.form.text.TextArea
 import io.kvision.html.*
-import io.kvision.jquery.invoke
-import io.kvision.jquery.jQuery
 import io.kvision.routing.Routing
 import io.kvision.state.ObservableListWrapper
 import io.kvision.state.ObservableValue

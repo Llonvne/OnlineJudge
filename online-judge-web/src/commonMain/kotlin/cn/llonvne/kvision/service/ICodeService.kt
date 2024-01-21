@@ -4,6 +4,7 @@ import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.Code
 import cn.llonvne.entity.problem.CodeVisibilityType
+import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -40,6 +41,7 @@ interface ICodeService {
         val token: AuthenticationToken?,
         val content: String,
         val codeId: Int,
+        val type: ShareCodeComment.Companion.ShareCodeCommentType
     )
 
     @Serializable
@@ -60,6 +62,8 @@ interface ICodeService {
     data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp
 
     suspend fun getComments(authenticationToken: AuthenticationToken?, sharCodeId: Int): GetCommitsOnCodeResp
+
+    suspend fun deleteComments(commentIds: List<Int>): List<Int>
 }
 
 

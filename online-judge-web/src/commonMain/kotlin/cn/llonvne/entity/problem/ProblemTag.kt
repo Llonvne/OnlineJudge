@@ -1,7 +1,7 @@
 package cn.llonvne.entity.problem
 
-import cn.llonvne.entity.types.BadgeColor
-import cn.llonvne.entity.types.BadgeColorGetter
+import cn.llonvne.entity.types.badge.BadgeColor
+import cn.llonvne.entity.types.badge.BadgeColorGetter
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 

@@ -1,7 +1,7 @@
 package cn.llonvne.database.entity.def.problem.tag
 
 import cn.llonvne.entity.problem.ProblemTag
-import cn.llonvne.entity.types.BadgeColor
+import cn.llonvne.entity.types.badge.BadgeColor
 import kotlinx.datetime.LocalDateTime
 import org.komapper.annotation.*
 

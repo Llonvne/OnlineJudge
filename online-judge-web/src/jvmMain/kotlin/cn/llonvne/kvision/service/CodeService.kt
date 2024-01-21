@@ -23,8 +23,7 @@ actual class CodeService(
     private val authenticationUserRepository: AuthenticationUserRepository
 ) : ICodeService {
     override suspend fun saveCode(
-        token: AuthenticationToken?,
-        saveCodeReq: ICodeService.SaveCodeReq
+        token: AuthenticationToken?, saveCodeReq: ICodeService.SaveCodeReq
     ): ICodeService.SaveCodeResp {
         return if (token == null) {
             PermissionDenied
@@ -56,9 +55,7 @@ actual class CodeService(
 
     private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
         return Code(
-            authenticationUserId = token.authenticationUserId,
-            code = code,
-            languageId = languageId
+            authenticationUserId = token.authenticationUserId, code = code, languageId = languageId
         )
     }
 
@@ -72,7 +69,8 @@ actual class CodeService(
             ShareCodeComment(
                 committerAuthenticationUserId = commitOnCodeReq.token.authenticationUserId,
                 content = commitOnCodeReq.content,
-                shareCodeId = commitOnCodeReq.codeId
+                shareCodeId = commitOnCodeReq.codeId,
+                type = commitOnCodeReq.type
             )
         )
 
@@ -90,14 +88,14 @@ actual class CodeService(
                 commitOnCodeReq.token.username,
                 commitOnCodeReq.codeId,
                 commitOnCodeReq.content,
-                createdAt = result.createdAt
+                createdAt = result.createdAt,
+                visibilityType = result.type
             )
         )
     }
 
     override suspend fun getComments(
-        authenticationToken: AuthenticationToken?,
-        sharCodeId: Int
+        authenticationToken: AuthenticationToken?, sharCodeId: Int
     ): ICodeService.GetCommitsOnCodeResp {
         if (!codeRepository.isIdExist(sharCodeId)) {
             return ICodeService.CodeNotFound
@@ -107,16 +105,35 @@ actual class CodeService(
                 val committerUsername = authenticationUserRepository.getByIdOrNull(it.committerAuthenticationUserId)
                     ?: return@mapNotNull null
 
+                val sharCodeOwnerId = codeRepository.getCodeOwnerId(sharCodeId)
+
+
+
+                if (it.type == ShareCodeComment.Companion.ShareCodeCommentType.Private) {
+                    if (authenticationToken == null) {
+                        return@mapNotNull null
+                    } else if (!(it.committerAuthenticationUserId == authenticationToken.authenticationUserId || authenticationToken.authenticationUserId == sharCodeOwnerId)) {
+                        return@mapNotNull null
+                    }
+                }
+
                 CreateCommentDto(
                     it.commentId ?: return@mapNotNull null,
                     committerUsername.username,
                     sharCodeId,
                     it.content,
-                    createdAt = it.createdAt ?: return@mapNotNull null
+                    createdAt = it.createdAt ?: return@mapNotNull null,
+                    visibilityType = it.type
                 )
             }.let {
                 ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits(it)
             }
+        }
+    }
+
+    override suspend fun deleteComments(commentIds: List<Int>): List<Int> {
+        return codeRepository.deleteComment(commentIds).mapNotNull {
+            it.commentId
         }
     }
 

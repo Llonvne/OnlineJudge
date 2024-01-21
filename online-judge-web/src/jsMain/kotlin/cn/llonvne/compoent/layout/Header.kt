@@ -4,11 +4,11 @@ import cn.llonvne.constants.Frontend
 import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container
 import io.kvision.dropdown.dropDown
-import io.kvision.form.check.checkBox
-import io.kvision.form.text.text
-import io.kvision.html.button
 import io.kvision.html.div
-import io.kvision.navbar.*
+import io.kvision.navbar.NavbarType
+import io.kvision.navbar.nav
+import io.kvision.navbar.navLink
+import io.kvision.navbar.navbar
 import io.kvision.routing.Routing
 import io.kvision.state.bind
 
