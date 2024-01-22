@@ -1,6 +1,6 @@
 package cn.llonvne.model
 
-import cn.llonvne.entity.problem.CodeVisibilityType
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.kvision.service.ICodeService
 import io.kvision.remote.getService
@@ -22,11 +22,15 @@ object CodeModel {
         AuthenticationModel.userToken.value, shareId
     )
 
+    suspend fun getCode(hash: String) = codeService.getCodeByHash(AuthenticationModel.userToken.value, hash)
+
     suspend fun commit(sharCodeId: Int, content: String, type: ShareCodeComment.Companion.ShareCodeCommentType) =
-        codeService.commit(ICodeService.CommitOnCodeReq(AuthenticationModel.userToken.value, content, sharCodeId,type))
+        codeService.commit(ICodeService.CommitOnCodeReq(AuthenticationModel.userToken.value, content, sharCodeId, type))
 
     suspend fun getCommentByCodeId(sharCodeId: Int) =
         codeService.getComments(AuthenticationModel.userToken.value, sharCodeId)
 
     suspend fun deleteCommentByIds(commentIds: List<Int>) = codeService.deleteComments(commentIds)
+    suspend fun setCodeVisibility(shareId: Int, result: CodeVisibilityType) =
+        codeService.setCodeVisibility(AuthenticationModel.userToken.value, shareId, result)
 }

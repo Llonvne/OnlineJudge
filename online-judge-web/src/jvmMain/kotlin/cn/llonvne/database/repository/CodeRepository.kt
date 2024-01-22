@@ -2,13 +2,12 @@ package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.shareCodeComment
-import cn.llonvne.entity.problem.Code
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
-import net.sf.jsqlparser.statement.comment.Comment
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.metamodel.define
-import org.komapper.core.dsl.metamodel.where
 import org.komapper.core.dsl.operator.count
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
@@ -32,6 +31,10 @@ class CodeRepository(
 
     suspend fun get(shareId: Int): Code? {
         return db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.codeId eq shareId }.singleOrNull() }
+    }
+
+    suspend fun getCodeByHash(hash: String): Code? {
+        return db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.hashLink eq hash }.singleOrNull() }
     }
 
     suspend fun getCodeOwnerId(shareCodeId: Int): Int? {
@@ -73,6 +76,26 @@ class CodeRepository(
             QueryDsl.from(commentMeta).where {
                 commentMeta.shareCodeId eq shareCodeId
             }.limit(500)
+        }
+    }
+
+    suspend fun setCodeVisibility(shareId: Int, visibilityType: CodeVisibilityType): Long {
+        return db.runQuery {
+            QueryDsl.update(codeMeta).set {
+                codeMeta.visibilityType eq visibilityType
+            }.where {
+                codeMeta.codeId eq shareId
+            }
+        }
+    }
+
+    suspend fun setHashLink(shareId: Int, hashLink: String?): Long {
+        return db.runQuery {
+            QueryDsl.update(codeMeta).set {
+                codeMeta.hashLink eq hashLink
+            }.where {
+                codeMeta.codeId eq shareId
+            }
         }
     }
 }

@@ -3,8 +3,15 @@ package cn.llonvne
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.constants.Frontend
+import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
+import cn.llonvne.site.share.CodeLoader
+import cn.llonvne.site.share.ShareCodeCommentComponent
+import cn.llonvne.site.share.ShareCodeHighlighter
+import cn.llonvne.site.share.share
 import io.kvision.*
+import io.kvision.html.Div
+import io.kvision.html.div
 import io.kvision.navigo.Match
 import io.kvision.routing.Routing
 import io.kvision.theme.ThemeManager
@@ -25,7 +32,7 @@ class App : Application() {
     }
 
     override fun start() {
-        val routing = Routing.init()
+        val routing = RoutingModule.routing
 
         routing.on(Frontend.Index.uri, {
             layout(routing) {
@@ -70,7 +77,24 @@ class App : Application() {
         }).on(RegExp("^share/(.*)"), {
             failTo404(routing) {
                 layout(routing) {
-                    share((it.data[0] as String).toInt())
+                    val id = it.data[0] as String
+
+                    val intId = id.toIntOrNull()
+                    val alert = div { }
+
+                    if (intId != null) {
+
+                        share(
+                            intId,
+                            CodeLoader.id(),
+                            ShareCodeHighlighter.highlighterJsImpl(intId, alert),
+                        )
+                    } else {
+                        share(
+                            id, CodeLoader.hash(),
+                            ShareCodeHighlighter.highlighterJsImpl(id, alert)
+                        )
+                    }
                 }
             }
         }).on("/404", {

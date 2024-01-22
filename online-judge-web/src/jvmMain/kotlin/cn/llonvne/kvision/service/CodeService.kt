@@ -5,9 +5,11 @@ import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.LanguageRepository
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
-import cn.llonvne.entity.problem.Code
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.security.AuthenticationToken
+import com.benasher44.uuid.uuid4
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -38,19 +40,68 @@ actual class CodeService(
         }
     }
 
-    override suspend fun getCode(value: AuthenticationToken?, shareId: Int): ICodeService.GetCodeResp {
-        val code = codeRepository.get(shareId) ?: return ICodeService.CodeNotFound
+    enum class GetCodeId {
+        HashLink, Id
+    }
+
+    private suspend fun getCodeSafetyCheck(
+        getCodeId: GetCodeId,
+        code: Code,
+        value: AuthenticationToken?
+    ): ICodeService.GetCodeResp {
+        when (code.visibilityType) {
+            CodeVisibilityType.Public -> {
+
+            }
+
+            CodeVisibilityType.Private -> {
+                if (value == null) {
+                    return PermissionDenied
+                } else if (value.authenticationUserId != codeRepository.getCodeOwnerId(
+                        code.codeId ?: return ICodeService.CodeNotFound
+                    )
+                ) {
+                    return PermissionDenied
+                }
+            }
+
+            CodeVisibilityType.Restrict -> {
+                if (getCodeId == GetCodeId.HashLink) {
+
+                } else if (value == null) {
+                    return PermissionDenied
+                } else if (value.authenticationUserId == codeRepository.getCodeOwnerId(
+                        code.codeId ?: return ICodeService.CodeNotFound
+                    )
+                ) {
+
+                }
+            }
+        }
 
         return ICodeService.GetCodeResp.SuccessfulGetCode(
             CodeDto(
+                codeId = code.codeId ?: return ICodeService.CodeNotFound,
                 rawCode = code.code,
                 language = languageRepository.getByIdOrNull(code.languageId),
                 shareUserId = code.authenticationUserId,
                 shareUsername = authenticationUserRepository.getByIdOrNull(code.authenticationUserId)?.username
                     ?: "未知",
-                visibilityType = code.visibilityType
+                visibilityType = code.visibilityType,
+                commentType = code.commentType,
+                hashLink = code.hashLink
             )
         )
+    }
+
+    override suspend fun getCode(value: AuthenticationToken?, shareId: Int): ICodeService.GetCodeResp {
+        val code = codeRepository.get(shareId) ?: return ICodeService.CodeNotFound
+        return getCodeSafetyCheck(GetCodeId.Id, code, value)
+    }
+
+    override suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): ICodeService.GetCodeResp {
+        val code = codeRepository.getCodeByHash(hash) ?: return ICodeService.CodeNotFound
+        return getCodeSafetyCheck(GetCodeId.HashLink, code, value)
     }
 
     private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
@@ -137,4 +188,40 @@ actual class CodeService(
         }
     }
 
+    override suspend fun setCodeVisibility(
+        token: AuthenticationToken?,
+        shareId: Int,
+        result: CodeVisibilityType
+    ): ICodeService.SetCodeVisibilityResp {
+        if (token == null) {
+            return PermissionDenied
+        }
+
+        val codeOwnerId = codeRepository.getCodeOwnerId(shareId) ?: return ICodeService.CodeNotFound
+
+        if (codeOwnerId != token.authenticationUserId) {
+            return PermissionDenied
+        }
+
+        val changeLine = codeRepository.setCodeVisibility(shareId, result)
+        if (changeLine != 1L) {
+            return ICodeService.CodeNotFound
+        }
+        return when (result) {
+            CodeVisibilityType.Public -> onNotRestrictType(shareId)
+            CodeVisibilityType.Private -> onNotRestrictType(shareId)
+            CodeVisibilityType.Restrict -> onRestrictType(shareId)
+        }
+    }
+
+    private suspend fun onNotRestrictType(shareId: Int): ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate {
+        codeRepository.setHashLink(shareId = shareId, null)
+        return ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate
+    }
+
+    private suspend fun onRestrictType(shareId: Int): ICodeService.SetCodeVisibilityResp.SuccessToRestrict {
+        val hashLink = uuid4().toString()
+        codeRepository.setHashLink(shareId = shareId, hashLink)
+        return ICodeService.SetCodeVisibilityResp.SuccessToRestrict(hashLink)
+    }
 }

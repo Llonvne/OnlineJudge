@@ -2,8 +2,8 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
-import cn.llonvne.entity.problem.Code
-import cn.llonvne.entity.problem.CodeVisibilityType
+import cn.llonvne.entity.problem.share.Code
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
@@ -32,6 +32,12 @@ interface ICodeService {
     sealed interface GetCodeResp {
         @Serializable
         data class SuccessfulGetCode(val codeDto: CodeDto) : GetCodeResp
+
+        fun onSuccess(block: (SuccessfulGetCode) -> Unit) {
+            if (this is SuccessfulGetCode) {
+                block(this)
+            }
+        }
     }
 
     suspend fun getCode(value: AuthenticationToken?, shareId: Int): GetCodeResp
@@ -59,11 +65,28 @@ interface ICodeService {
     }
 
     @Serializable
-    data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp
+    data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp, SetCodeVisibilityResp
 
     suspend fun getComments(authenticationToken: AuthenticationToken?, sharCodeId: Int): GetCommitsOnCodeResp
 
     suspend fun deleteComments(commentIds: List<Int>): List<Int>
+
+    @Serializable
+    sealed interface SetCodeVisibilityResp {
+        @Serializable
+        data object SuccessToPublicOrPrivate : SetCodeVisibilityResp
+
+        @Serializable
+        data class SuccessToRestrict(val link: String) : SetCodeVisibilityResp
+    }
+
+    suspend fun setCodeVisibility(
+        token: AuthenticationToken?,
+        shareId: Int,
+        result: CodeVisibilityType
+    ): SetCodeVisibilityResp
+
+    suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): GetCodeResp
 }
 
 

@@ -1,6 +1,7 @@
 package cn.llonvne.database.entity.def
 
-import cn.llonvne.entity.problem.Code
+import cn.llonvne.entity.problem.share.Code
+import cn.llonvne.entity.problem.share.CodeCommentType
 import org.komapper.annotation.*
 
 @KomapperEntityDef(entity = Code::class)
@@ -14,6 +15,8 @@ private data class CodeDef(
     val languageId: Nothing,
 
     val visibilityType: Nothing,
+    val commentType: CodeCommentType,
+    val hashLink: String? = null,
 
     //--- 数据库信息区 ---//
     @KomapperVersion

@@ -1,11 +1,8 @@
-package cn.llonvne.entity.problem
+package cn.llonvne.entity.problem.share
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
-enum class CodeVisibilityType {
-    Public, Private, Restrict
-}
 
 @Serializable
 data class Code(
@@ -17,6 +14,8 @@ data class Code(
     val languageId: Int?,
 
     val visibilityType: CodeVisibilityType = CodeVisibilityType.Public,
+    val commentType: CodeCommentType = CodeCommentType.Open,
+    val hashLink: String? = null,
 
     //--- 数据库信息区 ---//
     val version: Int? = null,
