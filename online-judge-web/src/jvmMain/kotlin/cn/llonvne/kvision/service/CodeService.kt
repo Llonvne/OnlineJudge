@@ -7,6 +7,7 @@ import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.security.AuthenticationToken
 import com.benasher44.uuid.uuid4
@@ -58,7 +59,7 @@ actual class CodeService(
                 if (value == null) {
                     return PermissionDenied
                 } else if (value.authenticationUserId != codeRepository.getCodeOwnerId(
-                        code.codeId ?: return ICodeService.CodeNotFound
+                        code.codeId ?: return CodeNotFound
                     )
                 ) {
                     return PermissionDenied
@@ -71,7 +72,7 @@ actual class CodeService(
                 } else if (value == null) {
                     return PermissionDenied
                 } else if (value.authenticationUserId == codeRepository.getCodeOwnerId(
-                        code.codeId ?: return ICodeService.CodeNotFound
+                        code.codeId ?: return CodeNotFound
                     )
                 ) {
 
@@ -81,7 +82,7 @@ actual class CodeService(
 
         return ICodeService.GetCodeResp.SuccessfulGetCode(
             CodeDto(
-                codeId = code.codeId ?: return ICodeService.CodeNotFound,
+                codeId = code.codeId ?: return CodeNotFound,
                 rawCode = code.code,
                 language = languageRepository.getByIdOrNull(code.languageId),
                 shareUserId = code.authenticationUserId,
@@ -95,13 +96,34 @@ actual class CodeService(
     }
 
     override suspend fun getCode(value: AuthenticationToken?, shareId: Int): ICodeService.GetCodeResp {
-        val code = codeRepository.get(shareId) ?: return ICodeService.CodeNotFound
+        val code = codeRepository.get(shareId) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.Id, code, value)
     }
 
     override suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): ICodeService.GetCodeResp {
-        val code = codeRepository.getCodeByHash(hash) ?: return ICodeService.CodeNotFound
+        val code = codeRepository.getCodeByHash(hash) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.HashLink, code, value)
+    }
+
+    override suspend fun setCodeCommentType(
+        token: AuthenticationToken?,
+        shareId: Int,
+        type: CodeCommentType
+    ): ICodeService.SetCodeCommentTypeResp {
+
+        if (token == null) {
+            return PermissionDenied
+        }
+        if (!codeRepository.isIdExist(shareId)) {
+            return CodeNotFound
+        }
+        if (token.authenticationUserId != codeRepository.getCodeOwnerId(shareId)) {
+            return PermissionDenied
+        }
+        if (codeRepository.setCodeCommentType(shareId, type) != 1L) {
+            return CodeNotFound
+        }
+        return ICodeService.SetCodeCommentTypeResp.SuccessSetCommentType
     }
 
     private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
@@ -149,7 +171,7 @@ actual class CodeService(
         authenticationToken: AuthenticationToken?, sharCodeId: Int
     ): ICodeService.GetCommitsOnCodeResp {
         if (!codeRepository.isIdExist(sharCodeId)) {
-            return ICodeService.CodeNotFound
+            return CodeNotFound
         } else {
             return codeRepository.getComments(sharCodeId).mapNotNull {
 
@@ -197,7 +219,7 @@ actual class CodeService(
             return PermissionDenied
         }
 
-        val codeOwnerId = codeRepository.getCodeOwnerId(shareId) ?: return ICodeService.CodeNotFound
+        val codeOwnerId = codeRepository.getCodeOwnerId(shareId) ?: return CodeNotFound
 
         if (codeOwnerId != token.authenticationUserId) {
             return PermissionDenied
@@ -205,7 +227,7 @@ actual class CodeService(
 
         val changeLine = codeRepository.setCodeVisibility(shareId, result)
         if (changeLine != 1L) {
-            return ICodeService.CodeNotFound
+            return CodeNotFound
         }
         return when (result) {
             CodeVisibilityType.Public -> onNotRestrictType(shareId)

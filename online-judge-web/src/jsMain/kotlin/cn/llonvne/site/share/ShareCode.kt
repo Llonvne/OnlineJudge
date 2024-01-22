@@ -41,7 +41,7 @@ private fun Container.shareInternal(load: Deferred<ICodeService.GetCodeResp>, hi
             }
             div(className = "col") {
                 resp.onSuccess { (code) ->
-                    val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code.codeId)
+                    val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code)
                     shareCodeComment.loadComments(this)
                 }
             }

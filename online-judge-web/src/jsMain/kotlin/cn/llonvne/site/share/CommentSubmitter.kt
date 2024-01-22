@@ -3,6 +3,7 @@ package cn.llonvne.site.share
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
+import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.message.Messager
@@ -15,6 +16,7 @@ import io.kvision.form.text.TextArea
 import io.kvision.html.button
 import io.kvision.html.h4
 import io.kvision.html.p
+import io.kvision.i18n.tr
 import io.kvision.utils.px
 import kotlinx.coroutines.launch
 
@@ -26,17 +28,24 @@ interface CommentSubmitter {
             PublicCommentSubmitter(shareId, shareCommentComponent)
 
         fun protected(
-            shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
-        ): CommentSubmitter = ProtectedCommentSubmitter(shareId, shareCommentComponent)
+            shareId: Int, code: CodeDto, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+        ): CommentSubmitter = ProtectedCommentSubmitter(shareId, shareCommentComponent, code)
     }
 }
 
 private class ProtectedCommentSubmitter(
-    shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+    shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>,
+    private val code: CodeDto
 ) : PublicCommentSubmitter(shareId, shareCommentComponent) {
     override fun getCommentVisibilityOptions(): List<Pair<String, String>> {
+
+
         return super.getCommentVisibilityOptions().filter {
-            it.first != PUBLIC_CODE
+            if (code.shareUserId != AuthenticationModel.userToken.value?.authenticationUserId) {
+                it.first != PUBLIC_CODE
+            } else {
+                return@filter true
+            }
         }
     }
 

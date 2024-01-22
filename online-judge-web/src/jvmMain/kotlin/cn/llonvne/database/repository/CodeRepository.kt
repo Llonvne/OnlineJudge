@@ -4,6 +4,7 @@ import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.shareCodeComment
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
@@ -93,6 +94,16 @@ class CodeRepository(
         return db.runQuery {
             QueryDsl.update(codeMeta).set {
                 codeMeta.hashLink eq hashLink
+            }.where {
+                codeMeta.codeId eq shareId
+            }
+        }
+    }
+
+    suspend fun setCodeCommentType(shareId: Int, type: CodeCommentType): Long {
+        return db.runQuery {
+            QueryDsl.update(codeMeta).set {
+                codeMeta.commentType eq type
             }.where {
                 codeMeta.codeId eq shareId
             }

@@ -4,11 +4,15 @@ import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
+import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.dtos.getVisibilityDecr
+import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.ll
+import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.CodeModel
+import cn.llonvne.site.share.visisbility.CodeCommentVisibilityTypeChanger
 import io.kvision.core.Container
 import io.kvision.core.TextAlign
 import io.kvision.core.onClick
@@ -32,14 +36,14 @@ interface CommentDisplay {
         }
 
         fun public(
-            shareId: Int,
+            code: CodeDto,
             shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
-        ): CommentDisplay = PublicShareCodeCommentDisplay(shareId, shareCodeCommentComponent)
+        ): CommentDisplay = PublicShareCodeCommentDisplay(code, shareCodeCommentComponent)
     }
 }
 
 private class PublicShareCodeCommentDisplay(
-    val shareId: Int,
+    val code: CodeDto,
     val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
 ) : CommentDisplay {
     override fun load(root: Container) {
@@ -76,6 +80,17 @@ private class PublicShareCodeCommentDisplay(
 
                                     badge(BadgeColor.Blue) {
                                         +comment.getVisibilityDecr()
+                                    }
+
+                                    if (comment.visibilityType == ShareCodeComment.Companion.ShareCodeCommentType.Private
+                                        && AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId
+                                    ) {
+                                        badge(BadgeColor.Green) {
+                                            +"转换评论可见性状态"
+                                            onClick {
+                                                CodeCommentVisibilityTypeChanger(code).change()
+                                            }
+                                        }
                                     }
 
                                     addCssStyle(style {

@@ -3,8 +3,11 @@ package cn.llonvne.site.share
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
+import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
+import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.message.Messager
 import cn.llonvne.model.CodeModel
@@ -31,12 +34,12 @@ interface ShareCodeCommentComponent<Comment> {
 
     companion object {
 
-        fun from(status: CodeCommentType, shareId: Int): ShareCodeCommentComponent<*> {
+        fun from(status: CodeCommentType, code: CodeDto): ShareCodeCommentComponent<*> {
             return when (status) {
-                CodeCommentType.Open -> public(shareId)
+                CodeCommentType.Open -> public(code.codeId, code)
                 CodeCommentType.Closed -> empty("评论区已被代码所有者关闭")
                 CodeCommentType.ClosedByAdmin -> empty("评论区已被管理员关闭")
-                CodeCommentType.Protected -> protected(shareId)
+                CodeCommentType.Protected -> protected(code.codeId, code)
             }
         }
 
@@ -60,24 +63,25 @@ interface ShareCodeCommentComponent<Comment> {
             }
         }
 
-        private fun public(shareId: Int): ShareCodeCommentComponent<CreateCommentDto> =
-            PublicShareCommentComponent(shareId)
+        private fun public(shareId: Int, code: CodeDto): ShareCodeCommentComponent<CreateCommentDto> =
+            PublicShareCommentComponent(shareId, code)
 
-        private fun protected(shareId: Int): ShareCodeCommentComponent<*> {
-            return ProtectedShareCommentComponent(shareId)
+        private fun protected(shareId: Int, code: CodeDto): ShareCodeCommentComponent<*> {
+            return ProtectedShareCommentComponent(shareId, code)
         }
     }
 }
 
 private class ProtectedShareCommentComponent(
     shareId: Int,
+    private val code: CodeDto,
     comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
-) : PublicShareCommentComponent(shareId, comments) {
+) : PublicShareCommentComponent(shareId, code, comments) {
     override fun loadComments(root: Container) {
         AppScope.launch {
             if (refreshComments().await()) {
-                CommentSubmitter.protected(shareId, this@ProtectedShareCommentComponent).load(root)
-                CommentDisplay.public(shareId, this@ProtectedShareCommentComponent).load(root)
+                CommentSubmitter.protected(shareId, code, this@ProtectedShareCommentComponent).load(root)
+                CommentDisplay.public(code, this@ProtectedShareCommentComponent).load(root)
             }
         }
     }
@@ -85,13 +89,14 @@ private class ProtectedShareCommentComponent(
 
 private open class PublicShareCommentComponent(
     override val shareId: Int,
+    private val code: CodeDto,
     override val comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
 ) : ShareCodeCommentComponent<CreateCommentDto> {
 
     override fun refreshComments(): Deferred<Boolean> {
         return AppScope.async {
             when (val commentsResp = CodeModel.getCommentByCodeId(shareId)) {
-                ICodeService.CodeNotFound -> {
+                CodeNotFound -> {
                     Messager.toastError("尝试获取评论失败")
                     false
                 }
@@ -117,7 +122,7 @@ private open class PublicShareCommentComponent(
                 loadUI(
                     root,
                     CommentSubmitter.public(shareId, this@PublicShareCommentComponent),
-                    CommentDisplay.public(shareId, this@PublicShareCommentComponent)
+                    CommentDisplay.public(code, this@PublicShareCommentComponent)
                 )
             }
         }
