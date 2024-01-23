@@ -34,10 +34,18 @@ interface ICodeService {
         @Serializable
         data class SuccessfulGetCode(val codeDto: CodeDto) : GetCodeResp
 
-        fun onSuccess(block: (SuccessfulGetCode) -> Unit) {
+        fun onSuccess(block: (SuccessfulGetCode) -> Unit): GetCodeResp {
             if (this is SuccessfulGetCode) {
                 block(this)
             }
+            return this
+        }
+
+        fun onFailure(block: (GetCodeResp) -> Unit): GetCodeResp {
+            if (this !is SuccessfulGetCode) {
+                block(this)
+            }
+            return this
         }
     }
 

@@ -16,7 +16,6 @@ import io.kvision.form.text.TextArea
 import io.kvision.html.button
 import io.kvision.html.h4
 import io.kvision.html.p
-import io.kvision.i18n.tr
 import io.kvision.utils.px
 import kotlinx.coroutines.launch
 

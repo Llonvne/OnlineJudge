@@ -4,4 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object LanguageNotFound : ISubmissionService.SubmissionGetByIdResp, ISubmissionService.ViewCodeGetByIdResp,
-    ICodeService.SaveCodeResp
+    ICodeService.SaveCodeResp, ISubmissionService.CreateSubmissionResp,
+    ISubmissionService.GetLastNPlaygroundSubmissionResp

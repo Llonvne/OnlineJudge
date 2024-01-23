@@ -13,6 +13,8 @@ data class Code(
     val code: String,
     val languageId: Int?,
 
+    val codeType: CodeType,
+
     val visibilityType: CodeVisibilityType = CodeVisibilityType.Public,
     val commentType: CodeCommentType = CodeCommentType.Open,
     val hashLink: String? = null,
@@ -21,4 +23,11 @@ data class Code(
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
-)
+) {
+    @Serializable
+    enum class CodeType {
+        Share, Playground
+    }
+}
+
+

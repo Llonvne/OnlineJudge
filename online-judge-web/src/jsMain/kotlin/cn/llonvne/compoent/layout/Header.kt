@@ -30,6 +30,11 @@ fun Container.header(routing: Routing) {
                     routing.navigate(Frontend.Submission.uri)
                 }
             }
+            navLink("训练场", icon = "fas fa-play") {
+                onClick {
+                    routing.navigate(Frontend.PlayGround.uri)
+                }
+            }
             dropDown(
                 "Favourites",
                 listOf("HTML" to "#!/basic", "Forms" to "#!/forms"),

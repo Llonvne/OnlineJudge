@@ -6,11 +6,9 @@ import cn.llonvne.constants.Frontend
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
-import cn.llonvne.site.share.ShareCodeCommentComponent
 import cn.llonvne.site.share.ShareCodeHighlighter
 import cn.llonvne.site.share.share
 import io.kvision.*
-import io.kvision.html.Div
 import io.kvision.html.div
 import io.kvision.navigo.Match
 import io.kvision.routing.Routing
@@ -68,6 +66,10 @@ class App : Application() {
             layout(routing) {
                 submission(routing)
             }
+        }).on("/playground", { match: Match ->
+            layout(routing) {
+                playground()
+            }
         }).on(RegExp("^code/(.*)"), { match: Match ->
             failTo404(routing) {
                 layout(routing) {
@@ -83,16 +85,15 @@ class App : Application() {
                     val alert = div { }
 
                     if (intId != null) {
-
                         share(
                             intId,
                             CodeLoader.id(),
-                            ShareCodeHighlighter.highlighterJsImpl(intId, alert),
+                            alert
                         )
                     } else {
                         share(
                             id, CodeLoader.hash(),
-                            ShareCodeHighlighter.highlighterJsImpl(id, alert)
+                            alert
                         )
                     }
                 }

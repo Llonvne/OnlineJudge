@@ -40,6 +40,11 @@ object Frontend {
         override val uri: String = "/submissions"
         override val name: String = "提交"
     }
+
+    object PlayGround : Site {
+        override val uri: String = "/playground"
+        override val name: String = "训练场"
+    }
 }
 
 

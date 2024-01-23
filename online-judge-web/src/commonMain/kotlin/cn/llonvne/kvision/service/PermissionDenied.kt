@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data object PermissionDenied : IProblemService.CreateProblemResp,
     ICodeService.SaveCodeResp, ICodeService.CommitOnCodeResp, ICodeService.SetCodeVisibilityResp,
     ICodeService.GetCodeResp, ICodeService.SetCodeCommentTypeResp,
-    ICodeService.SetCodeCommentVisibilityTypeResp
+    ICodeService.SetCodeCommentVisibilityTypeResp, ISubmissionService.CreateSubmissionResp,
+    ISubmissionService.GetOutputByCodeIdResp, ISubmissionService.GetLastNPlaygroundSubmissionResp

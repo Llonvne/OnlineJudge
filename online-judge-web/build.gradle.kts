@@ -112,7 +112,11 @@ kotlin {
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
+
                 implementation("io.ktor:ktor-client-okhttp:2.2.4")
+                implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
+
+                implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.4")
             }
         }
         val jvmTest by getting {

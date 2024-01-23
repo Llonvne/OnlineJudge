@@ -2,6 +2,7 @@ package cn.llonvne.dtos
 
 import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
 import kotlinx.serialization.Serializable
 
@@ -14,5 +15,6 @@ data class CodeDto(
     val shareUsername: String,
     val visibilityType: CodeVisibilityType,
     val commentType: CodeCommentType,
-    val hashLink: String?
+    val hashLink: String?,
+    val codeType: Code.CodeType
 )

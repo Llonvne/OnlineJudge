@@ -135,4 +135,34 @@ class CodeRepository(
                 }
         }
     }
+
+    suspend fun getCodeLanguageId(codeId: Int): Int? {
+        return db.runQuery {
+            QueryDsl.from(codeMeta)
+                .where {
+                    codeMeta.codeId eq codeId
+                }
+                .select(codeMeta.languageId)
+                .singleOrNull()
+        }
+    }
+
+    suspend fun getCodeLength(codeId: Int): Int? {
+        return db.runQuery {
+            QueryDsl.from(codeMeta)
+                .where {
+                    codeMeta.codeId eq codeId
+                }
+                .select(codeMeta.code)
+                .singleOrNull().map {
+                    it?.length
+                }
+        }
+    }
+
+    suspend fun getCodeVisibilityType(codeId: Int): CodeVisibilityType? = db.runQuery {
+        QueryDsl.from(codeMeta).where {
+            codeMeta.codeId eq codeId
+        }.select(codeMeta.visibilityType).singleOrNull()
+    }
 }

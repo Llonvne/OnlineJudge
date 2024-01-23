@@ -11,12 +11,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class Schema(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
+    private val schemaInitializer: List<SchemaInitializer>
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         runBlocking {
             db.runQuery {
                 QueryDsl.create(Meta.all())
+            }
+
+            schemaInitializer.forEach {
+                it.init(db)
             }
         }
     }

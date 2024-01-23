@@ -2,8 +2,6 @@ package cn.llonvne.site.share.visisbility
 
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.entity.problem.ShareCodeComment
-import cn.llonvne.entity.problem.share.CodeCommentType
-import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.CommentNotFound
 import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.kvision.service.PermissionDenied

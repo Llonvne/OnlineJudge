@@ -7,7 +7,6 @@ import cn.llonvne.compoent.badge
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.dtos.getVisibilityDecr
-import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.ll
 import cn.llonvne.model.AuthenticationModel

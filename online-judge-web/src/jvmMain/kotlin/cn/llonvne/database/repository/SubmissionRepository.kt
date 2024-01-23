@@ -1,8 +1,14 @@
 package cn.llonvne.database.repository
 
+import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.problem.submission
+import cn.llonvne.database.entity.def.shareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.Submission
+import cn.llonvne.entity.problem.share.Code
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
+import org.komapper.core.dsl.metamodel.define
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
@@ -12,7 +18,8 @@ import org.springframework.stereotype.Repository
 class SubmissionRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase
 ) {
-    val submissionMeta = Meta.submission
+    private val submissionMeta = Meta.submission
+    private val codeMeta = Meta.code
 
     suspend fun list(limit: Int = 500) = db.runQuery {
         QueryDsl.from(submissionMeta)
@@ -24,5 +31,37 @@ class SubmissionRepository(
             .where {
                 submissionMeta.submissionId eq id
             }.singleOrNull()
+    }
+
+    suspend fun save(submission: Submission): Submission {
+        return db.runQuery {
+            QueryDsl.insert(submissionMeta).single(submission).returning()
+        }
+    }
+
+    suspend fun getByCodeId(codeId: Int): Submission? {
+        return db.runQuery {
+            QueryDsl.from(submissionMeta)
+                .where {
+                    submissionMeta.codeId eq codeId
+                }.singleOrNull()
+        }
+    }
+
+    suspend fun getByAuthenticationUserID(
+        userID: Int, codeType: Code.CodeType?, limit: Int = 500
+    ): List<Submission> {
+        return db.runQuery {
+            QueryDsl.from(submissionMeta).innerJoin(codeMeta) {
+                submissionMeta.codeId eq codeMeta.codeId
+            }.where {
+                submissionMeta.authenticationUserId eq userID
+                and {
+                    if (codeType != null) {
+                        codeMeta.codeType eq codeType
+                    }
+                }
+            }
+        }
     }
 }

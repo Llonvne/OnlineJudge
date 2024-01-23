@@ -13,11 +13,9 @@ private class SubmissionDef(
     @KomapperAutoIncrement
     val submissionId: Nothing,
     val problemId: Nothing,
-    val languageId: Nothing,
+    val codeId: Nothing,
     // 用户 ID
     val authenticationUserId: Nothing,
-
-    val rowCode: Nothing,
 
     // 可见性
     val visibility: Nothing,

@@ -90,7 +90,8 @@ actual class CodeService(
                     ?: "未知",
                 visibilityType = code.visibilityType,
                 commentType = code.commentType,
-                hashLink = code.hashLink
+                hashLink = code.hashLink,
+                codeType = code.codeType
             )
         )
     }
@@ -149,7 +150,8 @@ actual class CodeService(
 
     private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
         return Code(
-            authenticationUserId = token.authenticationUserId, code = code, languageId = languageId
+            authenticationUserId = token.authenticationUserId, code = code, languageId = languageId,
+            codeType = Code.CodeType.Share
         )
     }
 

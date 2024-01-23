@@ -4,7 +4,10 @@ import cn.llonvne.AppScope
 import cn.llonvne.compoent.*
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.SubmissionStatus
+import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ISubmissionService
+import cn.llonvne.kvision.service.ISubmissionService.*
+import cn.llonvne.kvision.service.ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById
 import cn.llonvne.kvision.service.LanguageNotFound
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
@@ -42,20 +45,24 @@ fun Container.submissionDetail(routing: Routing, submissionId: Int) {
                     codeNotfound(submission, submissionId)
                 }
 
-                ISubmissionService.ProblemNotFound -> {
+                ProblemNotFound -> {
                     codeNotfound(submission, submissionId)
                 }
 
-                ISubmissionService.SubmissionNotFound -> {
+                SubmissionNotFound -> {
                     codeNotfound(submission, submissionId)
                 }
 
-                ISubmissionService.UserNotFound -> {
+                UserNotFound -> {
                     codeNotfound(submission, submissionId)
                 }
 
-                is ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById -> {
+                is SuccessfulGetById -> {
                     showStatus(submission.viewCodeDto)
+                }
+
+                CodeNotFound -> {
+                    codeNotfound(submission, submissionId)
                 }
             }
         }
@@ -65,6 +72,7 @@ fun Container.submissionDetail(routing: Routing, submissionId: Int) {
 fun Container.showStatus(submission: ViewCodeDto) {
     when (submission.status) {
         SubmissionStatus.Received -> circleCheck()
+        SubmissionStatus.Finished -> circleCheck()
     }
 
     code(submission.rawCode)

@@ -1,8 +1,8 @@
 package cn.llonvne.model
 
-import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.problem.share.CodeCommentType
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.kvision.service.ICodeService
 import io.kvision.remote.getService
 

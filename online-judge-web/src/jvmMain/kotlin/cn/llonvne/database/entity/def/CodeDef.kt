@@ -14,6 +14,8 @@ private data class CodeDef(
     val code: Nothing,
     val languageId: Nothing,
 
+    val codeType: Nothing,
+
     val visibilityType: Nothing,
     val commentType: CodeCommentType,
     val hashLink: String? = null,

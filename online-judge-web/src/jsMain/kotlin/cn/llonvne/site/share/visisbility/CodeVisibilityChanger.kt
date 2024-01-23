@@ -1,16 +1,10 @@
 package cn.llonvne.site.share.visisbility
 
-import cn.llonvne.AppScope
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.entity.problem.share.CodeVisibilityType
-import cn.llonvne.entity.problem.share.decr
 import cn.llonvne.message.Messager
-import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.CodeModel
-import io.kvision.html.*
-import io.kvision.modal.Dialog
-import io.kvision.toolbar.buttonGroup
-import kotlinx.coroutines.launch
+import io.kvision.html.p
 
 class CodeVisibilityChanger(override val codeDto: CodeDto) : VisibilityChanger {
     fun change() {

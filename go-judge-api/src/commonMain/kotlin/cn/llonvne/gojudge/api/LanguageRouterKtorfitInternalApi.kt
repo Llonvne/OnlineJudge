@@ -3,16 +3,18 @@ package cn.llonvne.gojudge.api
 import cn.llonvne.gojudge.api.task.Output
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.*
+import io.ktor.client.*
+import io.ktor.serialization.*
 
 internal interface LanguageRouterKtorfitInternalApi {
     @Headers("Content-Type:Application/Json")
-    @GET("/{language}/version")
+    @GET("{language}/version")
     suspend fun version(
         @Path language: String
     ): String
 
     @Headers("Content-Type:Application/Json")
-    @POST("/{language}")
+    @POST("{language}")
     @FormUrlEncoded
     suspend fun judge(
         @Path language: String,
@@ -31,11 +33,12 @@ interface LanguageFactory {
     fun getLanguageApi(language: SupportLanguages): LanguageRouterKtorfitApi
 
     companion object {
-        fun get(baseUrl: String): LanguageFactory {
+        fun get(baseUrl: String, httpClient: HttpClient): LanguageFactory {
             return object : LanguageFactory {
 
                 private val ktorfit = Ktorfit.Builder()
                     .baseUrl(baseUrl)
+                    .httpClient(httpClient)
                     .build()
 
                 override fun getLanguageApi(language: SupportLanguages): LanguageRouterKtorfitApi {

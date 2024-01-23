@@ -6,11 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Submission(
     val submissionId: Int? = null,
-    val problemId: Int,
-    val languageId: Int,
-
-    val rowCode: String,
-
+    val problemId: Int?,
+    val codeId: Int,
     // 用户 ID
     val authenticationUserId: Int,
 
