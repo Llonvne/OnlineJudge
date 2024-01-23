@@ -10,6 +10,7 @@ import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.metamodel.define
 import org.komapper.core.dsl.operator.count
+import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
@@ -54,6 +55,26 @@ class CodeRepository(
         }.select(count())
     } == 1.toLong()
 
+    suspend fun setCodeVisibility(shareId: Int, visibilityType: CodeVisibilityType): Long {
+        return db.runQuery {
+            QueryDsl.update(codeMeta).set {
+                codeMeta.visibilityType eq visibilityType
+            }.where {
+                codeMeta.codeId eq shareId
+            }
+        }
+    }
+
+    suspend fun setHashLink(shareId: Int, hashLink: String?): Long {
+        return db.runQuery {
+            QueryDsl.update(codeMeta).set {
+                codeMeta.hashLink eq hashLink
+            }.where {
+                codeMeta.codeId eq shareId
+            }
+        }
+    }
+
     suspend fun deleteComment(ids: List<Int>): List<ShareCodeComment> {
         return db.runQuery {
             QueryDsl.update(commentMeta).set {
@@ -80,26 +101,6 @@ class CodeRepository(
         }
     }
 
-    suspend fun setCodeVisibility(shareId: Int, visibilityType: CodeVisibilityType): Long {
-        return db.runQuery {
-            QueryDsl.update(codeMeta).set {
-                codeMeta.visibilityType eq visibilityType
-            }.where {
-                codeMeta.codeId eq shareId
-            }
-        }
-    }
-
-    suspend fun setHashLink(shareId: Int, hashLink: String?): Long {
-        return db.runQuery {
-            QueryDsl.update(codeMeta).set {
-                codeMeta.hashLink eq hashLink
-            }.where {
-                codeMeta.codeId eq shareId
-            }
-        }
-    }
-
     suspend fun setCodeCommentType(shareId: Int, type: CodeCommentType): Long {
         return db.runQuery {
             QueryDsl.update(codeMeta).set {
@@ -107,6 +108,31 @@ class CodeRepository(
             }.where {
                 codeMeta.codeId eq shareId
             }
+        }
+    }
+
+    suspend fun isCommentIdExist(commentId: Int) = db.runQuery {
+        QueryDsl.from(commentMeta)
+            .where {
+                commentMeta.commentId eq commentId
+            }
+            .select(count()).map {
+                it == 1L
+            }
+    }
+
+    suspend fun setShareCodeCommentVisibilityType(
+        commentId: Int,
+        type: ShareCodeComment.Companion.ShareCodeCommentType
+    ) {
+        db.runQuery {
+            QueryDsl.update(commentMeta)
+                .set {
+                    commentMeta.type eq type
+                }
+                .where {
+                    commentMeta.commentId eq commentId
+                }
         }
     }
 }

@@ -99,7 +99,18 @@ interface ICodeService {
         type: CodeCommentType
     ): SetCodeCommentTypeResp
 
-    suspend fun setCodeCommentVisibilityType(commentId: Int, type: ShareCodeComment.Companion.ShareCodeCommentType): Any
+    @Serializable
+    sealed interface SetCodeCommentVisibilityTypeResp {
+        @Serializable
+        data object SuccessSetCodeCommentVisibilityType : SetCodeCommentVisibilityTypeResp
+    }
+
+    suspend fun setCodeCommentVisibilityType(
+        token: AuthenticationToken?,
+        shareId: Int,
+        commentId: Int,
+        type: ShareCodeComment.Companion.ShareCodeCommentType
+    ): SetCodeCommentVisibilityTypeResp
 }
 
 

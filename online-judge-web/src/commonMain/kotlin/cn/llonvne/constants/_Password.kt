@@ -32,14 +32,14 @@ object _Password {
         data object Ok : PasswordCheckResult
 
         @Serializable
-        data object PasswordIsTooLongOrTooShort : PasswordCheckResult{
+        data object PasswordIsTooLongOrTooShort : PasswordCheckResult {
             override fun toString(): String {
                 return "密码太长或者太短"
             }
         }
 
         @Serializable
-        data object PasswordIsNull : PasswordCheckResult{
+        data object PasswordIsNull : PasswordCheckResult {
             override fun toString(): String {
                 return "密码不能为空"
             }

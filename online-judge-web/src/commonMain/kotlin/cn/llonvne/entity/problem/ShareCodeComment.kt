@@ -1,5 +1,6 @@
 package cn.llonvne.entity.problem
 
+import cn.llonvne.entity.DescriptionGetter
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -21,15 +22,24 @@ data class ShareCodeComment(
     val updatedAt: LocalDateTime? = null
 ) {
     companion object {
-        enum class ShareCodeCommentType {
+        @Serializable
+        enum class ShareCodeCommentType : DescriptionGetter {
             Deleted,
             Public,
-            Private
-        }
+            Private;
 
-        enum class SelectCodeCommentType {
-            Public,
-            Private
+            override val decr: String
+                get() = when (this) {
+                    Deleted -> "被删除"
+                    Public -> "公开的评论"
+                    Private -> "私有的"
+                }
+            override val reprName: String
+                get() = when (this) {
+                    Deleted -> "被删除"
+                    Public -> "公开"
+                    Private -> "私密"
+                }
         }
     }
 }

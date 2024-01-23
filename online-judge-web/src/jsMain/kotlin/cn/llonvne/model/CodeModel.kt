@@ -38,6 +38,13 @@ object CodeModel {
     suspend fun setCodeCommentType(shareId: Int, type: CodeCommentType) =
         codeService.setCodeCommentType(AuthenticationModel.userToken.value, shareId, type)
 
-    suspend fun setCodeCommentVisibilityType(commentId: Int, type: ShareCodeComment.Companion.ShareCodeCommentType) =
-        codeService.setCodeCommentVisibilityType(commentId, type)
+    suspend fun setCodeCommentVisibilityType(
+        shareId: Int,
+        commentId: Int,
+        type: ShareCodeComment.Companion.ShareCodeCommentType
+    ) =
+        codeService.setCodeCommentVisibilityType(
+            AuthenticationModel.userToken.value,
+            shareId = shareId, commentId = commentId, type
+        )
 }

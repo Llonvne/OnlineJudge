@@ -126,6 +126,27 @@ actual class CodeService(
         return ICodeService.SetCodeCommentTypeResp.SuccessSetCommentType
     }
 
+    override suspend fun setCodeCommentVisibilityType(
+        token: AuthenticationToken?,
+        shareId: Int,
+        commentId: Int,
+        type: ShareCodeComment.Companion.ShareCodeCommentType
+    ): ICodeService.SetCodeCommentVisibilityTypeResp {
+
+        if (token == null) {
+            return PermissionDenied
+        } else if (token.authenticationUserId != codeRepository.getCodeOwnerId(shareId)) {
+            return PermissionDenied
+        }
+
+        if (!codeRepository.isCommentIdExist(commentId)) {
+            return CommentNotFound
+        }
+
+        codeRepository.setShareCodeCommentVisibilityType(commentId, type)
+        return ICodeService.SetCodeCommentVisibilityTypeResp.SuccessSetCodeCommentVisibilityType
+    }
+
     private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
         return Code(
             authenticationUserId = token.authenticationUserId, code = code, languageId = languageId

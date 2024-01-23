@@ -1,7 +1,11 @@
+@file:Suppress("unused")
+
 package cn.llonvne.database.entity.def.problem
+
 
 import cn.llonvne.entity.problem.Submission
 import org.komapper.annotation.*
+
 
 @KomapperEntityDef(entity = Submission::class)
 private class SubmissionDef(

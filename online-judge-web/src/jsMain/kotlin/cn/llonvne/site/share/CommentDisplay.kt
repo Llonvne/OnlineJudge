@@ -69,30 +69,29 @@ private class PublicShareCodeCommentDisplay(
                                 }
 
                                 div {
-                                    badge(BadgeColor.Red) {
-                                        +"删除"
-                                        onClick {
-                                            deletePanel(
-                                                listOf(comment.commentId),
-                                            )
+
+                                    if (comment.committerUsername == AuthenticationModel.userToken.value?.username
+                                        || AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId
+                                    ) {
+                                        badge(BadgeColor.Red) {
+                                            +"删除"
+                                            onClick {
+                                                deletePanel(
+                                                    listOf(comment.commentId),
+                                                )
+                                            }
                                         }
                                     }
 
                                     badge(BadgeColor.Blue) {
                                         +comment.getVisibilityDecr()
-                                    }
 
-                                    if (comment.visibilityType == ShareCodeComment.Companion.ShareCodeCommentType.Private
-                                        && AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId
-                                    ) {
-                                        badge(BadgeColor.Green) {
-                                            +"转换评论可见性状态"
-                                            onClick {
-                                                CodeCommentVisibilityTypeChanger(code).change()
+                                        onClick {
+                                            if (AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
+                                                CodeCommentVisibilityTypeChanger(code).change(comment.commentId)
                                             }
                                         }
                                     }
-
                                     addCssStyle(style {
                                         textAlign = TextAlign.RIGHT
                                     })
