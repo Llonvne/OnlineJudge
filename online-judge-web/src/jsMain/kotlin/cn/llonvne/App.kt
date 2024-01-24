@@ -44,10 +44,6 @@ class App : Application() {
             layout(routing) {
                 registerPanel(routing)
             }
-        }).on(Frontend.Login.uri, {
-            layout(routing) {
-                loginPanel(routing)
-            }
         }).on(Frontend.Problems.Create.uri, {
             layout(routing) {
                 createProblem(routing)

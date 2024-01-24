@@ -13,6 +13,7 @@ import io.kvision.html.button
 import io.kvision.html.div
 import io.kvision.html.h1
 import io.kvision.html.h4
+import io.kvision.modal.Dialog
 import io.kvision.routing.Routing
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -23,37 +24,38 @@ internal data class LoginPanel(
     val password: String
 )
 
-internal fun Container.loginPanel(routing: Routing) {
-    val alert = div { }
-    add(alert)
+internal fun loginPanel() {
 
-    h1 {
-        +"Login"
+    val dialog = Dialog(
+        "登入",
+    ) {
+
+        val loginPanel = formPanel<LoginPanel> {
+            addUsername(LoginPanel::username)
+            addPassword(LoginPanel::password)
+        }
+
+        button("登入") {
+            onClick {
+                setResult(loginPanel)
+            }
+        }
     }
 
-    val loginPanel = formPanel<LoginPanel> {
-        addUsername(LoginPanel::username)
-        addPassword(LoginPanel::password)
-    }
+    AppScope.launch {
+        val data = dialog.getResult()
+        if (data == null) {
+            Messager.toastError("登入失败")
+            return@launch
+        }
 
-    button("登入") {
-        onClick {
-            AppScope.launch {
-                if (loginPanel.validate()) {
-                    val value = loginPanel.getData()
-
-                    kotlin.runCatching {
-                        val result = AuthenticationModel.login(value.username, value.password)
-                        Messager.send(result.message)
-                        if (result.isOk()) {
-                            routing.navigate("/")
-                        }
-                    }.onFailure {
-                        alert.alert(AlertType.Danger) {
-                            h4 { +"请检查你的网络设置" }
-                        }
-                    }
-                }
+        if (data.validate()) {
+            val value = data.getData()
+            kotlin.runCatching {
+                val result = AuthenticationModel.login(value.username, value.password)
+                Messager.send(result.message)
+            }.onFailure {
+                Messager.toastError("请检查你的网络设置")
             }
         }
     }
