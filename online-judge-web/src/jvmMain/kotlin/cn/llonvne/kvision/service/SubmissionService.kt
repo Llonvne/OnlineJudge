@@ -11,17 +11,28 @@ import cn.llonvne.entity.problem.share.CodeVisibilityType.*
 import cn.llonvne.exts.now
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.gojudge.api.fromId
+import cn.llonvne.gojudge.api.spec.runtime.GoJudgeFile
 import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.api.task.Output.Companion.formatOnSuccess
+import cn.llonvne.gojudge.api.task.Output.Failure.CompileResultIsNull
+import cn.llonvne.gojudge.api.task.Output.Failure.TargetFileNotExist
+import cn.llonvne.gojudge.api.task.Output.Success
 import cn.llonvne.gojudge.api.task.format
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.*
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureOutput
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -192,10 +203,46 @@ actual class SubmissionService(
             json.decodeFromString<Output>(submission.judgeResult)
         }
 
+        val languageId = codeRepository.getCodeLanguageId(codeId) ?: return LanguageNotFound
+        val language = SupportLanguages.fromId(languageId) ?: return LanguageNotFound
+
         output.onFailure {
             return JudgeResultParseError
-        }.onSuccess {
-            return GetOutputByCodeIdResp.SuccessGetOutput(it)
+        }.onSuccess { output ->
+            return SuccessGetOutput(
+                when (output) {
+                    is Output.Failure.CompileError -> {
+                        FailureOutput(
+                            CompileError(output.compileResult.files?.get("stderr").toString()),
+                            language
+                        )
+                    }
+
+                    is CompileResultIsNull -> {
+                        FailureOutput(
+                            CompileResultNotFound,
+                            language
+                        )
+                    }
+
+                    is Output.Failure.RunResultIsNull -> FailureOutput(
+                        RunResultIsNull,
+                        language
+                    )
+
+                    is TargetFileNotExist -> FailureOutput(
+                        TargetResultNotFound,
+                        language
+                    )
+
+                    is Success -> GetOutputByCodeIdResp.OutputDto.SuccessOutput(
+                        stdin = output.runRequest.cmd.first().files?.filterIsInstance<GoJudgeFile.MemoryFile>()
+                            ?.first()?.content.toString(),
+                        stdout = output.runResult.files?.get("stdout").toString(),
+                        language
+                    )
+                }
+            )
         }
         TODO()
     }
@@ -245,7 +292,7 @@ actual class SubmissionService(
                 stdin = req.stdin
             )
         }.onFailure {
-            return JudgeError(it)
+            return JudgeError(it.cause.toString())
         }
 
         val judgeResult = json.encodeToString(output.getOrNull())

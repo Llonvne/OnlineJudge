@@ -29,6 +29,14 @@ interface CommentSubmitter {
         fun protected(
             shareId: Int, code: CodeDto, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
         ): CommentSubmitter = ProtectedCommentSubmitter(shareId, shareCommentComponent, code)
+
+        fun closed(): CommentSubmitter = object : CommentSubmitter {
+            override fun load(root: Container) {
+                root.alert(AlertType.Dark) {
+                    +"评论区已经被冻结"
+                }
+            }
+        }
     }
 }
 

@@ -8,4 +8,4 @@ data class InternalError(val reason: String) : ICodeService.CommitOnCodeResp, IS
     ISubmissionService.GetLastNPlaygroundSubmissionResp
 
 @Serializable
-data class JudgeError(@Contextual val throwable: Throwable) : ISubmissionService.CreateSubmissionResp
+data class JudgeError(@Contextual val reason: String) : ISubmissionService.CreateSubmissionResp

@@ -1,6 +1,7 @@
 package cn.llonvne.entity.problem.share
 
 import cn.llonvne.entity.DescriptionGetter
+import cn.llonvne.entity.problem.share.CodeCommentType.*
 import cn.llonvne.security.AuthenticationToken
 import kotlinx.serialization.Serializable
 import kotlin.enums.EnumEntries
@@ -10,6 +11,7 @@ enum class CodeCommentType : DescriptionGetter {
     Open,
     Closed,
     ClosedByAdmin,
+    Freezing,
     Protected;
 
     override val decr: String
@@ -19,10 +21,11 @@ enum class CodeCommentType : DescriptionGetter {
 }
 
 private fun CodeCommentType.decr() = when (this) {
-    CodeCommentType.Open -> "任何人均可查看，均可发表评论"
-    CodeCommentType.Closed -> "评论区被关闭"
-    CodeCommentType.ClosedByAdmin -> "评论区被管理员关闭"
-    CodeCommentType.Protected -> "评论区被保护（需经过审核才能公开展示）"
+    Open -> "任何人均可查看，均可发表评论"
+    Closed -> "评论区被关闭"
+    ClosedByAdmin -> "评论区被管理员关闭"
+    Protected -> "评论区被保护（需经过审核才能公开展示）"
+    Freezing -> "评论区被冻结，无法添加/删除/修改评论"
 }
 
 fun EnumEntries<CodeCommentType>.limited(token: AuthenticationToken): EnumEntries<CodeCommentType> {

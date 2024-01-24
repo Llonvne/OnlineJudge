@@ -5,6 +5,7 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.kvision.service.ISubmissionService
+import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
 import cn.llonvne.kvision.service.InternalError
 import cn.llonvne.kvision.service.LanguageNotFound
 import cn.llonvne.kvision.service.PermissionDenied
@@ -31,6 +32,10 @@ fun Container.playground() {
 
     alert(AlertType.Light) {
         h1 { +"代码训练场" }
+
+        p {
+            +"*训练场提交的代码会永久在服务器保存，且不可删除。请注意保护个人隐私，不要上传任何有关个人隐私的内容"
+        }
     }
 
     div(className = "row") {
@@ -70,12 +75,13 @@ fun Container.playground() {
         }
         div(className = "col") {
 
+            h4 { +"最近一次运行结果" }
             val lastRun = div { }
 
+            h4 { +"历史记录" }
+
             alert(AlertType.Dark) {
-                h4 {
-                    +"历史记录"
-                }
+
                 AppScope.launch {
                     when (val resp = SubmissionModel.getLastNPlaygroundSubmission()) {
                         is InternalError -> {
@@ -90,7 +96,7 @@ fun Container.playground() {
                             Messager.toastError("你还为登入，无法获得历史记录")
                         }
 
-                        is ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission -> {
+                        is SuccessGetLastNPlaygroundSubmission -> {
 
 
                             val sortByTime = resp.subs.sortedByDescending {
@@ -100,13 +106,12 @@ fun Container.playground() {
                             val first = sortByTime.firstOrNull()
 
                             if (first != null) {
-                                h4 { +"最近一次运行结果" }
                                 JudgeResultDisplay.playground(first.codeId, lastRun)
                             }
 
                             sortByTime.forEach { dto ->
-                                alert(AlertType.Success) {
-                                    link("${dto.codeId}-${dto.submitTime.ll()}") {
+                                alert(AlertType.Light) {
+                                    link("训练场提交-语言:${dto.language}-时间:${dto.submitTime.ll()}") {
                                         onClick {
                                             RoutingModule.routing.navigate("/share/${dto.codeId}")
                                         }

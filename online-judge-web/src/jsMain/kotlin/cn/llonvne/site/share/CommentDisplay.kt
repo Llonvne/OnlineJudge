@@ -35,16 +35,72 @@ interface CommentDisplay {
         }
 
         fun public(
-            code: CodeDto,
-            shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
         ): CommentDisplay = PublicShareCodeCommentDisplay(code, shareCodeCommentComponent)
+
+        fun freezing(
+            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+        ): CommentDisplay {
+            return FreezingShareCodeCommentDisplay(code, shareCodeCommentComponent)
+        }
     }
 }
 
-private class PublicShareCodeCommentDisplay(
-    val code: CodeDto,
-    val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+private class FreezingShareCodeCommentDisplay(
+    code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+) : PublicShareCodeCommentDisplay(code, shareCodeCommentComponent) {
+    override fun getDeleteComponent(root: Container, comment: CreateCommentDto) {
+    }
+
+    override fun getVisibilityChangerComponent(root: Container, comment: CreateCommentDto) {
+        root.badge(BadgeColor.Blue) {
+            +comment.getVisibilityDecr()
+        }
+    }
+
+    override fun getDeleteAllComponent(root: Container, commentIds: List<Int>) {
+    }
+}
+
+private open class PublicShareCodeCommentDisplay(
+    val code: CodeDto, val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
 ) : CommentDisplay {
+
+    open fun getDeleteComponent(root: Container, comment: CreateCommentDto) {
+        if (comment.committerUsername == AuthenticationModel.userToken.value?.username || AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
+            root.badge(BadgeColor.Red) {
+                +"删除"
+                onClick {
+                    deletePanel(
+                        listOf(comment.commentId),
+                    )
+                }
+            }
+        }
+    }
+
+    open fun getVisibilityChangerComponent(root: Container, comment: CreateCommentDto) {
+        root.badge(BadgeColor.Blue) {
+            +comment.getVisibilityDecr()
+
+            onClick {
+                if (AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
+                    CodeCommentVisibilityTypeChanger(code).change(comment.commentId)
+                }
+            }
+        }
+    }
+
+    open fun getDeleteAllComponent(root: Container, commentIds: List<Int>) {
+        root.badge(BadgeColor.Red) {
+            +"删除全部"
+
+            onClick {
+                deletePanel(commentIds)
+            }
+        }
+    }
+
     override fun load(root: Container) {
         root.div().bind(
             shareCodeCommentComponent.getComments()
@@ -68,29 +124,8 @@ private class PublicShareCodeCommentDisplay(
                                 }
 
                                 div {
-
-                                    if (comment.committerUsername == AuthenticationModel.userToken.value?.username
-                                        || AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId
-                                    ) {
-                                        badge(BadgeColor.Red) {
-                                            +"删除"
-                                            onClick {
-                                                deletePanel(
-                                                    listOf(comment.commentId),
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    badge(BadgeColor.Blue) {
-                                        +comment.getVisibilityDecr()
-
-                                        onClick {
-                                            if (AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
-                                                CodeCommentVisibilityTypeChanger(code).change(comment.commentId)
-                                            }
-                                        }
-                                    }
+                                    getDeleteComponent(this, comment)
+                                    getVisibilityChangerComponent(this, comment)
                                     addCssStyle(style {
                                         textAlign = TextAlign.RIGHT
                                     })
@@ -104,13 +139,7 @@ private class PublicShareCodeCommentDisplay(
                     badge(BadgeColor.Green) {
                         +"最后更新于 ${lastUpdate.ll()}"
                     }
-                    badge(BadgeColor.Red) {
-                        +"删除全部"
-
-                        onClick {
-                            deletePanel(commentIds)
-                        }
-                    }
+                    getDeleteAllComponent(this, commentIds)
                 }
             }
         }
@@ -119,8 +148,7 @@ private class PublicShareCodeCommentDisplay(
     fun deletePanel(
         commentIds: List<Int>,
     ) {
-        Confirm.show(
-            "你正在尝试删除评论",
+        Confirm.show("你正在尝试删除评论",
             "此操作将删除您的所有评论，请确认您的选择",
             animation = true,
             align = Align.LEFT,
@@ -140,7 +168,6 @@ private class PublicShareCodeCommentDisplay(
                     }
                     shareCodeCommentComponent.refreshComments()
                 }
-            }
-        )
+            })
     }
 }

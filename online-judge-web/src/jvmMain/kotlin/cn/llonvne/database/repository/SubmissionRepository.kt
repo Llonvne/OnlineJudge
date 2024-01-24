@@ -61,7 +61,7 @@ class SubmissionRepository(
                         codeMeta.codeType eq codeType
                     }
                 }
-            }
+            }.limit(limit)
         }
     }
 }

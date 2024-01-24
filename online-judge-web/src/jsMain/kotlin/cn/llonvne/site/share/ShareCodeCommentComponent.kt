@@ -6,6 +6,7 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.share.CodeCommentType
+import cn.llonvne.entity.problem.share.CodeCommentType.*
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.message.Messager
@@ -35,10 +36,11 @@ interface ShareCodeCommentComponent<Comment> {
 
         fun from(status: CodeCommentType, code: CodeDto): ShareCodeCommentComponent<*> {
             return when (status) {
-                CodeCommentType.Open -> public(code.codeId, code)
-                CodeCommentType.Closed -> empty("评论区已被代码所有者关闭")
-                CodeCommentType.ClosedByAdmin -> empty("评论区已被管理员关闭")
-                CodeCommentType.Protected -> protected(code.codeId, code)
+                Open -> public(code.codeId, code)
+                Closed -> empty("评论区已被代码所有者关闭")
+                ClosedByAdmin -> empty("评论区已被管理员关闭")
+                Protected -> protected(code.codeId, code)
+                Freezing -> freezing(code.codeId, code)
             }
         }
 
@@ -67,6 +69,25 @@ interface ShareCodeCommentComponent<Comment> {
 
         private fun protected(shareId: Int, code: CodeDto): ShareCodeCommentComponent<*> {
             return ProtectedShareCommentComponent(shareId, code)
+        }
+
+        private fun freezing(shareId: Int, code: CodeDto): ShareCodeCommentComponent<*> {
+            return FreezingShareCommentCompoent(shareId, code)
+        }
+    }
+}
+
+private class FreezingShareCommentCompoent(
+    shareId: Int,
+    private val code: CodeDto,
+    comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
+) : PublicShareCommentComponent(shareId, code, comments) {
+    override fun loadComments(root: Container) {
+        AppScope.launch {
+            if (refreshComments().await()) {
+                CommentSubmitter.closed()
+                CommentDisplay.freezing(code, this@FreezingShareCommentCompoent).load(root)
+            }
         }
     }
 }

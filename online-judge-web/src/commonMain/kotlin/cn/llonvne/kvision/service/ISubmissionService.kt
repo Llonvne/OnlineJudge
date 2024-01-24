@@ -1,3 +1,5 @@
+@file:UseContextualSerialization
+
 package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.AuthenticationUserDto
@@ -7,11 +9,14 @@ import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.Code.CodeType
-import cn.llonvne.gojudge.api.task.Output
+import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @KVService
 interface ISubmissionService {
@@ -47,8 +52,7 @@ interface ISubmissionService {
     }
 
     suspend fun getSupportLanguageId(
-        authenticationToken: AuthenticationToken?,
-        problemId: Int
+        authenticationToken: AuthenticationToken?, problemId: Int
     ): GetSupportLanguageByProblemIdResp
 
     @Serializable
@@ -68,7 +72,9 @@ interface ISubmissionService {
 
         @Serializable
         data class PlaygroundCreateSubmissionReq(
-            val stdin: String, override val rawCode: String, override val languageId: Int,
+            val stdin: String,
+            override val rawCode: String,
+            override val languageId: Int,
             override val codeType: CodeType
         ) : CreateSubmissionReq
     }
@@ -81,19 +87,52 @@ interface ISubmissionService {
     }
 
     suspend fun create(
-        authenticationToken: AuthenticationToken?,
-        createSubmissionReq: CreateSubmissionReq
+        authenticationToken: AuthenticationToken?, createSubmissionReq: CreateSubmissionReq
     ): CreateSubmissionResp
 
     @Serializable
     sealed interface GetOutputByCodeIdResp {
         @Serializable
-        data class SuccessGetOutput(val output: Output) : GetOutputByCodeIdResp
+        data class SuccessGetOutput(
+            val outputDto: OutputDto
+        ) : GetOutputByCodeIdResp
+
+        @Serializable
+        sealed interface OutputDto {
+            val language: SupportLanguages
+
+            @Serializable
+            data class SuccessOutput(
+                val stdin: String,
+                val stdout: String,
+                override val language: SupportLanguages,
+            ) : OutputDto
+
+            @Serializable
+            sealed interface FailureReason {
+                @Serializable
+                data object CompileResultNotFound : FailureReason
+
+                @Serializable
+                data class CompileError(val compileErrMessage: String) : FailureReason
+
+                @Serializable
+                data object RunResultIsNull : FailureReason
+
+                @Serializable
+                data object TargetResultNotFound : FailureReason
+            }
+
+            @Serializable
+            data class FailureOutput(
+                val reason: FailureReason,
+                override val language: SupportLanguages
+            ) : OutputDto
+        }
     }
 
     suspend fun getOutputByCodeId(
-        authenticationToken: AuthenticationToken?,
-        codeId: Int
+        authenticationToken: AuthenticationToken?, codeId: Int
     ): GetOutputByCodeIdResp
 
     @Serializable
@@ -115,7 +154,6 @@ interface ISubmissionService {
     }
 
     suspend fun getLastNPlaygroundSubmission(
-        authenticationToken: AuthenticationToken?,
-        last: Int = 5
+        authenticationToken: AuthenticationToken?, last: Int = 5
     ): GetLastNPlaygroundSubmissionResp
 }
