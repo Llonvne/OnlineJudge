@@ -9,6 +9,7 @@ import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
+import org.komapper.core.dsl.query.Query
 import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
@@ -41,6 +42,14 @@ class AuthenticationUserRepository(
             IAuthenticationService.LoginResult.SuccessfulLogin(AuthenticationToken(username, username, user.id))
         } else {
             IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
+        }
+    }
+
+    internal suspend fun usernameAvailableQuery(username: String): Query<Boolean> {
+        return QueryDsl.from(userMeta).where {
+            userMeta.username eq username
+        }.selectNotNull(count()).map {
+            it == 0L
         }
     }
 

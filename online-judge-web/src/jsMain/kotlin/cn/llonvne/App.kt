@@ -1,12 +1,11 @@
 package cn.llonvne
 
-import cn.llonvne.compoent.AlertType
+import  cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.constants.Frontend
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
-import cn.llonvne.site.share.ShareCodeHighlighter
 import cn.llonvne.site.share.share
 import io.kvision.*
 import io.kvision.html.div
@@ -25,7 +24,7 @@ class App : Application() {
         ThemeManager.init()
     }
 
-    fun failTo404(routing: Routing, block: () -> Unit) = kotlin.runCatching { block() }.onFailure {
+    private fun failTo404(routing: Routing, block: () -> Unit) = kotlin.runCatching { block() }.onFailure {
         routing.navigate("/404")
     }
 
@@ -82,14 +81,11 @@ class App : Application() {
 
                     if (intId != null) {
                         share(
-                            intId,
-                            CodeLoader.id(),
-                            alert
+                            intId, CodeLoader.id(), alert
                         )
                     } else {
                         share(
-                            id, CodeLoader.hash(),
-                            alert
+                            id, CodeLoader.hash(), alert
                         )
                     }
                 }

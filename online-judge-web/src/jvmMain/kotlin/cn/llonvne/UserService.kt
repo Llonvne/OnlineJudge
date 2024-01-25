@@ -27,5 +27,4 @@ actual class UserService(
             }
         return database.runQuery(query).firstOrNull() ?: throw UserNotFound()
     }
-
 }

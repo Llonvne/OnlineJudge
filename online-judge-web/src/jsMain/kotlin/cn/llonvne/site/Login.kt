@@ -5,6 +5,7 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.addPassword
 import cn.llonvne.compoent.addUsername
 import cn.llonvne.compoent.alert
+import cn.llonvne.loader.Loadable
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container
@@ -41,6 +42,7 @@ internal fun loginPanel() {
             }
         }
     }
+
 
     AppScope.launch {
         val data = dialog.getResult()

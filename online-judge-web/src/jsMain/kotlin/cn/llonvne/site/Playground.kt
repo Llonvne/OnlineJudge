@@ -29,7 +29,6 @@ data class PlaygroundSubmission(
 
 fun Container.playground() {
 
-
     alert(AlertType.Light) {
         h1 { +"代码训练场" }
 

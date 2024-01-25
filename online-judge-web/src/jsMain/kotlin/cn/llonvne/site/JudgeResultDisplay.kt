@@ -5,6 +5,8 @@ import cn.llonvne.compoent.*
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
 import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
@@ -19,37 +21,25 @@ interface JudgeResultDisplay {
 
     fun display(root: Container, outputDto: OutputDto)
 
-    fun onCompilerError(root: Container, compileError: OutputDto.FailureReason.CompileError)
+    fun onCompilerError(root: Container, compileError: CompileError)
 
-    fun onCompileResultNotFound(root: Container, compileResultNotFound: OutputDto.FailureReason.CompileResultNotFound)
+    fun onCompileResultNotFound(root: Container, compileResultNotFound: CompileResultNotFound)
 
-    fun onRunResultIsNull(root: Container, runResultIsNull: OutputDto.FailureReason.RunResultIsNull)
+    fun onRunResultIsNull(root: Container, runResultIsNull: RunResultIsNull)
 
-    fun onTargetResultNotFound(root: Container, targetFileNotExist: OutputDto.FailureReason.TargetResultNotFound)
+    fun onTargetResultNotFound(root: Container, targetFileNotExist: TargetResultNotFound)
 
-    fun onSuccess(root: Container, successOutput: OutputDto.SuccessOutput)
+    fun onSuccess(root: Container, successOutput: SuccessOutput)
 
     companion object {
         fun empty() = object : JudgeResultDisplay {
             override fun load(root: Container) {}
             override fun display(root: Container, outputDto: OutputDto) {}
-            override fun onCompilerError(root: Container, compileError: OutputDto.FailureReason.CompileError) {
-            }
-
-            override fun onCompileResultNotFound(
-                root: Container,
-                compileResultNotFound: OutputDto.FailureReason.CompileResultNotFound
-            ) {
-            }
-
-            override fun onRunResultIsNull(root: Container, runResultIsNull: OutputDto.FailureReason.RunResultIsNull) {}
-            override fun onTargetResultNotFound(
-                root: Container,
-                targetFileNotExist: OutputDto.FailureReason.TargetResultNotFound
-            ) {
-            }
-
-            override fun onSuccess(root: Container, successOutput: OutputDto.SuccessOutput) {}
+            override fun onCompilerError(root: Container, compileError: CompileError) {}
+            override fun onCompileResultNotFound(root: Container, compileResultNotFound: CompileResultNotFound) {}
+            override fun onRunResultIsNull(root: Container, runResultIsNull: RunResultIsNull) {}
+            override fun onTargetResultNotFound(root: Container, targetFileNotExist: TargetResultNotFound) {}
+            override fun onSuccess(root: Container, successOutput: SuccessOutput) {}
         }
 
         fun playground(codeId: Int, root: Container): JudgeResultDisplay = PlaygroundJudgeResultDisplay(codeId)
@@ -85,7 +75,7 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    override fun onCompilerError(root: Container, compileError: OutputDto.FailureReason.CompileError) {
+    override fun onCompilerError(root: Container, compileError: CompileError) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"编译错误"
@@ -97,10 +87,7 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    override fun onCompileResultNotFound(
-        root: Container,
-        compileResultNotFound: OutputDto.FailureReason.CompileResultNotFound
-    ) {
+    override fun onCompileResultNotFound(root: Container, compileResultNotFound: CompileResultNotFound) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到编译结果"
@@ -112,7 +99,7 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    override fun onRunResultIsNull(root: Container, runResultIsNull: OutputDto.FailureReason.RunResultIsNull) {
+    override fun onRunResultIsNull(root: Container, runResultIsNull: RunResultIsNull) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到运行结果"
@@ -124,10 +111,7 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    override fun onTargetResultNotFound(
-        root: Container,
-        targetFileNotExist: OutputDto.FailureReason.TargetResultNotFound
-    ) {
+    override fun onTargetResultNotFound(root: Container, targetFileNotExist: TargetResultNotFound) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到运行目标"
@@ -139,7 +123,7 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    override fun onSuccess(root: Container, successOutput: OutputDto.SuccessOutput) {
+    override fun onSuccess(root: Container, successOutput: SuccessOutput) {
         root.alert(AlertType.Success) {
             h4 {
                 +"运行成功"
@@ -175,14 +159,14 @@ private class PlaygroundJudgeResultDisplay(
         when (outputDto) {
             is OutputDto.FailureOutput -> {
                 when (val reason = outputDto.reason) {
-                    is OutputDto.FailureReason.CompileError -> onCompilerError(root, reason)
-                    is OutputDto.FailureReason.CompileResultNotFound -> onCompileResultNotFound(root, reason)
-                    is OutputDto.FailureReason.RunResultIsNull -> onRunResultIsNull(root, reason)
-                    is OutputDto.FailureReason.TargetResultNotFound -> onTargetResultNotFound(root, reason)
+                    is CompileError -> onCompilerError(root, reason)
+                    is CompileResultNotFound -> onCompileResultNotFound(root, reason)
+                    is RunResultIsNull -> onRunResultIsNull(root, reason)
+                    is TargetResultNotFound -> onTargetResultNotFound(root, reason)
                 }
             }
 
-            is OutputDto.SuccessOutput -> onSuccess(root, outputDto)
+            is SuccessOutput -> onSuccess(root, outputDto)
         }
     }
 }

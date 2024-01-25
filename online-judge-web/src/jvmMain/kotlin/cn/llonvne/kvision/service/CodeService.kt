@@ -7,8 +7,18 @@ import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
+import cn.llonvne.entity.problem.share.CodeVisibilityType.*
+import cn.llonvne.kvision.service.ICodeService.*
+import cn.llonvne.kvision.service.ICodeService.GetCodeResp.SuccessfulGetCode
+import cn.llonvne.kvision.service.ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits
+import cn.llonvne.kvision.service.ICodeService.SaveCodeResp.SuccessfulSaveCode
+import cn.llonvne.kvision.service.ICodeService.SetCodeCommentTypeResp.SuccessSetCommentType
+import cn.llonvne.kvision.service.ICodeService.SetCodeCommentVisibilityTypeResp.SuccessSetCodeCommentVisibilityType
+import cn.llonvne.kvision.service.ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate
+import cn.llonvne.kvision.service.ICodeService.SetCodeVisibilityResp.SuccessToRestrict
 import cn.llonvne.security.AuthenticationToken
 import com.benasher44.uuid.uuid4
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -26,8 +36,8 @@ actual class CodeService(
     private val authenticationUserRepository: AuthenticationUserRepository
 ) : ICodeService {
     override suspend fun saveCode(
-        token: AuthenticationToken?, saveCodeReq: ICodeService.SaveCodeReq
-    ): ICodeService.SaveCodeResp {
+        token: AuthenticationToken?, saveCodeReq: SaveCodeReq
+    ): SaveCodeResp {
         return if (token == null) {
             PermissionDenied
         } else {
@@ -37,7 +47,7 @@ actual class CodeService(
                 }
             }
 
-            ICodeService.SaveCodeResp.SuccessfulSaveCode(codeRepository.save(saveCodeReq.toCode(token)))
+            SuccessfulSaveCode(codeRepository.save(saveCodeReq.toCode(token)))
         }
     }
 
@@ -49,13 +59,14 @@ actual class CodeService(
         getCodeId: GetCodeId,
         code: Code,
         value: AuthenticationToken?
-    ): ICodeService.GetCodeResp {
+    ): GetCodeResp {
+
         when (code.visibilityType) {
-            CodeVisibilityType.Public -> {
+            Public -> {
 
             }
 
-            CodeVisibilityType.Private -> {
+            Private -> {
                 if (value == null) {
                     return PermissionDenied
                 } else if (value.authenticationUserId != codeRepository.getCodeOwnerId(
@@ -66,7 +77,7 @@ actual class CodeService(
                 }
             }
 
-            CodeVisibilityType.Restrict -> {
+            Restrict -> {
                 if (getCodeId == GetCodeId.HashLink) {
 
                 } else if (value == null) {
@@ -80,7 +91,7 @@ actual class CodeService(
             }
         }
 
-        return ICodeService.GetCodeResp.SuccessfulGetCode(
+        return SuccessfulGetCode(
             CodeDto(
                 codeId = code.codeId ?: return CodeNotFound,
                 rawCode = code.code,
@@ -96,12 +107,12 @@ actual class CodeService(
         )
     }
 
-    override suspend fun getCode(value: AuthenticationToken?, shareId: Int): ICodeService.GetCodeResp {
+    override suspend fun getCode(value: AuthenticationToken?, shareId: Int): GetCodeResp {
         val code = codeRepository.get(shareId) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.Id, code, value)
     }
 
-    override suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): ICodeService.GetCodeResp {
+    override suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): GetCodeResp {
         val code = codeRepository.getCodeByHash(hash) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.HashLink, code, value)
     }
@@ -110,7 +121,7 @@ actual class CodeService(
         token: AuthenticationToken?,
         shareId: Int,
         type: CodeCommentType
-    ): ICodeService.SetCodeCommentTypeResp {
+    ): SetCodeCommentTypeResp {
 
         if (token == null) {
             return PermissionDenied
@@ -124,15 +135,15 @@ actual class CodeService(
         if (codeRepository.setCodeCommentType(shareId, type) != 1L) {
             return CodeNotFound
         }
-        return ICodeService.SetCodeCommentTypeResp.SuccessSetCommentType
+        return SuccessSetCommentType
     }
 
     override suspend fun setCodeCommentVisibilityType(
         token: AuthenticationToken?,
         shareId: Int,
         commentId: Int,
-        type: ShareCodeComment.Companion.ShareCodeCommentType
-    ): ICodeService.SetCodeCommentVisibilityTypeResp {
+        type: ShareCodeCommentType
+    ): SetCodeCommentVisibilityTypeResp {
 
         if (token == null) {
             return PermissionDenied
@@ -145,17 +156,17 @@ actual class CodeService(
         }
 
         codeRepository.setShareCodeCommentVisibilityType(commentId, type)
-        return ICodeService.SetCodeCommentVisibilityTypeResp.SuccessSetCodeCommentVisibilityType
+        return SuccessSetCodeCommentVisibilityType
     }
 
-    private fun ICodeService.SaveCodeReq.toCode(token: AuthenticationToken): Code {
+    private fun SaveCodeReq.toCode(token: AuthenticationToken): Code {
         return Code(
             authenticationUserId = token.authenticationUserId, code = code, languageId = languageId,
             codeType = Code.CodeType.Share
         )
     }
 
-    override suspend fun commit(commitOnCodeReq: ICodeService.CommitOnCodeReq): ICodeService.CommitOnCodeResp {
+    override suspend fun commit(commitOnCodeReq: CommitOnCodeReq): CommitOnCodeResp {
 
         if (commitOnCodeReq.token == null) {
             return PermissionDenied
@@ -178,7 +189,7 @@ actual class CodeService(
             return InternalError("ShareCodeComment.CreateAt 在插入后仍不存在")
         }
 
-        return ICodeService.CommitOnCodeResp.SuccessfulCommit(
+        return CommitOnCodeResp.SuccessfulCommit(
             CreateCommentDto(
                 result.commentId,
                 commitOnCodeReq.token.username,
@@ -192,7 +203,7 @@ actual class CodeService(
 
     override suspend fun getComments(
         authenticationToken: AuthenticationToken?, sharCodeId: Int
-    ): ICodeService.GetCommitsOnCodeResp {
+    ): GetCommitsOnCodeResp {
         if (!codeRepository.isIdExist(sharCodeId)) {
             return CodeNotFound
         } else {
@@ -205,7 +216,7 @@ actual class CodeService(
 
 
 
-                if (it.type == ShareCodeComment.Companion.ShareCodeCommentType.Private) {
+                if (it.type == ShareCodeCommentType.Private) {
                     if (authenticationToken == null) {
                         return@mapNotNull null
                     } else if (!(it.committerAuthenticationUserId == authenticationToken.authenticationUserId || authenticationToken.authenticationUserId == sharCodeOwnerId)) {
@@ -221,9 +232,7 @@ actual class CodeService(
                     createdAt = it.createdAt ?: return@mapNotNull null,
                     visibilityType = it.type
                 )
-            }.let {
-                ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits(it)
-            }
+            }.let { SuccessfulGetCommits(it) }
         }
     }
 
@@ -237,7 +246,7 @@ actual class CodeService(
         token: AuthenticationToken?,
         shareId: Int,
         result: CodeVisibilityType
-    ): ICodeService.SetCodeVisibilityResp {
+    ): SetCodeVisibilityResp {
         if (token == null) {
             return PermissionDenied
         }
@@ -253,20 +262,20 @@ actual class CodeService(
             return CodeNotFound
         }
         return when (result) {
-            CodeVisibilityType.Public -> onNotRestrictType(shareId)
-            CodeVisibilityType.Private -> onNotRestrictType(shareId)
-            CodeVisibilityType.Restrict -> onRestrictType(shareId)
+            Public -> onNotRestrictType(shareId)
+            Private -> onNotRestrictType(shareId)
+            Restrict -> onRestrictType(shareId)
         }
     }
 
-    private suspend fun onNotRestrictType(shareId: Int): ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate {
+    private suspend fun onNotRestrictType(shareId: Int): SuccessToPublicOrPrivate {
         codeRepository.setHashLink(shareId = shareId, null)
-        return ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate
+        return SuccessToPublicOrPrivate
     }
 
-    private suspend fun onRestrictType(shareId: Int): ICodeService.SetCodeVisibilityResp.SuccessToRestrict {
+    private suspend fun onRestrictType(shareId: Int): SuccessToRestrict {
         val hashLink = uuid4().toString()
         codeRepository.setHashLink(shareId = shareId, hashLink)
-        return ICodeService.SetCodeVisibilityResp.SuccessToRestrict(hashLink)
+        return SuccessToRestrict(hashLink)
     }
 }
