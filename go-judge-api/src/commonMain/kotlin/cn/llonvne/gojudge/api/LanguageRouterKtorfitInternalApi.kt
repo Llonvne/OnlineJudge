@@ -4,7 +4,6 @@ import cn.llonvne.gojudge.api.task.Output
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.*
 import io.ktor.client.*
-import io.ktor.serialization.*
 
 internal interface LanguageRouterKtorfitInternalApi {
     @Headers("Content-Type:Application/Json")

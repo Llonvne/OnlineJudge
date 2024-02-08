@@ -1,12 +1,14 @@
 package cn.llonvne.message
 
+import cn.llonvne.message.Message.ToastMessage
+import cn.llonvne.message.MessageLevel.*
 import io.kvision.toast.Toast
 import io.kvision.toast.ToastOptions
 import io.kvision.toast.ToastPosition
 
 object Messager {
     fun send(message: Message) = when (message) {
-        is Message.ToastMessage -> {
+        is ToastMessage -> {
             toastByLevel(message.level, message.message)
         }
     }
@@ -16,20 +18,20 @@ object Messager {
      */
     private fun toastByLevel(level: MessageLevel, rawMessage: String) {
         when (level) {
-            MessageLevel.Info -> Toast.info(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
-            MessageLevel.Warning -> Toast.warning(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
-            MessageLevel.Danger -> Toast.danger(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
-            MessageLevel.Success -> Toast.success(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
+            Info -> Toast.info(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
+            Warning -> Toast.warning(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
+            Danger -> Toast.danger(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
+            Success -> Toast.success(rawMessage, options = ToastOptions(ToastPosition.BOTTOMRIGHT))
         }
     }
 
     fun toastInfo(message: String) = send(
-        Message.ToastMessage(
-            MessageLevel.Info, message
+        ToastMessage(
+            Info, message
         )
     )
 
     fun toastError(message: String) = send(
-        Message.ToastMessage(MessageLevel.Danger, message)
+        ToastMessage(Danger, message)
     )
 }

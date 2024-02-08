@@ -4,6 +4,8 @@ import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.kvision.service.IAuthenticationService
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.SuccessfulLogin
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import org.komapper.core.dsl.Meta
@@ -39,9 +41,9 @@ class AuthenticationUserRepository(
         return@passwordEncoder if (user == null) {
             IAuthenticationService.LoginResult.UserDoNotExist
         } else if (matches(rawPassword, user.encryptedPassword)) {
-            IAuthenticationService.LoginResult.SuccessfulLogin(AuthenticationToken(username, username, user.id))
+            SuccessfulLogin(AuthenticationToken.of(username, username, user.id))
         } else {
-            IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
+            IncorrectUsernameOrPassword
         }
     }
 

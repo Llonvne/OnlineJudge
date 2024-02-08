@@ -1,7 +1,9 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
-import cn.llonvne.compoent.*
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
+import cn.llonvne.compoent.badge
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto

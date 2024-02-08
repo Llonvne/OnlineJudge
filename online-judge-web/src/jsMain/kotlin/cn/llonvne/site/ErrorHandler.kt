@@ -3,7 +3,6 @@ package cn.llonvne.site
 import cn.llonvne.compoent.NotFoundAble
 import cn.llonvne.compoent.notFound
 import io.kvision.core.Container
-import io.kvision.html.I
 
 interface ErrorHandler<ID> {
     fun handleLanguageNotFound(root: Container, id: ID) {

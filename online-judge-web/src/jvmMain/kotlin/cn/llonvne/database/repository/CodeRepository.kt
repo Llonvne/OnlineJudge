@@ -2,8 +2,8 @@ package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.shareCodeComment
-import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
 import org.komapper.core.dsl.Meta

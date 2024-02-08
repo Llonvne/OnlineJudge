@@ -9,8 +9,6 @@ import io.kvision.html.div
 import io.kvision.navbar.*
 import io.kvision.routing.Routing
 import io.kvision.state.bind
-import io.kvision.state.insertNotNull
-import io.kvision.state.insertWhen
 
 private fun Navbar.showNavigator(routing: Routing) {
     nav {

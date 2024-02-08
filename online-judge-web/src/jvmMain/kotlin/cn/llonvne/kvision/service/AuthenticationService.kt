@@ -36,7 +36,7 @@ actual class AuthenticationService(
         return if (userRepository.usernameAvailable(username)) {
             val user = userRepository.new(username, password)
             // 返回成功注册
-            SuccessfulRegistration(AuthenticationToken(username, user.encryptedPassword, user.id))
+            SuccessfulRegistration(AuthenticationToken.of(username, user.encryptedPassword, user.id))
 
         } else {
             // 提示用户名已经存在

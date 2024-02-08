@@ -1,6 +1,8 @@
 package cn.llonvne.model
 
 import cn.llonvne.kvision.service.IAuthenticationService
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResult
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.SuccessfulLogin
 import cn.llonvne.message.Messager
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.remote.getService
@@ -20,11 +22,11 @@ object AuthenticationModel {
 
     suspend fun register(username: String, password: String) = authenticationService.register(username, password)
 
-    suspend fun login(username: String, password: String): IAuthenticationService.LoginResult {
+    suspend fun login(username: String, password: String): LoginResult {
         val result = authenticationService.login(username, password)
 
         when (result) {
-            is IAuthenticationService.LoginResult.SuccessfulLogin -> {
+            is SuccessfulLogin -> {
                 userToken.value = result.token
                 save()
             }

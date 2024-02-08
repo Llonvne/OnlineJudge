@@ -6,8 +6,8 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.codeHighlighter
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.entity.problem.share.Code
-import cn.llonvne.entity.problem.share.Code.CodeType.*
+import cn.llonvne.entity.problem.share.Code.CodeType.Playground
+import cn.llonvne.entity.problem.share.Code.CodeType.Share
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ICodeService

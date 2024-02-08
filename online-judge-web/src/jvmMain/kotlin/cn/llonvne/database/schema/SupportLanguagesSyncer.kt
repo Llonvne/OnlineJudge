@@ -3,7 +3,6 @@ package cn.llonvne.database.schema
 import cn.llonvne.database.entity.def.problem.language
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.gojudge.api.SupportLanguages
-import kotlinx.datetime.Month
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.query.andThen

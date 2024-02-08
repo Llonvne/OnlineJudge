@@ -2,13 +2,10 @@ package cn.llonvne.database.repository
 
 import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.problem.submission
-import cn.llonvne.database.entity.def.shareCodeComment
-import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.share.Code
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
-import org.komapper.core.dsl.metamodel.define
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository

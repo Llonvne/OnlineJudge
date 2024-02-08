@@ -1,7 +1,6 @@
 package cn.llonvne.loader
 
 import cn.llonvne.AppScope
-import cn.llonvne.model.CodeModel
 import io.kvision.state.ObservableValue
 import kotlinx.coroutines.launch
 import kotlin.experimental.ExperimentalTypeInference

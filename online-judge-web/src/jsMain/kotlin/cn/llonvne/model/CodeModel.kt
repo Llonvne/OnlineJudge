@@ -1,9 +1,10 @@
 package cn.llonvne.model
 
-import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.kvision.service.ICodeService
+import cn.llonvne.kvision.service.ICodeService.*
 import io.kvision.remote.getService
 
 
@@ -14,9 +15,9 @@ object CodeModel {
     suspend fun saveCode(
         rawCode: String,
         languageId: Int?
-    ): ICodeService.SaveCodeResp = codeService.saveCode(
+    ): SaveCodeResp = codeService.saveCode(
         AuthenticationModel.userToken.value,
-        ICodeService.SaveCodeReq(rawCode, languageId = languageId, CodeVisibilityType.Public)
+        SaveCodeReq(rawCode, languageId = languageId, CodeVisibilityType.Public)
     )
 
     suspend fun getCode(shareId: Int) = codeService.getCode(
@@ -25,8 +26,8 @@ object CodeModel {
 
     suspend fun getCode(hash: String) = codeService.getCodeByHash(AuthenticationModel.userToken.value, hash)
 
-    suspend fun commit(sharCodeId: Int, content: String, type: ShareCodeComment.Companion.ShareCodeCommentType) =
-        codeService.commit(ICodeService.CommitOnCodeReq(AuthenticationModel.userToken.value, content, sharCodeId, type))
+    suspend fun commit(sharCodeId: Int, content: String, type: ShareCodeCommentType) =
+        codeService.commit(CommitOnCodeReq(AuthenticationModel.userToken.value, content, sharCodeId, type))
 
     suspend fun getCommentByCodeId(sharCodeId: Int) =
         codeService.getComments(AuthenticationModel.userToken.value, sharCodeId)
@@ -41,10 +42,11 @@ object CodeModel {
     suspend fun setCodeCommentVisibilityType(
         shareId: Int,
         commentId: Int,
-        type: ShareCodeComment.Companion.ShareCodeCommentType
+        type: ShareCodeCommentType
     ) =
         codeService.setCodeCommentVisibilityType(
             AuthenticationModel.userToken.value,
-            shareId = shareId, commentId = commentId, type
+            shareId = shareId,
+            commentId = commentId, type
         )
 }

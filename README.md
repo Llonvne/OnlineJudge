@@ -6,7 +6,7 @@
 ## Modules
 
 ### go-judger-api
-a **kotlin-multiplatform** **API** module define judge api and platform independecy operation,shared by all services.
+a **kotlin-multiplatform** **API** module define judge api and platform independence operation,shared by all services.
 
 ### go-judger
 

@@ -1,7 +1,6 @@
 package cn.llonvne.entity.problem.share
 
 import cn.llonvne.entity.DescriptionGetter
-import cn.llonvne.entity.problem.share.CodeVisibilityType.*
 import kotlinx.serialization.Serializable
 
 @Serializable

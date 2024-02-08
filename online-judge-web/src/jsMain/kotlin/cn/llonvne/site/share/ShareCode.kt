@@ -2,13 +2,11 @@ package cn.llonvne.site.share
 
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.NotFoundAble
-import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.notFound
-import cn.llonvne.entity.problem.share.Code
-import cn.llonvne.entity.problem.share.Code.CodeType.*
+import cn.llonvne.entity.problem.share.Code.CodeType.Playground
+import cn.llonvne.entity.problem.share.Code.CodeType.Share
 import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.site.JudgeResultDisplay
-import cn.llonvne.site.codeNotfound
 import io.kvision.core.Container
 import io.kvision.html.Div
 import io.kvision.html.div

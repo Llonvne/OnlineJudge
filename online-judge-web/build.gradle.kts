@@ -103,6 +103,8 @@ kotlin {
                 implementation("org.springframework.boot:spring-boot-devtools")
                 implementation("org.springframework.boot:spring-boot-starter-webflux")
                 implementation("org.springframework.boot:spring-boot-starter-security")
+                implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+                implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
                 implementation("org.komapper:komapper-spring-boot-starter-r2dbc:$komapperVersion")
                 runtimeOnly("org.postgresql:postgresql")

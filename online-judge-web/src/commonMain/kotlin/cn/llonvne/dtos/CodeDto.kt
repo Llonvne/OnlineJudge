@@ -1,9 +1,9 @@
 package cn.llonvne.dtos
 
-import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import kotlinx.serialization.Serializable
 
 @Serializable
