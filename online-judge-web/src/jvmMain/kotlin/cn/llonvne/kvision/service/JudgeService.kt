@@ -11,6 +11,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,18 +20,30 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class JudgeService(
-    private val languageDispatcher: LanguageDispatcher =
-        LanguageDispatcher.get(
-            LanguageFactory.get("http://localhost:8081/", httpClient = HttpClient(OkHttp) {
-                install(ContentNegotiation) {
-                    json(Json {})
-                }
-            })
-        )
+    env: Environment,
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    private val judgeUrl: String = env.getProperty("oj.url") ?: throw RuntimeException("无法获得 oj.url "),
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    private val languageDispatcher: LanguageDispatcher = default(judgeUrl)
 ) : IJudgeService {
+
     override suspend fun judge(languages: SupportLanguages, stdin: String, code: String): Output {
         return languageDispatcher.dispatch(languages) {
             judge(code, stdin)
+        }
+    }
+
+    companion object {
+        fun default(judgeUrl: String): LanguageDispatcher {
+            return LanguageDispatcher.get(
+                LanguageFactory.get(
+                    judgeUrl,
+                    httpClient = HttpClient(OkHttp) {
+                        install(ContentNegotiation) {
+                            json(Json)
+                        }
+                    })
+            )
         }
     }
 }

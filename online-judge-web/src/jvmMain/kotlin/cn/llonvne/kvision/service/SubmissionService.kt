@@ -14,6 +14,9 @@ import cn.llonvne.gojudge.api.fromId
 import cn.llonvne.gojudge.api.spec.runtime.GoJudgeFile
 import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.api.task.Output.Companion.formatOnSuccess
+import cn.llonvne.gojudge.api.task.Output.Companion.memoryRepr
+import cn.llonvne.gojudge.api.task.Output.Companion.runTimeRepr
+import cn.llonvne.gojudge.api.task.Output.Failure
 import cn.llonvne.gojudge.api.task.Output.Failure.CompileResultIsNull
 import cn.llonvne.gojudge.api.task.Output.Failure.TargetFileNotExist
 import cn.llonvne.gojudge.api.task.Output.Success
@@ -25,8 +28,10 @@ import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissio
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
+import cn.llonvne.kvision.service.ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.RedisAuthenticationService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -45,16 +50,16 @@ actual class SubmissionService(
     private val problemRepository: ProblemRepository,
     private val authenticationUserRepository: AuthenticationUserRepository,
     private val judgeService: JudgeService,
-    private val codeRepository: CodeRepository
+    private val codeRepository: CodeRepository,
+    private val authentication: RedisAuthenticationService
 ) : ISubmissionService {
 
     private val json = Json
 
     override suspend fun list(req: ListSubmissionReq): List<SubmissionListDto> {
-
         return submissionRepository.list()
-            .mapNotNull {
-                when (val result = it.toSubmissionListDto()) {
+            .mapNotNull { submission ->
+                when (val result = submission.aslistDto()) {
                     is SuccessfulGetById -> result.submissionListDto
                     else -> null
                 }
@@ -65,7 +70,7 @@ actual class SubmissionService(
         val submission =
             submissionRepository.getById(id) ?: return SubmissionNotFound
 
-        return submission.toSubmissionListDto()
+        return submission.aslistDto()
     }
 
     override suspend fun getViewCode(id: Int): ViewCodeGetByIdResp {
@@ -76,7 +81,7 @@ actual class SubmissionService(
         }
 
         val problem =
-            problemRepository.getById(submission.problemId ?: return ProblemNotFound) ?: return ProblemNotFound
+            problemRepository.getById(submission.problemId) ?: return ProblemNotFound
 
         val code = codeRepository.get(
             submission.codeId
@@ -96,49 +101,45 @@ actual class SubmissionService(
         )
     }
 
-    private suspend fun Submission.toSubmissionListDto(): SubmissionGetByIdResp {
+    private suspend fun Submission.aslistDto(): SubmissionGetByIdResp {
         val result: Result<Output> = kotlin.runCatching {
             Json.decodeFromString(judgeResult)
         }
 
-        val problem = problemRepository.getById(problemId ?: return ProblemNotFound) ?: return ProblemNotFound
-        val languageId = codeRepository.getCodeLanguageId(this.codeId)
-        return SuccessfulGetById(
-            SubmissionListDto(
-                language = languageRepository.getByIdOrNull(languageId) ?: return LanguageNotFound,
-                user = AuthenticationUserDto(
-                    authenticationUserRepository.getByIdOrNull(authenticationUserId)?.username
-                        ?: return UserNotFound,
-                ),
-                problemId = problemId,
-                problemName = problem.problemName,
-                submissionId = this.submissionId ?: return SubmissionNotFound,
-                status = this.status,
-                runTime = result.getOrNull().format("-") {
-                    formatOnSuccess("-") {
-                        it.runResult.runTime.toString()
-                    }
-                },
-                runMemory = result.getOrNull().format("-") {
-                    formatOnSuccess("-") {
-                        it.runResult.memory.toString()
-                    }
-                },
-                codeLength = codeRepository.getCodeLength(codeId)?.toLong() ?: return CodeNotFound,
-                submitTime = this.createdAt ?: LocalDateTime.now()
+        val problem = problemRepository.getById(problemId) ?: return ProblemNotFound
+
+        return problem.onIdNotNull(ProblemNotFound) { problemId, problem ->
+            val languageId = codeRepository.getCodeLanguageId(codeId)
+            SuccessfulGetById(
+                SubmissionListDto(
+                    language = languageRepository.getByIdOrNull(languageId) ?: return@onIdNotNull LanguageNotFound,
+                    user = AuthenticationUserDto(
+                        authenticationUserRepository.getByIdOrNull(authenticationUserId)?.username
+                            ?: return@onIdNotNull UserNotFound,
+                    ),
+                    problemId = problemId,
+                    problemName = problem.problemName,
+                    submissionId = this.submissionId ?: return@onIdNotNull SubmissionNotFound,
+                    status = this.status,
+                    runTime = result.getOrNull().runTimeRepr,
+                    runMemory = result.getOrNull().memoryRepr,
+                    codeLength = codeRepository.getCodeLength(codeId)?.toLong() ?: return@onIdNotNull CodeNotFound,
+                    submitTime = this.createdAt ?: LocalDateTime.now()
+                )
             )
-        )
+        }
     }
 
     override suspend fun getSupportLanguageId(
         authenticationToken: AuthenticationToken?,
         problemId: Int
     ): GetSupportLanguageByProblemIdResp {
+
         if (!problemRepository.isIdExist(problemId)) {
             return ProblemNotFound
         }
 
-        return GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage(
+        return SuccessfulGetSupportLanguage(
             problemRepository.getSupportLanguage(problemId)
         )
     }
@@ -148,15 +149,12 @@ actual class SubmissionService(
         createSubmissionReq: CreateSubmissionReq
     ): CreateSubmissionResp {
 
-        if (authenticationToken == null) {
-            return PermissionDenied
-        }
-
         val language = SupportLanguages.fromId(createSubmissionReq.languageId) ?: return LanguageNotFound
+        val user = authentication.validate(authenticationToken) { requireLogin() } ?: return PermissionDenied
 
         val code = codeRepository.save(
             Code(
-                authenticationUserId = authenticationToken.authenticationUserId,
+                authenticationUserId = user.id,
                 code = createSubmissionReq.rawCode,
                 languageId = createSubmissionReq.languageId,
                 visibilityType = Private,
@@ -184,7 +182,10 @@ actual class SubmissionService(
             }
 
             Private -> {
-                if (authenticationToken?.authenticationUserId != codeOwnerId) {
+                val user = authentication.validate(authenticationToken) {
+                    requireLogin()
+                } ?: return PermissionDenied
+                if (user.id != codeOwnerId) {
                     return PermissionDenied
                 }
             }
@@ -208,7 +209,7 @@ actual class SubmissionService(
         }.onSuccess { output ->
             return SuccessGetOutput(
                 when (output) {
-                    is Output.Failure.CompileError -> {
+                    is Failure.CompileError -> {
                         FailureOutput(
                             CompileError(output.compileResult.files?.get("stderr").toString()),
                             language
@@ -222,7 +223,7 @@ actual class SubmissionService(
                         )
                     }
 
-                    is Output.Failure.RunResultIsNull -> FailureOutput(
+                    is Failure.RunResultIsNull -> FailureOutput(
                         RunResultIsNull,
                         language
                     )
@@ -248,11 +249,9 @@ actual class SubmissionService(
         authenticationToken: AuthenticationToken?,
         last: Int
     ): GetLastNPlaygroundSubmissionResp {
-        if (authenticationToken == null) {
-            return PermissionDenied
-        }
+        val user = authentication.getAuthenticationUser(authenticationToken) ?: return PermissionDenied
         return submissionRepository.getByAuthenticationUserID(
-            authenticationToken.authenticationUserId,
+            user.id,
             Code.CodeType.Playground,
             last
         ).map { sub ->

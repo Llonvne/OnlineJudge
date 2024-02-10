@@ -4,10 +4,10 @@ import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.kvision.service.IAuthenticationService
-import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.IncorrectUsernameOrPassword
-import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.SuccessfulLogin
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.*
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
+import cn.llonvne.security.RedisAuthenticationService
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service
 class AuthenticationUserRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
     private val passwordEncoder: PasswordEncoder,
+    private val redisAuthenticationService: RedisAuthenticationService
 ) {
 
     private val userMeta = Meta.authenticationUser
@@ -39,9 +40,9 @@ class AuthenticationUserRepository(
             }.singleOrNull()
         }
         return@passwordEncoder if (user == null) {
-            IAuthenticationService.LoginResult.UserDoNotExist
+            UserDoNotExist
         } else if (matches(rawPassword, user.encryptedPassword)) {
-            SuccessfulLogin(AuthenticationToken.of(username, username, user.id))
+            SuccessfulLogin(redisAuthenticationService.login(user), user.username)
         } else {
             IncorrectUsernameOrPassword
         }

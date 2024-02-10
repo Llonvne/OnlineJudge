@@ -8,3 +8,5 @@ spring:
     url: r2dbc:postgresql://localhost:5432/online_judge
     name: admin
     password: admin
+oj:
+  url: http://localhost:8081/

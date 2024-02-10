@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.entity.def.problem.fromCreateReq
 import cn.llonvne.database.repository.AuthorRepository
 import cn.llonvne.database.repository.ProblemRepository
+import cn.llonvne.database.repository.SubmissionRepository
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.Problem
 import cn.llonvne.entity.types.ProblemStatus
@@ -19,12 +20,13 @@ import org.springframework.transaction.annotation.Transactional
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class ProblemService(
     private val authorRepository: AuthorRepository,
-    private val problemRepository: ProblemRepository
+    private val problemRepository: ProblemRepository,
+    private val submissionRepository: SubmissionRepository
 ) :
     IProblemService {
 
     override suspend fun list(authenticationToken: AuthenticationToken?): List<ProblemListDto> {
-        return problemRepository.list().mapNotNull { it.toProblemListDto(authenticationToken) }
+        return problemRepository.list().mapNotNull { it.listDto(authenticationToken) }
     }
 
     override suspend fun create(
@@ -61,26 +63,18 @@ actual class ProblemService(
     override suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto> {
         return problemRepository.search(text)
             .mapNotNull {
-                it.toProblemListDto(token)
+                it.listDto(token)
             }
     }
 
-    private suspend fun Problem.toProblemListDto(token: AuthenticationToken?): ProblemListDto? {
-        return if (token == null) {
+    private suspend fun Problem.listDto(token: AuthenticationToken?): ProblemListDto? {
+        return onIdNotNull(null) { id, problem ->
             ProblemListDto(
-                this,
-                this.problemId ?: return null,
+                problem,
+                id,
                 authorRepository.getByIdOrThrow(authorId),
-                ProblemStatus.NotLogin,
-                problemRepository.getProblemTags(problemId)
-            )
-        } else {
-            ProblemListDto(
-                this,
-                this.problemId ?: return null,
-                authorRepository.getByIdOrThrow(authorId),
-                ProblemStatus.NotBegin,
-                problemRepository.getProblemTags(problemId)
+                submissionRepository.getUserProblemStatus(token, id),
+                problemRepository.getProblemTags(id)
             )
         }
     }

@@ -1,6 +1,9 @@
 package cn.llonvne.compoent.layout
 
+import cn.llonvne.AppScope
 import cn.llonvne.constants.Frontend
+import cn.llonvne.kvision.service.IAuthenticationService
+import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.site.loginPanel
 import io.kvision.core.Container
@@ -8,7 +11,9 @@ import io.kvision.dropdown.dropDown
 import io.kvision.html.div
 import io.kvision.navbar.*
 import io.kvision.routing.Routing
+import io.kvision.state.ObservableValue
 import io.kvision.state.bind
+import kotlinx.coroutines.launch
 
 private fun Navbar.showNavigator(routing: Routing) {
     nav {
@@ -42,7 +47,6 @@ private fun Navbar.showNavigator(routing: Routing) {
 }
 
 fun Container.header(routing: Routing) {
-
     div { }.bind(AuthenticationModel.userToken) { token ->
         navbar("OnlineJudge", type = NavbarType.STICKYTOP) {
             showNavigator(routing)
@@ -61,9 +65,16 @@ fun Container.header(routing: Routing) {
                     }
                 }
             } else {
-                nav(rightAlign = true) {
+
+                val loginInfo = ObservableValue<Login?>(null)
+
+                AppScope.launch {
+                    loginInfo.value = AuthenticationModel.info()
+                }
+
+                nav(rightAlign = true).bind(loginInfo) { info ->
                     dropDown(
-                        token.username,
+                        info?.username.toString(),
                         listOf("我的主页" to "#/me", "Forms" to "#!/forms"),
                         icon = "fas fa-star",
                         forNavbar = true
@@ -71,7 +82,6 @@ fun Container.header(routing: Routing) {
                     navLink("登出") {
                         onClick {
                             AuthenticationModel.logout()
-                            this@nav.dispose()
                         }
                     }
                 }

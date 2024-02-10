@@ -24,7 +24,15 @@ data class Problem(
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 ) {
-    companion object
+    suspend fun <R> onIdNotNull(
+        onNull: R,
+        action: suspend (id: Int, problem: Problem) -> R,
+    ): R {
+        if (problemId != null) {
+            return action(problemId, this)
+        }
+        return onNull
+    }
 }
 
 

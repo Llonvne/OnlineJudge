@@ -24,7 +24,7 @@ interface VisibilityChanger {
             Messager.toastError("你需要先验证你的身份才能更改代码可见性")
             return false
         }
-        if (token.authenticationUserId != codeDto.shareUserId) {
+        if (token.id != codeDto.shareUserId) {
             Messager.toastError("只有代码所有者才能更改代码可见性")
             return false
         }

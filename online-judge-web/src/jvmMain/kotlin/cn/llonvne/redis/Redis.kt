@@ -1,6 +1,8 @@
 package cn.llonvne.redis
 
 import io.lettuce.core.RedisClient
+import io.lettuce.core.api.async.RedisAsyncCommands
+import io.lettuce.core.api.async.multi
 import kotlinx.coroutines.future.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -11,6 +13,8 @@ interface Redis {
     suspend fun getString(key: String): String?
 
     suspend fun set(key: String, value: String): String
+
+    suspend fun clear(key: String)
 }
 
 @OptIn(ExperimentalTypeInference::class)
@@ -31,13 +35,23 @@ internal suspend inline fun <reified T> Redis.set(key: String, value: T): String
 
 @Component
 private class RedisImpl : Redis {
-    private val redisClient = RedisClient.create("redis://localhost:6379").connect().async()
+    private val redisClient: RedisAsyncCommands<String, String> =
+        RedisClient.create("redis://localhost:6379").connect().async()
 
-    override suspend fun getString(key: String): String? {
-        return redisClient.get(key).await()
+    private suspend fun <R> onRedis(block: suspend RedisAsyncCommands<String, String>.() -> R): R {
+        return block(redisClient)
     }
 
-    override suspend fun set(key: String, value: String): String {
-        return redisClient.set(key, value).await()
+    override suspend fun getString(key: String) = onRedis {
+        get(key).await()
+    }
+
+    override suspend fun set(key: String, value: String) = onRedis {
+        set(key, value).await()
+    }
+
+    override suspend fun clear(key: String) = onRedis {
+        del(key).await()
+        Unit
     }
 }

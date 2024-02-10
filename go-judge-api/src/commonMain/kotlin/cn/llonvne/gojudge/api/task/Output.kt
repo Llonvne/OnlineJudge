@@ -40,5 +40,22 @@ sealed interface Output {
                 else -> notSuccess
             }
         }
+
+        val Output?.runTimeRepr: String
+            get() {
+                return format("-") {
+                    formatOnSuccess("-") {
+                        it.runResult.runTime.toString()
+                    }
+                }
+            }
+        val Output?.memoryRepr: String
+            get() {
+               return format("-") {
+                    formatOnSuccess("-") {
+                        it.runResult.memory.toString()
+                    }
+                }
+            }
     }
 }

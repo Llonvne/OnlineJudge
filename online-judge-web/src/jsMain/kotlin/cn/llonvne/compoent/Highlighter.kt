@@ -12,7 +12,7 @@ fun Container.codeHighlighter(code: String, init: Div.() -> Unit = {}) = div {
 
         }
     }.addAfterInsertHook {
-        js("hljs.highlightAll()")
+        js("hljs.highlightAll()") as Unit
     }
 
     init()

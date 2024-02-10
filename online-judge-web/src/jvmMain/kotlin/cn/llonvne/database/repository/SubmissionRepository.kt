@@ -4,6 +4,10 @@ import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.problem.submission
 import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.share.Code
+import cn.llonvne.entity.types.ProblemStatus
+import cn.llonvne.security.AuthenticationToken
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.query.singleOrNull
@@ -60,5 +64,10 @@ class SubmissionRepository(
                 }
             }.limit(limit)
         }
+    }
+
+    fun getUserProblemStatus(token: AuthenticationToken?, problemId: Int): ProblemStatus {
+        // TODO
+        return ProblemStatus.NotBegin
     }
 }

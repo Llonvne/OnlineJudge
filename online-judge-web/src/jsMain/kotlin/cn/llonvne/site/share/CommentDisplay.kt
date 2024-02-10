@@ -1,5 +1,6 @@
 package cn.llonvne.site.share
 
+import cn.llonvne.App
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
@@ -67,13 +68,15 @@ private open class PublicShareCodeCommentDisplay(
 ) : CommentDisplay {
 
     open fun getDeleteComponent(root: Container, comment: CreateCommentDto) {
-        if (comment.committerUsername == AuthenticationModel.userToken.value?.username || AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
-            root.badge(BadgeColor.Red) {
-                +"删除"
-                onClick {
-                    deletePanel(
-                        listOf(comment.commentId),
-                    )
+        AppScope.launch {
+            if (comment.committerUsername == AuthenticationModel.info()?.username || AuthenticationModel.info()?.id == code.shareUserId) {
+                root.badge(BadgeColor.Red) {
+                    +"删除"
+                    onClick {
+                        deletePanel(
+                            listOf(comment.commentId),
+                        )
+                    }
                 }
             }
         }
@@ -84,8 +87,10 @@ private open class PublicShareCodeCommentDisplay(
             +comment.getVisibilityDecr()
 
             onClick {
-                if (AuthenticationModel.userToken.value?.authenticationUserId == code.shareUserId) {
-                    CodeCommentVisibilityTypeChanger(code).change(comment.commentId)
+                AppScope.launch {
+                    if (AuthenticationModel.info()?.id == code.shareUserId) {
+                        CodeCommentVisibilityTypeChanger(code).change(comment.commentId)
+                    }
                 }
             }
         }

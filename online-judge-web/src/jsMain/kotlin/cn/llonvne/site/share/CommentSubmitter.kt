@@ -6,6 +6,8 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Private
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Public
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.CodeModel
@@ -48,7 +50,10 @@ private class ProtectedCommentSubmitter(
 
 
         return super.getCommentVisibilityOptions().filter {
-            if (code.shareUserId != AuthenticationModel.userToken.value?.authenticationUserId) {
+            if (AuthenticationModel.userToken.value?.id == null) {
+                return@filter false
+            }
+            if (code.shareUserId != AuthenticationModel.userToken.value?.id) {
                 it.first != PUBLIC_CODE
             } else {
                 return@filter true
@@ -129,7 +134,7 @@ private open class PublicCommentSubmitter(
 
                         AppScope.launch {
 
-                            val username = AuthenticationModel.userToken.value?.username ?: return@launch
+                            val username = AuthenticationModel.info()?.username ?: return@launch
 
                             if (shareCommentComponent.getComments().filter {
                                     it.committerUsername == username
@@ -144,8 +149,8 @@ private open class PublicCommentSubmitter(
                             }
 
                             val type = when (data.type) {
-                                PUBLIC_CODE -> ShareCodeComment.Companion.ShareCodeCommentType.Public
-                                PRIVATE_CODE -> ShareCodeComment.Companion.ShareCodeCommentType.Private
+                                PUBLIC_CODE -> Public
+                                PRIVATE_CODE -> Private
                                 else -> return@launch Messager.toastInfo("无效的可见性选择")
                             }
 

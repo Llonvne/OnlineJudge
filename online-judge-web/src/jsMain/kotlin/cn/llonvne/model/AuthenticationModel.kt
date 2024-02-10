@@ -1,6 +1,9 @@
 package cn.llonvne.model
 
+import cn.llonvne.AppScope
 import cn.llonvne.kvision.service.IAuthenticationService
+import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*
+import cn.llonvne.kvision.service.IAuthenticationService.GetLogoutResp.Logout
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResult
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.SuccessfulLogin
 import cn.llonvne.message.Messager
@@ -8,6 +11,7 @@ import cn.llonvne.security.AuthenticationToken
 import io.kvision.remote.getService
 import io.kvision.state.ObservableValue
 import kotlinx.browser.localStorage
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -38,8 +42,15 @@ object AuthenticationModel {
     }
 
     fun logout() {
-        clear()
-        userToken.value = null
+        AppScope.launch {
+            when (authenticationService.logout(userToken.value)) {
+                Logout -> {
+                    Messager.toastInfo("登出成功")
+                }
+            }
+            clear()
+            userToken.value = null
+        }
     }
 
     private const val authenticationKey = "authentication-key"
@@ -59,11 +70,23 @@ object AuthenticationModel {
         val tokenStr = localStorage.getItem(authenticationKey)
         if (tokenStr != null) {
             userToken.value = Json.decodeFromString<AuthenticationToken?>(tokenStr)
-                .also {
-                    if (it != null) {
-                        Messager.toastInfo("欢迎回来，${it.username}")
-                    }
+
+            AppScope.launch {
+                val info = info()
+                if (info == null) {
+                    userToken.value = null
+                } else {
+                    Messager.toastInfo("欢迎回来，${info.username}")
                 }
+            }
+        }
+    }
+
+    suspend fun info(): Login? {
+        return when (val resp = authenticationService.getLoginInfo(this.userToken.value)) {
+            is Login -> resp
+            LoginExpired -> null
+            NotLogin -> null
         }
     }
 }

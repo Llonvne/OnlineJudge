@@ -17,7 +17,8 @@ internal interface LanguageRouterKtorfitInternalApi {
     @FormUrlEncoded
     suspend fun judge(
         @Path language: String,
-        @Field("code") code: String, @Field("stdin") stdin: String,
+        @Field("code") code: String,
+        @Field("stdin") stdin: String,
     ): Output
 }
 
