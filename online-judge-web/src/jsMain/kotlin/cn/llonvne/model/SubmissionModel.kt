@@ -33,9 +33,8 @@ object SubmissionModel {
         )
     }
 
-    suspend fun getJudgeResultByCodeID(codeId: Int) = submissionService.getOutputByCodeId(
-        AuthenticationModel.userToken.value, codeId
-    )
+    suspend fun getJudgeResultByCodeID(codeId: Int) =
+        submissionService.getOutputByCodeId(AuthenticationModel.userToken.value, codeId)
 
     suspend fun getLastNPlaygroundSubmission(lastN: Int = 5) =
         submissionService.getLastNPlaygroundSubmission(

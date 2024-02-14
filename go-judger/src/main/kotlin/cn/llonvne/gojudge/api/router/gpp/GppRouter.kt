@@ -2,6 +2,7 @@ package cn.llonvne.gojudge.api.router.gpp
 
 import cn.llonvne.gojudge.api.router.LanguageRouter
 import cn.llonvne.gojudge.api.task.CodeInput
+import cn.llonvne.gojudge.api.task.gpp.CppVersion
 import cn.llonvne.gojudge.api.task.gpp.gppCompileTask
 import cn.llonvne.gojudge.docker.JudgeContext
 import cn.llonvne.gojudge.judgeClient
@@ -10,10 +11,11 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
-context(JudgeContext)
-internal fun gpp() = object : LanguageRouter {
 
-    val gppCompileTask = gppCompileTask()
+context(JudgeContext)
+internal fun gpp(cppVersion: CppVersion) = object : LanguageRouter {
+
+    val gppCompileTask = gppCompileTask(cppVersion)
 
     context(PipelineContext<Unit, ApplicationCall>)
     override suspend fun version() {

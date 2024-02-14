@@ -2,12 +2,18 @@ package cn.llonvne.gojudge.api.task.python
 
 import arrow.core.Option
 import arrow.core.some
+import cn.llonvne.gojudge.api.Task
 import cn.llonvne.gojudge.api.spec.runtime.*
 import cn.llonvne.gojudge.api.task.AbstractTask
 import cn.llonvne.gojudge.api.task.CodeInput
+import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.internal.cmd
 
-private class PythonCompileTask : AbstractTask<CodeInput>() {
+fun python3CompileTask(): Task<CodeInput, Output> = PythonCompileTask()
+
+private class PythonCompileTask(
+    private val pyCmd: String = "python3"
+) : AbstractTask<CodeInput>() {
     /**
      * 源代码拓展名
      * 返回 None 时将没有后缀
@@ -37,9 +43,13 @@ private class PythonCompileTask : AbstractTask<CodeInput>() {
         }
     }
 
+    override fun transformCompileStatus(compileStatus: Status, compileResult: Result): Status {
+        return Status.Accepted
+    }
+
     override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
         return cmd {
-            args = listOf("python3.11", runFilename.name)
+            args = listOf(pyCmd, runFilename.name)
             env = useUsrBinEnv
             files = useStdOutErrForFiles(input.stdin)
             copyIn = useFileIdCopyIn(fileId = runFileId, newName = runFilename.asString())

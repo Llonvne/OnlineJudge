@@ -2,7 +2,6 @@ package cn.llonvne.redis
 
 import io.lettuce.core.RedisClient
 import io.lettuce.core.api.async.RedisAsyncCommands
-import io.lettuce.core.api.async.multi
 import kotlinx.coroutines.future.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

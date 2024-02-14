@@ -1,8 +1,6 @@
 package cn.llonvne.site
 
 import cn.llonvne.AppScope
-import cn.llonvne.kvision.service.IAuthenticationService
-import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
 import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container

@@ -10,7 +10,7 @@ private data class AuthorDef(
     val authorName: Nothing,
     val introduction: Nothing,
 
-    val authenticationUserId: kotlin.Int? = null,
+    val authenticationUserId: Int? = null,
 
     //--- 数据库信息区 ---//
     @KomapperVersion

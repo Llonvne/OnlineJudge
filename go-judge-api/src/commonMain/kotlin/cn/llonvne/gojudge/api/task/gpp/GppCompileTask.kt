@@ -10,9 +10,9 @@ import cn.llonvne.gojudge.api.task.CodeInput
 import cn.llonvne.gojudge.api.task.Output
 import cn.llonvne.gojudge.internal.cmd
 
-fun gppCompileTask(): Task<CodeInput, Output> = GppCompileTask()
+fun gppCompileTask(cppVersion: CppVersion): Task<CodeInput, Output> = GppCompileTask(cppVersion)
 
-private class GppCompileTask : AbstractTask<CodeInput>() {
+private class GppCompileTask(private val cppVersion: CppVersion) : AbstractTask<CodeInput>() {
     override val sourceCodeExtension: Option<String>
         get() = "cpp".some()
     override val compiledFileExtension: Option<String>
@@ -20,7 +20,7 @@ private class GppCompileTask : AbstractTask<CodeInput>() {
 
     override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
         return cmd {
-            args = buildGppCompileCommand(filenames)
+            args = buildGppCompileCommand(filenames, cppVersion = cppVersion)
             env = useUsrBinEnv
             files = useStdOutErrForFiles()
             copyIn = useMemoryCodeCopyIn(filenames.source.asString(), input.code)
@@ -31,7 +31,7 @@ private class GppCompileTask : AbstractTask<CodeInput>() {
 
     override fun getRunCmd(
         input: CodeInput,
-        compileResult: cn.llonvne.gojudge.api.spec.runtime.Result,
+        compileResult: Result,
         runFilename: Filename,
         runFileId: String
     ): Cmd {

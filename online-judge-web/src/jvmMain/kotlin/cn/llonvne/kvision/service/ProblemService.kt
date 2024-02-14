@@ -6,7 +6,6 @@ import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.database.repository.SubmissionRepository
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.Problem
-import cn.llonvne.entity.types.ProblemStatus
 import cn.llonvne.kvision.service.exception.ProblemIdDoNotExistAfterCreation
 import cn.llonvne.security.AuthenticationToken
 import org.springframework.beans.factory.config.ConfigurableBeanFactory

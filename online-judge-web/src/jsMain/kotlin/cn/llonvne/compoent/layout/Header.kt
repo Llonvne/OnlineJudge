@@ -2,8 +2,8 @@ package cn.llonvne.compoent.layout
 
 import cn.llonvne.AppScope
 import cn.llonvne.constants.Frontend
-import cn.llonvne.kvision.service.IAuthenticationService
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
+import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.site.loginPanel
 import io.kvision.core.Container
@@ -73,6 +73,7 @@ fun Container.header(routing: Routing) {
                 }
 
                 nav(rightAlign = true).bind(loginInfo) { info ->
+
                     dropDown(
                         info?.username.toString(),
                         listOf("我的主页" to "#/me", "Forms" to "#!/forms"),
@@ -81,7 +82,7 @@ fun Container.header(routing: Routing) {
                     )
                     navLink("登出") {
                         onClick {
-                            AuthenticationModel.logout()
+                            Messager.toastInfo(AuthenticationModel.logout().toString())
                         }
                     }
                 }

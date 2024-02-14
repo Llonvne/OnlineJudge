@@ -6,6 +6,7 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.*
+import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
@@ -14,6 +15,8 @@ import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.html.*
+import io.kvision.state.ObservableValue
+import io.kvision.state.bind
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -58,20 +61,20 @@ private class PlaygroundJudgeResultDisplay(
 
     override fun load(root: Container) {
 
-        val result = AppScope.async {
-            SubmissionModel.getJudgeResultByCodeID(codeId)
+        val result = ObservableValue<GetOutputByCodeIdResp?>(null)
+        AppScope.launch {
+            result.value = SubmissionModel.getJudgeResultByCodeID(codeId)
         }
-        root.div {
-            AppScope.launch {
-                result.await().let { resp ->
-                    when (resp) {
-                        LanguageNotFound -> errorHandler.handleLanguageNotFound(this@div, codeId)
-                        CodeNotFound -> errorHandler.handleCodeNotFound(this@div, codeId)
-                        JudgeResultParseError -> errorHandler.handleJudgeResultParseError(this@div, codeId)
-                        PermissionDenied -> Messager.toastInfo("请登入来查看对应评测结果")
-                        ISubmissionService.SubmissionNotFound -> errorHandler.handleSubmissionNotFound(this@div, codeId)
-                        is SuccessGetOutput -> display(this@div, resp.outputDto)
-                    }
+
+        root.div {}.bind(result) { result ->
+            result?.let { resp ->
+                when (resp) {
+                    LanguageNotFound -> errorHandler.handleLanguageNotFound(this, codeId)
+                    CodeNotFound -> errorHandler.handleCodeNotFound(this, codeId)
+                    JudgeResultParseError -> errorHandler.handleJudgeResultParseError(this, codeId)
+                    PermissionDenied -> Messager.toastInfo("请登入来查看对应评测结果")
+                    SubmissionNotFound -> errorHandler.handleSubmissionNotFound(this, codeId)
+                    is SuccessGetOutput -> display(this, resp.outputDto)
                 }
             }
         }

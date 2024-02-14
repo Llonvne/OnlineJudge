@@ -5,7 +5,6 @@ import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.kvision.service.IAuthenticationService
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.*
-import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import cn.llonvne.security.RedisAuthenticationService
 import org.komapper.core.dsl.Meta

@@ -5,7 +5,6 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
-import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Private
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Public
 import cn.llonvne.message.Messager

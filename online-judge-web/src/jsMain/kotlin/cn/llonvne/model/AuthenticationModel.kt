@@ -48,27 +48,27 @@ object AuthenticationModel {
                     Messager.toastInfo("登出成功")
                 }
             }
-            clear()
-            userToken.value = null
         }
+        userToken.value = null
+        clear()
+        restore()
     }
 
-    private const val authenticationKey = "authentication-key"
+    private const val key = "authentication-key"
 
     private fun save() {
         localStorage.setItem(
-            authenticationKey,
-            Json.encodeToString(userToken.value)
+            key, Json.encodeToString(userToken.value)
         )
     }
 
     private fun clear() {
-        localStorage.removeItem(authenticationKey)
+        localStorage.setItem(key, "")
     }
 
     private fun restore() {
-        val tokenStr = localStorage.getItem(authenticationKey)
-        if (tokenStr != null) {
+        val tokenStr = localStorage.getItem(key)
+        if (tokenStr != null && tokenStr != "") {
             userToken.value = Json.decodeFromString<AuthenticationToken?>(tokenStr)
 
             AppScope.launch {

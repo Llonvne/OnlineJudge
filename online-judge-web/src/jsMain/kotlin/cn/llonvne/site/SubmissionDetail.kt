@@ -5,7 +5,6 @@ import cn.llonvne.compoent.*
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.kvision.service.CodeNotFound
-import cn.llonvne.kvision.service.ISubmissionService
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById
 import cn.llonvne.kvision.service.LanguageNotFound
@@ -20,7 +19,7 @@ import io.kvision.state.bind
 import kotlinx.coroutines.launch
 
 fun Container.submissionDetail(routing: Routing, submissionId: Int) {
-    val submissionObservableValue = ObservableValue<ISubmissionService.ViewCodeGetByIdResp?>(null)
+    val submissionObservableValue = ObservableValue<ViewCodeGetByIdResp?>(null)
 
     val alert = div {}
     add(alert)
@@ -78,7 +77,7 @@ fun Container.showStatus(submission: ViewCodeDto) {
     code(submission.rawCode)
 }
 
-fun Container.codeNotfound(type: ISubmissionService.ViewCodeGetByIdResp, id: Int) {
+fun Container.codeNotfound(type: ViewCodeGetByIdResp, id: Int) {
     notFound(object : NotFoundAble {
         override val header: String
             get() = "代码走丢啦"

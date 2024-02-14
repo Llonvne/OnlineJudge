@@ -9,6 +9,7 @@ import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeCommentType.*
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ICodeService
+import cn.llonvne.kvision.service.ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits
 import cn.llonvne.message.Messager
 import cn.llonvne.model.CodeModel
 import io.kvision.core.Container
@@ -121,7 +122,7 @@ private open class PublicShareCommentComponent(
                     false
                 }
 
-                is ICodeService.GetCommitsOnCodeResp.SuccessfulGetCommits -> {
+                is SuccessfulGetCommits -> {
                     Messager.toastInfo(commentsResp.commits.toString())
                     comments.clear()
                     comments.addAll(commentsResp.commits)
@@ -138,14 +139,13 @@ private open class PublicShareCommentComponent(
 
     override fun loadComments(root: Container) {
         AppScope.launch {
-            if (refreshComments().await()) {
-                loadUI(
-                    root,
-                    CommentSubmitter.public(shareId, this@PublicShareCommentComponent),
-                    CommentDisplay.public(code, this@PublicShareCommentComponent)
-                )
-            }
+            refreshComments().await()
         }
+        loadUI(
+            root,
+            CommentSubmitter.public(shareId, this@PublicShareCommentComponent),
+            CommentDisplay.public(code, this@PublicShareCommentComponent)
+        )
     }
 
     override fun getComments(): ObservableListWrapper<CreateCommentDto> {

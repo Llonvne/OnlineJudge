@@ -24,7 +24,7 @@ interface IProblemService {
         fun isOk() = this is Ok
 
         @Serializable
-        data class Ok(val problemId: kotlin.Int) : CreateProblemResp
+        data class Ok(val problemId: Int) : CreateProblemResp
 
         @Serializable
         data class AuthorIdNotExist(val authorId: Int) : CreateProblemResp

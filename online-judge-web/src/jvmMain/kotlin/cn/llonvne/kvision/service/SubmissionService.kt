@@ -13,20 +13,19 @@ import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.gojudge.api.fromId
 import cn.llonvne.gojudge.api.spec.runtime.GoJudgeFile
 import cn.llonvne.gojudge.api.task.Output
-import cn.llonvne.gojudge.api.task.Output.Companion.formatOnSuccess
 import cn.llonvne.gojudge.api.task.Output.Companion.memoryRepr
 import cn.llonvne.gojudge.api.task.Output.Companion.runTimeRepr
 import cn.llonvne.gojudge.api.task.Output.Failure
 import cn.llonvne.gojudge.api.task.Output.Failure.CompileResultIsNull
 import cn.llonvne.gojudge.api.task.Output.Failure.TargetFileNotExist
 import cn.llonvne.gojudge.api.task.Output.Success
-import cn.llonvne.gojudge.api.task.format
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.PlaygroundSubmissionDto
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
@@ -35,6 +34,8 @@ import cn.llonvne.security.RedisAuthenticationService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -173,7 +174,6 @@ actual class SubmissionService(
         authenticationToken: AuthenticationToken?,
         codeId: Int
     ): GetOutputByCodeIdResp {
-
         val visibilityType = codeRepository.getCodeVisibilityType(codeId) ?: return CodeNotFound
         val codeOwnerId = codeRepository.getCodeOwnerId(codeId) ?: return CodeNotFound
 
@@ -233,7 +233,7 @@ actual class SubmissionService(
                         language
                     )
 
-                    is Success -> GetOutputByCodeIdResp.OutputDto.SuccessOutput(
+                    is Success -> SuccessOutput(
                         stdin = output.runRequest.cmd.first().files?.filterIsInstance<GoJudgeFile.MemoryFile>()
                             ?.first()?.content.toString(),
                         stdout = output.runResult.files?.get("stdout").toString(),
@@ -242,7 +242,7 @@ actual class SubmissionService(
                 }
             )
         }
-        TODO()
+        error("这不应该发生")
     }
 
     override suspend fun getLastNPlaygroundSubmission(

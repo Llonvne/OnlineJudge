@@ -8,6 +8,8 @@ import cn.llonvne.gojudge.api.spec.runtime.Cmd
 import cn.llonvne.gojudge.api.spec.runtime.RequestType
 import cn.llonvne.gojudge.api.spec.runtime.Result
 import cn.llonvne.gojudge.api.spec.runtime.Status
+import cn.llonvne.gojudge.api.task.Output.Failure.CompileError
+import cn.llonvne.gojudge.api.task.Output.Failure.CompileResultIsNull
 import cn.llonvne.gojudge.internal.GoJudgeClient
 import cn.llonvne.gojudge.internal.request
 import cn.llonvne.gojudge.internal.run
@@ -198,12 +200,12 @@ internal abstract class AbstractTask<I : Input> : Task<I, Output> {
         emit(FlowOutputStatus.BeforeCompile(compileRequest))
 
         val compileResult = service.run(compileRequest).getOrNull(0)
-            ?: return@flow emit(FlowOutputStatus.Output(Output.Failure.CompileResultIsNull(compileRequest)))
+            ?: return@flow emit(FlowOutputStatus.Output(CompileResultIsNull(compileRequest)))
 
         emit(FlowOutputStatus.CompileSuccess(compileResult))
 
         if (transformCompileStatus(compileResult.status, compileResult) != expectCompileStatus()) {
-            return@flow emit(FlowOutputStatus.Output(Output.Failure.CompileError(compileRequest, compileResult)))
+            return@flow emit(FlowOutputStatus.Output(CompileError(compileRequest, compileResult)))
         }
 
         val fileId = compileResult.fileIds?.get(filenames.compiled.asString()) ?: return@flow emit(
@@ -254,7 +256,7 @@ internal abstract class AbstractTask<I : Input> : Task<I, Output> {
         hookOnBeforeCompile(compileRequest)
 
         val compileResult = service.run(compileRequest).getOrNull(0) ?: when (val result =
-            transformCompileResultNull(compileRequest, Output.Failure.CompileResultIsNull(compileRequest))) {
+            transformCompileResultNull(compileRequest, CompileResultIsNull(compileRequest))) {
             is HookError.Error -> return result.output
             is HookError.Resume -> result.result
         }
@@ -262,7 +264,7 @@ internal abstract class AbstractTask<I : Input> : Task<I, Output> {
         hookOnCompileResult(compileResult)
 
         if (transformCompileStatus(compileResult.status, compileResult) != expectCompileStatus()) {
-            return Output.Failure.CompileError(compileRequest, compileResult)
+            return CompileError(compileRequest, compileResult)
         }
 
         val fileId =
