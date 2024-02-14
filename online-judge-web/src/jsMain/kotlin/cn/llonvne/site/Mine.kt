@@ -1,33 +1,22 @@
 package cn.llonvne.site
 
-import cn.llonvne.AppScope
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
 import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container
-import io.kvision.html.div
-import io.kvision.html.h1
-import io.kvision.state.ObservableValue
-import io.kvision.state.bind
-import kotlinx.coroutines.launch
 
 fun Container.mine() {
-    div().bind(AuthenticationModel.userToken) { token ->
-        if (token == null) {
-            h1 {
-                +"您还未登入"
-            }
-        } else {
+    observableOf<Login?>(null) {
+        setUpdater {
+            AuthenticationModel.info()
+        }
 
-            val info = ObservableValue<Login?>(null)
-            AppScope.launch {
-                info.value = AuthenticationModel.info()
+        sync {
+            if (it == null) {
+                +"你还未登入"
+            } else {
+                +it.username
             }
-            div().bind(info) {
-                if (it != null) {
-                    +it.username
-                }
-            }
-
         }
     }
 }

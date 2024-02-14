@@ -38,8 +38,11 @@ private fun Navbar.showNavigator(routing: Routing) {
             }
         }
         dropDown(
-            "Favourites",
-            listOf("HTML" to "#!/basic", "Forms" to "#!/forms"),
+            "队伍",
+            listOf(
+                "创建" to "#/team/create",
+                "Forms" to "#!/forms"
+            ),
             icon = "fas fa-star",
             forNavbar = true
         )

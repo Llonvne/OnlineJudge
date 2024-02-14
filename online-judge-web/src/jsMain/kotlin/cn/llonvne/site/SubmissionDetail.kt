@@ -2,6 +2,7 @@ package cn.llonvne.site
 
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.*
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.kvision.service.CodeNotFound
@@ -19,49 +20,43 @@ import io.kvision.state.bind
 import kotlinx.coroutines.launch
 
 fun Container.submissionDetail(routing: Routing, submissionId: Int) {
-    val submissionObservableValue = ObservableValue<ViewCodeGetByIdResp?>(null)
 
     val alert = div {}
     add(alert)
 
-    AppScope.launch {
-        val result = runCatching {
+    observableOf<ViewCodeGetByIdResp?>(null) {
+        setUpdater {
             SubmissionModel.codeGetById(submissionId)
-        }.onFailure {
-            alert.alert(AlertType.Danger) {
-                h4 { +"请检查你的网络设置" }
-            }
         }
-        submissionObservableValue.value = result.getOrNull()
-    }
 
-    div().bind(submissionObservableValue) { submission ->
-        if (submission == null) {
-            loading()
-        } else {
-            when (submission) {
-                LanguageNotFound -> {
-                    codeNotfound(submission, submissionId)
-                }
+        div().bind(this) { submission ->
+            if (submission == null) {
+                loading()
+            } else {
+                when (submission) {
+                    LanguageNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
 
-                ProblemNotFound -> {
-                    codeNotfound(submission, submissionId)
-                }
+                    ProblemNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
 
-                SubmissionNotFound -> {
-                    codeNotfound(submission, submissionId)
-                }
+                    SubmissionNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
 
-                UserNotFound -> {
-                    codeNotfound(submission, submissionId)
-                }
+                    UserNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
 
-                is SuccessfulGetById -> {
-                    showStatus(submission.viewCodeDto)
-                }
+                    is SuccessfulGetById -> {
+                        showStatus(submission.viewCodeDto)
+                    }
 
-                CodeNotFound -> {
-                    codeNotfound(submission, submissionId)
+                    CodeNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
                 }
             }
         }

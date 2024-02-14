@@ -11,6 +11,7 @@ import cn.llonvne.entity.problem.share.Code.CodeType.Share
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ICodeService
+import cn.llonvne.kvision.service.ICodeService.GetCodeResp.SuccessfulGetCode
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.RoutingModule
@@ -30,17 +31,8 @@ interface ShareCodeHighlighter {
     val title: Div
     val shareName: String
 
-    fun load(root: Container, resp: ICodeService.GetCodeResp) {
-        AppScope.launch {
-            when (resp) {
-                CodeNotFound -> onNotFound()
-                is ICodeService.GetCodeResp.SuccessfulGetCode -> {
-                    root.onSuccess(resp)
-                }
-
-                PermissionDenied -> onNotFound()
-            }
-        }
+    fun load(root: Container, codeDto: CodeDto) {
+        root.onSuccess(codeDto)
     }
 
     fun Container.slotOnTitle() {}
@@ -58,43 +50,43 @@ interface ShareCodeHighlighter {
     }
 
     private fun Container.onSuccess(
-        resp: ICodeService.GetCodeResp.SuccessfulGetCode,
+        codeDto: CodeDto,
     ) {
         title.alert(AlertType.Light) {
             h3 {
-                +"${resp.codeDto.shareUsername} 的${shareName}"
+                +"${codeDto.shareUsername} 的${shareName}"
             }
 
             slotOnTitle()
 
             badge(BadgeColor.Green) {
-                +resp.codeDto.visibilityType.reprName
+                +codeDto.visibilityType.reprName
 
                 onClick {
-                    CodeVisibilityChanger(resp.codeDto).change()
+                    CodeVisibilityChanger(codeDto).change()
                 }
             }
             badge(BadgeColor.Blue) {
-                +"语言 ${resp.codeDto.language.toString()}"
+                +"语言 ${codeDto.language.toString()}"
             }
             badge(BadgeColor.Red) {
-                +resp.codeDto.commentType.decr
+                +codeDto.commentType.decr
 
                 onClick {
-                    CommentVisibilityChanger(resp.codeDto).change()
+                    CommentVisibilityChanger(codeDto).change()
                 }
             }
 
-            if (resp.codeDto.hashLink != null) {
+            if (codeDto.hashLink != null) {
                 badge(BadgeColor.Golden) {
                     +"分享链接"
                     onClick {
-                        RoutingModule.routing.navigate("/share/${resp.codeDto.hashLink}")
+                        RoutingModule.routing.navigate("/share/${codeDto.hashLink}")
                     }
                 }
             }
         }
-        codeHighlighter(code = resp.codeDto.rawCode)
+        codeHighlighter(code = codeDto.rawCode)
     }
 
     companion object {

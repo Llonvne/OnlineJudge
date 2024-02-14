@@ -13,6 +13,7 @@ import cn.llonvne.message.Messager
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
+import io.kvision.core.onClick
 import io.kvision.form.formPanel
 import io.kvision.form.select.TomSelect
 import io.kvision.form.text.TextArea
@@ -96,15 +97,18 @@ fun Container.playground() {
 
                         is SuccessGetLastNPlaygroundSubmission -> {
 
+                            Messager.toastInfo(resp.subs.toString())
 
-                            val sortByTime = resp.subs.sortedByDescending {
+                            val sortByTime = resp.subs.sortedBy {
                                 it.submitTime
                             }
 
                             val first = sortByTime.firstOrNull()
 
                             if (first != null) {
-                                JudgeResultDisplay.playground(first.codeId, lastRun)
+                                lastRun.onClick {
+                                    RoutingModule.routing.navigate("/share/${first.codeId}")
+                                }
                             }
 
                             sortByTime.forEach { dto ->

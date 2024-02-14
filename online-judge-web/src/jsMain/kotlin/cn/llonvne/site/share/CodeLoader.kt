@@ -2,16 +2,17 @@ package cn.llonvne.site.share
 
 import cn.llonvne.AppScope
 import cn.llonvne.kvision.service.ICodeService
+import cn.llonvne.kvision.service.ICodeService.GetCodeResp
 import cn.llonvne.model.CodeModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 
 interface CodeLoader<ID> {
-    fun load(id: ID): Deferred<ICodeService.GetCodeResp>
+    fun load(id: ID): Deferred<GetCodeResp>
 
     companion object {
         fun id() = object : CodeLoader<Int> {
-            override fun load(id: Int): Deferred<ICodeService.GetCodeResp> {
+            override fun load(id: Int): Deferred<GetCodeResp> {
                 return AppScope.async {
                     CodeModel.getCode(id)
                 }
@@ -19,7 +20,7 @@ interface CodeLoader<ID> {
         }
 
         fun hash() = object : CodeLoader<String> {
-            override fun load(id: String): Deferred<ICodeService.GetCodeResp> {
+            override fun load(id: String): Deferred<GetCodeResp> {
                 return AppScope.async {
                     CodeModel.getCode(id)
                 }

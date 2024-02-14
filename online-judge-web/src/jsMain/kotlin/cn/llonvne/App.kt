@@ -10,6 +10,7 @@ import cn.llonvne.site.share.share
 import io.kvision.*
 import io.kvision.html.div
 import io.kvision.navigo.Match
+import io.kvision.navigo.Navigo
 import io.kvision.routing.Routing
 import io.kvision.theme.ThemeManager
 import kotlinx.browser.window
@@ -26,11 +27,11 @@ class App : Application() {
 
     private fun failTo404(routing: Routing, block: () -> Unit) = kotlin.runCatching { block() }.onFailure {
         routing.navigate("/404")
+        throw it
     }
 
     override fun start() {
         val routing = RoutingModule.routing
-
         routing.on(Frontend.Index.uri, {
             layout(routing) {
                 index(routing)
@@ -77,15 +78,14 @@ class App : Application() {
                     val id = it.data[0] as String
 
                     val intId = id.toIntOrNull()
-                    val alert = div { }
 
                     if (intId != null) {
                         share(
-                            intId, CodeLoader.id(), alert
+                            intId, CodeLoader.id()
                         )
                     } else {
                         share(
-                            id, CodeLoader.hash(), alert
+                            id, CodeLoader.hash()
                         )
                     }
                 }
@@ -96,8 +96,24 @@ class App : Application() {
                     +"解析失败了"
                 }
             }
-        }).resolve()
+        }).notFound(
+            {
+                routing.navigate("/404")
+            },
+        )
+            .injectTeam(routing)
+            .resolve()
         Unit
+    }
+
+    private fun Navigo.injectTeam(routing: Routing): Navigo {
+        return on("/team/create", {
+            failTo404(routing) {
+                layout(routing) {
+                    teamCreate(this, routing)
+                }
+            }
+        })
     }
 }
 

@@ -3,6 +3,7 @@ package cn.llonvne.site.share
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.NotFoundAble
 import cn.llonvne.compoent.notFound
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.share.Code.CodeType.Playground
 import cn.llonvne.entity.problem.share.Code.CodeType.Share
 import cn.llonvne.kvision.service.ICodeService
@@ -28,59 +29,57 @@ interface ShareID {
 fun Container.share(
     hash: String,
     codeLoader: CodeLoader<String>,
-    alert: Div
 ) {
     val load = codeLoader.load(hash)
-    shareInternal(load, ShareID.HashId(hash), alert)
+    shareInternal(load, ShareID.HashId(hash))
 }
 
 fun Container.share(
     shareId: Int,
     codeLoader: CodeLoader<Int>,
-    alert: Div
 ) {
     val load = codeLoader.load(shareId)
-    shareInternal(load, ShareID.IntId(shareId), alert)
+    shareInternal(load, ShareID.IntId(shareId))
 }
 
-private fun Container.shareInternal(load: Deferred<GetCodeResp>, id: ShareID, alert: Div) {
+private fun Container.shareInternal(load: Deferred<GetCodeResp>, id: ShareID) {
 
-    val getCdeRespValue = ObservableValue<GetCodeResp?>(null)
+    observableOf<GetCodeResp?>(null) {
+        setUpdater { load.await() }
+        sync { resp ->
+            resp?.onSuccess { (code) ->
+                val highlighter = ShareCodeHighlighter.loadHighlighter(code, id, div { })
 
-    AppScope.launch {
-        val resp = load.await()
-        getCdeRespValue.value = resp
-    }
+                div(className = "row") {
+                    div(className = "col") {
+                        add(Div {
+                            highlighter.load(this, code)
+                        })
 
-    div { }.bind(getCdeRespValue) { resp ->
-        resp?.onSuccess { (code) ->
-            val highlighter = ShareCodeHighlighter.loadHighlighter(code, shareId = id, alert = alert)
-
-            div(className = "row") {
-                div(className = "col-6") {
-                    highlighter.load(this, resp)
-
-                    when (code.codeType) {
-                        Share -> {}
-                        Playground -> {
-                            JudgeResultDisplay.playground(code.codeId, this)
-                        }
+                        add(Div{
+                            when (code.codeType) {
+                                Share -> {}
+                                Playground -> {
+                                    JudgeResultDisplay.playground(code.codeId, this)
+                                }
+                            }
+                        })
+                    }
+                    div(className = "col") {
+                        val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code)
+                        shareCodeComment.loadComments(this)
                     }
                 }
-                div(className = "col") {
-                    val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code)
-                    shareCodeComment.loadComments(this@div)
-                }
+            }?.onFailure {
+                notFound(object : NotFoundAble {
+                    override val header: String
+                        get() = "未找到对应的代码分享/提交/训练场数据"
+                    override val notice: String
+                        get() = "有可能是该ID/Hash不存在，也可有可能是对方设置了权限"
+                    override val errorCode: String
+                        get() = "ShareNotFound-${id}"
+                })
             }
-        }?.onFailure {
-            notFound(object : NotFoundAble {
-                override val header: String
-                    get() = "未找到对应的代码分享/提交/训练场数据"
-                override val notice: String
-                    get() = "有可能是该ID/Hash不存在，也可有可能是对方设置了权限"
-                override val errorCode: String
-                    get() = "ShareNotFound-${id}"
-            })
         }
     }
 }

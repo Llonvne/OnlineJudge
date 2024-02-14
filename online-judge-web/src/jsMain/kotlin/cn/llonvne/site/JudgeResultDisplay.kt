@@ -4,6 +4,7 @@ import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.ISubmissionService.*
@@ -61,13 +62,10 @@ private class PlaygroundJudgeResultDisplay(
 
     override fun load(root: Container) {
 
-        val result = ObservableValue<GetOutputByCodeIdResp?>(null)
-        AppScope.launch {
-            result.value = SubmissionModel.getJudgeResultByCodeID(codeId)
-        }
+        observableOf<GetOutputByCodeIdResp?>(null) {
+            setUpdater { SubmissionModel.getJudgeResultByCodeID(codeId) }
 
-        root.div {}.bind(result) { result ->
-            result?.let { resp ->
+            root.syncNotNull { resp ->
                 when (resp) {
                     LanguageNotFound -> errorHandler.handleLanguageNotFound(this, codeId)
                     CodeNotFound -> errorHandler.handleCodeNotFound(this, codeId)
@@ -75,6 +73,7 @@ private class PlaygroundJudgeResultDisplay(
                     PermissionDenied -> Messager.toastInfo("请登入来查看对应评测结果")
                     SubmissionNotFound -> errorHandler.handleSubmissionNotFound(this, codeId)
                     is SuccessGetOutput -> display(this, resp.outputDto)
+                    null -> {}
                 }
             }
         }
