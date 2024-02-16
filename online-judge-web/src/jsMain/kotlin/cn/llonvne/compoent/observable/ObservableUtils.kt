@@ -1,6 +1,7 @@
 package cn.llonvne.compoent.observable
 
 import cn.llonvne.AppScope
+import cn.llonvne.model.Storage
 import io.kvision.core.Container
 import io.kvision.state.*
 import kotlinx.coroutines.CoroutineScope
@@ -20,10 +21,16 @@ data class ObservableDsl<V>(
         obv.value = value
     }
 
-    fun Container.sync(action: Container.(V?) -> Unit) {
+    fun <T : Container> T.sync(action: T.(V?) -> Unit): T {
         this.bind(this@ObservableDsl) {
             action(it)
         }
+        return this
+    }
+
+    fun <T : Container> sync(container: T, action: T.(V?) -> Unit): T {
+        container.sync(action)
+        return container
     }
 
     fun Container.syncNotNull(action: Container.(V) -> Unit) {

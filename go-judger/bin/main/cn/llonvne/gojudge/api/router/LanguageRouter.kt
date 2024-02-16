@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.api.router
 
+import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.gojudge.web.links.LinkTreeConfigurer
 import cn.llonvne.gojudge.web.links.get
 import cn.llonvne.gojudge.web.links.linkIn
@@ -12,6 +13,16 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.html.body
+
+context(Routing)
+internal fun LinkTreeConfigurer.install(supportLanguages: SupportLanguages, languageRouter: LanguageRouter) {
+    installLanguageRouter(
+        supportLanguages.name,
+        path = "/${supportLanguages.path}",
+        decr = supportLanguages.name + supportLanguages.languageVersion,
+        languageRouter
+    )
+}
 
 context(Routing)
 internal fun LinkTreeConfigurer.installLanguageRouter(
@@ -41,7 +52,7 @@ internal interface LanguageRouter {
     suspend fun judge(code: String, stdin: String)
 
     context(PipelineContext<Unit, ApplicationCall>)
-    suspend fun playground(languageName: String, judgePath: String){
+    suspend fun playground(languageName: String, judgePath: String) {
         call.respondHtml {
             body {
                 this.playground(languageName, judgePath)
