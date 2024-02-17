@@ -43,13 +43,13 @@ fun teamCreate(root: Container, routing: Routing) {
             div(className = "col-6") {
 
                 alert(AlertType.Light) {
-                    formPanel<CreateTeam> {
+                    val form = formPanel<CreateTeam> {
                         add(CreateTeam::teamName, Text {
-                            label = "你的组织的名字"
+                            label = "你的组织的名字，(请尽量与官方组织名称错开，否则您的名称可能会被收回)"
                         })
 
                         observableOf("") {
-                            add(CreateTeam::teamName, sync(Text()) {
+                            add(CreateTeam::shortName, sync(Text()) {
                                 label =
                                     "短名称,仅支持数字英文，最长不超过20个字符(你可以通过 /t/${it ?: "<短名称>"} 访问您的组织)"
                                 onChangeLaunch {

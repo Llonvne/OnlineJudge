@@ -2,6 +2,7 @@ package cn.llonvne.database.entity.def
 
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.exts.now
+import cn.llonvne.security.normalUserRole
 import kotlinx.datetime.LocalDateTime
 import org.springframework.security.crypto.password.PasswordEncoder
 
@@ -15,5 +16,6 @@ fun AuthenticationUser.Companion.createAtNow(
     username = username,
     encryptedPassword = encode(rawPassword),
     createdAt = LocalDateTime.now(),
-    updatedAt = LocalDateTime.now()
+    updatedAt = LocalDateTime.now(),
+    role = normalUserRole()
 )

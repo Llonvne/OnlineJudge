@@ -14,10 +14,10 @@ data class AuthenticationUser(
     val username: String,
     val encryptedPassword: String,
     val version: Int? = null,
+    val role: String,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 ) {
-    companion object
 }
 
 

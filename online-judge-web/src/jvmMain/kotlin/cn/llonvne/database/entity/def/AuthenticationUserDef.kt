@@ -10,6 +10,7 @@ private data class AuthenticationUserDef(
     val id: Nothing,
     val username: Nothing,
     val encryptedPassword: Nothing,
+    val role: Nothing,
     @KomapperVersion
     val version: Nothing,
     @KomapperCreatedAt

@@ -1,6 +1,7 @@
 package cn.llonvne.security
 
 import cn.llonvne.entity.AuthenticationUser
+import cn.llonvne.entity.role.Role
 import cn.llonvne.redis.Redis
 import cn.llonvne.redis.get
 import cn.llonvne.redis.set
@@ -56,14 +57,13 @@ class RedisAuthenticationService(
         private val validators = mutableListOf<Validator>()
 
         suspend fun requireLogin() {
-            validators.add(Validator {
+            addValidator {
                 isLogin(token)
-            })
+            }
         }
 
         suspend fun <R> requireUser(action: suspend (AuthenticationUser) -> R): R? {
             var ret: R? = null
-
             validators.add(Validator {
                 val isLogin = isLogin(token)
                 if (isLogin) {
@@ -73,6 +73,20 @@ class RedisAuthenticationService(
             })
             return ret
         }
+
+        private fun addValidator(validator: Validator) {
+            validators.add(validator)
+        }
+
+        suspend fun requireRole(vararg required: Role) {
+            requireUser {
+                check {
+                    provide(userRole = it.userRole)
+                    require(required.toList())
+                }
+            }
+        }
+
 
         internal suspend fun result(): Boolean {
             return validators.all { it.validate() }
