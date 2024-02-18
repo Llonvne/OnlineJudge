@@ -5,7 +5,8 @@ import cn.llonvne.entity.role.Role
 import cn.llonvne.redis.Redis
 import cn.llonvne.redis.get
 import cn.llonvne.redis.set
-import cn.llonvne.security.RedisAuthenticationService.Validator
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
@@ -15,6 +16,8 @@ class RedisAuthenticationService(
     private val redis: Redis,
     private val passwordEncoder: PasswordEncoder,
 ) {
+
+    val log: Logger = getLogger(this::class.java)
 
     private val AuthenticationUser.asRedisKey get() = "user-id-$id-" + UUID.randomUUID()
 
@@ -32,7 +35,6 @@ class RedisAuthenticationService(
     }
 
     suspend fun getAuthenticationUser(token: AuthenticationToken?): AuthenticationUser? {
-
         if (token == null) {
             return null
         }
@@ -51,10 +53,12 @@ class RedisAuthenticationService(
     }
 
     inner class UserValidatorDsl(
-        private val token: AuthenticationToken?
+        val token: AuthenticationToken?
     ) {
 
         private val validators = mutableListOf<Validator>()
+
+        val validateId = UUID.randomUUID().toString().substring(0..6)
 
         suspend fun requireLogin() {
             addValidator {
@@ -62,29 +66,22 @@ class RedisAuthenticationService(
             }
         }
 
-        suspend fun <R> requireUser(action: suspend (AuthenticationUser) -> R): R? {
-            var ret: R? = null
-            validators.add(Validator {
-                val isLogin = isLogin(token)
-                if (isLogin) {
-                    getAuthenticationUser(token)?.let { ret = action(it) }
-                }
-                isLogin
-            })
-            return ret
-        }
+        suspend inline fun <reified R : Role> UserValidatorDsl.check(required: R) {
+            addValidator {
 
-        private fun addValidator(validator: Validator) {
-            validators.add(validator)
-        }
 
-        suspend fun requireRole(vararg required: Role) {
-            requireUser {
-                check {
-                    provide(userRole = it.userRole)
-                    require(required.toList())
+                val user = getAuthenticationUser(token) ?: return@addValidator false
+
+                log.info("[$validateId] require $required for user ${user.id} provides ${user.userRole}")
+
+                user.check(required).also {
+                    log.info("[$validateId] check failed")
                 }
             }
+        }
+
+        fun addValidator(validator: Validator) {
+            validators.add(validator)
         }
 
 
@@ -97,7 +94,11 @@ class RedisAuthenticationService(
         authenticationToken: AuthenticationToken?,
         action: suspend UserValidatorDsl.() -> Unit
     ): AuthenticationUser? {
+
         val userValidatorDsl = UserValidatorDsl(authenticationToken)
+
+        log.info("[${userValidatorDsl.validateId}] validate for $authenticationToken")
+
         userValidatorDsl.action()
         return if (!userValidatorDsl.result()) {
             null

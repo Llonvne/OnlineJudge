@@ -1,6 +1,7 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.entity.group.GroupType
+import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -9,7 +10,9 @@ import kotlinx.serialization.Serializable
 interface ITeamService {
     @Serializable
     data class CreateTeamReq(
-        val id: Nothing,
+        val teamName: String,
+        val teamShortName: String,
+        val teamVisibility: GroupVisibility,
         val teamType: GroupType
     )
 

@@ -5,8 +5,13 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.group.GroupType
 import cn.llonvne.entity.group.GroupVisibility
+import cn.llonvne.kvision.service.ITeamService
+import cn.llonvne.kvision.service.TeamServiceManager
+import cn.llonvne.message.Messager
+import cn.llonvne.model.TeamModel
 import io.kvision.core.Container
 import io.kvision.core.onChangeLaunch
+import io.kvision.core.onClickLaunch
 import io.kvision.core.onInput
 import io.kvision.form.formPanel
 import io.kvision.form.select.TomSelect
@@ -71,6 +76,20 @@ fun teamCreate(root: Container, routing: Routing) {
                                 label = "小组类型（对于个人用户，请选择经典小组）"
                             )
                         )
+
+                        button("提交") {
+                            onClickLaunch {
+                                val createTeam = form.getData()
+                                TeamModel.create(
+                                    ITeamService.CreateTeamReq(
+                                        teamName = createTeam.teamName,
+                                        teamShortName = createTeam.shortName,
+                                        teamVisibility = GroupVisibility.entries[createTeam.visibilityStr.toInt()],
+                                        teamType = GroupType.entries[createTeam.typeStr.toInt()]
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }

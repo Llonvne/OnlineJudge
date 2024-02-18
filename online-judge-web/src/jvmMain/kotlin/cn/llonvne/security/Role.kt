@@ -1,75 +1,50 @@
+@file:UseContextualSerialization
+
 package cn.llonvne.security
 
+import kotlinx.serialization.UseContextualSerialization
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.Role
+import cn.llonvne.entity.role.TeamRole
+import cn.llonvne.security.RedisAuthenticationService.UserValidatorDsl
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.reflect.full.isSubclassOf
 
-private val json = Json
-
-fun normalUserRole() = json.encodeToString(UserRole.empty())
-
-interface RoleCheckDsl {
-    fun require(role: Role)
-
-    fun require(roles: List<Role>)
-
-    fun provide(role: Role)
-
-    fun provide(userRole: UserRole)
+private val json = Json {
+    encodeDefaults = true
 }
 
-private class RoleCheckDslImpl : RoleCheckDsl {
 
-    private val requiredRoles = mutableListOf<Role>()
+fun normalUserRole() = json.encodeToString(UserRole.default())
 
-    private val provideRoles = mutableListOf<Role>()
-
-    override fun require(role: Role) {
-        requiredRoles.add(role)
-    }
-
-    override fun require(roles: List<Role>) {
-        requiredRoles += roles
-    }
-
-    override fun provide(role: Role) {
-        provideRoles.add(role)
-    }
-
-    override fun provide(userRole: UserRole) {
-        provideRoles += userRole.roles
-    }
-
-    private fun check(role: Role): Boolean {
-        return provideRoles.any {
-//            role.given(it)
-            role::class.isSubclassOf(role::class)
-        }
-    }
-
-    fun result(): Boolean {
-        return requiredRoles.all { check(it) }
-    }
+inline fun <reified R : Role> List<Role>.check(required: R): Boolean {
+    return map { provide ->
+        required.check(provide)
+    }.contains(true)
 }
 
-fun check(action: RoleCheckDsl.() -> Unit): Boolean {
-    val roleCheckDsl = RoleCheckDslImpl()
-    roleCheckDsl.action()
-    return roleCheckDsl.result()
+inline fun <reified R : Role> AuthenticationUser.check(required: R): Boolean {
+    return userRole.roles.check(required)
 }
 
 @Serializable
 data class UserRole(val roles: List<Role> = listOf()) {
+
+
     companion object {
-        fun empty() = UserRole()
+        fun default() = UserRole(
+            TeamRole.default()
+        )
+    }
+
+    override fun toString(): String {
+        return roles.toString()
     }
 }
 
 val AuthenticationUser.userRole: UserRole
     get() = runCatching {
         json.decodeFromString<UserRole>(role)
-    }.getOrNull() ?: UserRole.empty()
+    }.getOrNull() ?: UserRole.default()

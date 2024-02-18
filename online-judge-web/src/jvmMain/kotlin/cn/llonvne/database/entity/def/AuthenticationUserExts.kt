@@ -19,3 +19,4 @@ fun AuthenticationUser.Companion.createAtNow(
     updatedAt = LocalDateTime.now(),
     role = normalUserRole()
 )
+

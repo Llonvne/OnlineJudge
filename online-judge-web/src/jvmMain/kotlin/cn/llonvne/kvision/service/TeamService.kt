@@ -6,6 +6,7 @@ import cn.llonvne.kvision.service.ITeamService.*
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
 import cn.llonvne.security.RedisAuthenticationService.UserValidatorDsl
+import cn.llonvne.security.check
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.context.annotation.Scope
@@ -25,14 +26,8 @@ actual class TeamService(
         createTeamReq: CreateTeamReq
     ): CreateTeamResp {
         val user = authentication.validate(authenticationToken) {
-            when (createTeamReq.teamType) {
-                // 任何人都可以创建经典小组,不做任何操作
-                Classic -> {}
-                College -> requireRole(CreateTeam)
-                Team -> requireRole(CreateTeam)
-            }
+            check(CreateTeam.require(createTeamReq.teamType))
         } ?: return PermissionDenied
-
         TODO()
     }
 }

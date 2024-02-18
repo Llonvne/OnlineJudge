@@ -1,5 +1,8 @@
 package cn.llonvne.entity.group
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class GroupType {
     Classic,
     College,
