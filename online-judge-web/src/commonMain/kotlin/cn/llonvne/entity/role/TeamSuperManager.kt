@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * 超级队伍管理员，拥有对一切队伍的管理权限
  */
 @Serializable
-sealed interface TeamSuperManager : TeamIdRole, CreateTeam {
+sealed interface TeamSuperManager : TeamIdRole, CreateGroup {
     override val teamId: Int
         get() = 0
 

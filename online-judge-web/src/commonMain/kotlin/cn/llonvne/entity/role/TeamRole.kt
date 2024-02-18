@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 @Serializable
 sealed interface TeamRole : Role {
     companion object {
-        fun default(): List<TeamRole> = listOf(CreateTeam.CreateTeamImpl())
+        fun default(): List<TeamRole> = listOf(CreateGroup.CreateTeamImpl())
         fun TeamRole.simpleName(cls: KClass<*>): String = withSimpleName(cls) { "" }
 
         fun withSimpleName(cls: KClass<*>, build: () -> String) = "<${cls.simpleName}-${build()}>"
@@ -22,16 +22,16 @@ sealed interface TeamRole : Role {
 }
 
 @Serializable
-sealed interface CreateTeam : TeamRole {
+sealed interface CreateGroup : TeamRole {
 
     val teamTypes: List<GroupType>
 
     @Serializable
     data class CreateTeamImpl(
         override val teamTypes: List<GroupType> = listOf(GroupType.Classic)
-    ) : CreateTeam {
+    ) : CreateGroup {
         override fun check(provide: Role): Boolean {
-            return if (provide is CreateTeam) {
+            return if (provide is CreateGroup) {
                 return provide.teamTypes.containsAll(teamTypes)
             } else {
                 false
@@ -39,14 +39,14 @@ sealed interface CreateTeam : TeamRole {
         }
 
         override fun toString(): String {
-            return TeamRole.withSimpleName(CreateTeam::class) {
+            return TeamRole.withSimpleName(CreateGroup::class) {
                 teamTypes.joinToString(",") { it.name }
             }
         }
     }
 
     companion object {
-        fun require(type: GroupType): CreateTeam {
+        fun require(type: GroupType): CreateGroup {
             return CreateTeamImpl(listOf(type))
         }
     }

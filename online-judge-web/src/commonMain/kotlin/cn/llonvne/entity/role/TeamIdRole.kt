@@ -1,6 +1,5 @@
 package cn.llonvne.entity.role
 
-import cn.llonvne.entity.group.GroupType
 import cn.llonvne.entity.role.TeamIdRole.Companion.simpleName
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
@@ -38,8 +37,6 @@ private inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Bool
     return false
 }
 
-
-
 @Serializable
 sealed interface DeleteTeam : TeamIdRole {
     @Serializable
@@ -74,12 +71,12 @@ sealed interface KickMember : TeamIdRole {
 }
 
 @Serializable
-sealed interface TeamManager : DeleteTeam, InviteMember, KickMember {
+sealed interface GroupManager : DeleteTeam, InviteMember, KickMember {
     @Serializable
-    data class TeamMangerImpl(override val teamId: Int) : TeamManager {
-        override fun check(provide: Role): Boolean = checkInternal<TeamManager>(provide)
+    data class GroupMangerImpl(override val teamId: Int) : GroupManager {
+        override fun check(provide: Role): Boolean = checkInternal<GroupManager>(provide)
         override fun toString(): String {
-            return simpleName(TeamManager::class)
+            return simpleName(GroupManager::class)
         }
     }
 }

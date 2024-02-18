@@ -5,7 +5,9 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.group.GroupType
 import cn.llonvne.entity.group.GroupVisibility
-import cn.llonvne.kvision.service.ITeamService
+import cn.llonvne.kvision.service.*
+import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
+import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
 import io.kvision.core.Container
 import io.kvision.core.onChangeLaunch
@@ -48,44 +50,58 @@ fun teamCreate(root: Container, routing: Routing) {
                 alert(AlertType.Light) {
                     val form = formPanel<CreateTeam> {
                         add(CreateTeam::teamName, Text {
-                            label = "你的组织的名字，(请尽量与官方组织名称错开，否则您的名称可能会被收回)"
-                        })
+                            label = "你的组织的名字"
+                        }, required = true)
 
                         observableOf("") {
-                            add(CreateTeam::shortName, sync(Text()) {
-                                label =
-                                    "短名称,仅支持数字英文，最长不超过20个字符(你可以通过 /t/${it ?: "<短名称>"} 访问您的组织)"
-                                onChangeLaunch {
-                                    setObv(this.value ?: "<短名称>")
-                                }
-                            })
+                            add(
+                                CreateTeam::shortName, sync(Text()) {
+                                    label =
+                                        "短名称,仅支持数字英文，最长不超过20个字符(你可以通过 /t/${it ?: "<短名称>"} 访问您的组织)"
+                                    onChangeLaunch {
+                                        setObv(this.value ?: "<短名称>")
+                                    }
+                                }, required = true
+                            )
                         }
 
                         add(
                             CreateTeam::visibilityStr, TomSelect(
                                 options = GroupVisibility.options,
                                 label = "小组可见性"
-                            )
+                            ), required = true
                         )
 
                         add(
                             CreateTeam::typeStr, TomSelect(
                                 options = GroupType.options,
                                 label = "小组类型（对于个人用户，请选择经典小组）"
-                            )
+                            ),
+                            required = true
                         )
 
                         button("提交") {
                             onClickLaunch {
+                                form.clearValidation()
+                                if (!form.validate()) {
+                                    return@onClickLaunch
+                                }
                                 val createTeam = form.getData()
-                                TeamModel.create(
-                                    ITeamService.CreateTeamReq(
-                                        teamName = createTeam.teamName,
-                                        teamShortName = createTeam.shortName,
+                                val resp = TeamModel.create(
+                                    IGroupService.CreateGroupReq(
+                                        groupName = createTeam.teamName,
+                                        groupShortName = createTeam.shortName,
                                         teamVisibility = GroupVisibility.entries[createTeam.visibilityStr.toInt()],
-                                        teamType = GroupType.entries[createTeam.typeStr.toInt()]
+                                        groupType = GroupType.entries[createTeam.typeStr.toInt()]
                                     )
                                 )
+                                when (resp) {
+                                    is ClientError -> Messager.toastInfo(resp.message)
+                                    is CreateGroupOk -> Messager.toastInfo("成功创建小组,小组ID为${resp.group.groupId}")
+                                    GroupShortNameUnavailable -> Messager.toastInfo("小组短名称已经在被占用")
+                                    PermissionDenied -> Messager.toastInfo("你没有创建改小组的权限，或者你还未登入")
+                                    is InternalError -> Messager.toastInfo(resp.reason)
+                                }
                             }
                         }
                     }

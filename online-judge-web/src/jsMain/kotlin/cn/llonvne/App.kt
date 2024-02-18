@@ -8,6 +8,7 @@ import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
 import cn.llonvne.site.share.share
 import io.kvision.*
+import io.kvision.html.div
 import io.kvision.navigo.Match
 import io.kvision.navigo.Navigo
 import io.kvision.routing.Routing
@@ -89,18 +90,18 @@ class App : Application() {
                     }
                 }
             }
-        }).on("/404", {
-            layout(routing) {
-                alert(AlertType.Danger) {
-                    +"解析失败了"
+        }).injectTeam(routing)
+            .on("/404", {
+                layout(routing) {
+                    alert(AlertType.Danger) {
+                        +"解析失败了"
+                    }
                 }
-            }
-        }).notFound(
-            {
-                routing.navigate("/404")
-            },
-        )
-            .injectTeam(routing)
+            }).notFound(
+                {
+                    routing.navigate("/404")
+                },
+            )
             .resolve()
         Unit
     }
@@ -110,6 +111,20 @@ class App : Application() {
             failTo404(routing) {
                 layout(routing) {
                     teamCreate(this, routing)
+                }
+            }
+        }).on(RegExp("^/team/(.*)"), { match: Match ->
+            failTo404(routing) {
+                layout(routing) {
+                    val id = match.data[0] as String
+                    val intId = id.toIntOrNull()
+                    if (intId != null) {
+                        showTeam(div { }, TeamId.IntTeamId(intId), routing)
+                    } else if (id.length == 36) {
+                        showTeam(div { }, TeamId.HashTeamId(id), routing)
+                    } else {
+                        showTeam(div { }, TeamId.ShortTeamName(id), routing)
+                    }
                 }
             }
         })

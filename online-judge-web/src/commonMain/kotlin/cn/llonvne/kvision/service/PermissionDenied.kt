@@ -8,4 +8,4 @@ data object PermissionDenied : IProblemService.CreateProblemResp,
     ICodeService.GetCodeResp, ICodeService.SetCodeCommentTypeResp,
     ICodeService.SetCodeCommentVisibilityTypeResp, ISubmissionService.CreateSubmissionResp,
     ISubmissionService.GetOutputByCodeIdResp, ISubmissionService.GetLastNPlaygroundSubmissionResp,
-    ITeamService.CreateTeamResp
+    IGroupService.CreateGroupResp

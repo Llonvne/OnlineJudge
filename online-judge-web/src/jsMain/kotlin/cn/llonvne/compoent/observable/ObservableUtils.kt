@@ -5,6 +5,7 @@ import io.kvision.core.Container
 import io.kvision.state.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.experimental.ExperimentalTypeInference
 
 data class ObservableDsl<V>(
     private val obv: ObservableValue<V?>,
@@ -49,7 +50,8 @@ data class ObservableDsl<V>(
         return obv.subscribe(observer)
     }
 }
-
+@OptIn(ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
 fun <V> observableOf(
     initialValue: V?,
     updater: suspend () -> V? = { null },

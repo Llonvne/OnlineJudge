@@ -14,7 +14,6 @@ private val json = Json {
     encodeDefaults = true
 }
 
-
 fun normalUserRole() = json.encodeToString(UserRole.default())
 
 inline fun <reified R : Role> List<Role>.check(required: R): Boolean {
@@ -40,9 +39,13 @@ data class UserRole(val roles: List<Role> = listOf()) {
     override fun toString(): String {
         return roles.toString()
     }
+
+    val asJson get() = json.encodeToString(this)
 }
 
 val AuthenticationUser.userRole: UserRole
-    get() = runCatching {
-        json.decodeFromString<UserRole>(role)
-    }.getOrNull() ?: UserRole.default()
+    get() = fromUserRoleString(role = role) ?: UserRole.default()
+
+fun fromUserRoleString(role: String): UserRole? = runCatching {
+    json.decodeFromString<UserRole>(role)
+}.getOrNull()

@@ -1,9 +1,5 @@
 package cn.llonvne
 
-import cn.llonvne.entity.group.GroupType
-import cn.llonvne.entity.role.CreateTeam
-import cn.llonvne.entity.role.TeamSuperManager
-import cn.llonvne.security.check
 import io.kvision.remote.getAllServiceManagers
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -23,11 +19,7 @@ class KVApplication {
 }
 
 fun main(args: Array<String>) {
-    listOf(TeamSuperManager.TeamSuperManagerImpl).check(CreateTeam.require(GroupType.Team)).also {
-        println(it)
-    }
-
-//    runApplication<KVApplication>(*args)
+    runApplication<KVApplication>(*args)
 }
 
 @Service

@@ -178,4 +178,5 @@ tasks {
 
 ksp {
     arg("komapper.enableEntityMetamodelListing", "true")
+    arg("komapper.enableEntityProjection", "true")
 }
