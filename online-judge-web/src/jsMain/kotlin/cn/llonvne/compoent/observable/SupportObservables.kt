@@ -1,7 +1,6 @@
 package cn.llonvne.compoent.observable
 
 import cn.llonvne.entity.problem.Language
-import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.kvision.service.ISubmissionService
 import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel

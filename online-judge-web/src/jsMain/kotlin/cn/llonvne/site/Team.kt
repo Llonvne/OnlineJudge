@@ -6,20 +6,18 @@ import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.group.GroupType
 import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.kvision.service.ITeamService
-import cn.llonvne.kvision.service.TeamServiceManager
-import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
 import io.kvision.core.Container
 import io.kvision.core.onChangeLaunch
 import io.kvision.core.onClickLaunch
-import io.kvision.core.onInput
 import io.kvision.form.formPanel
 import io.kvision.form.select.TomSelect
-import io.kvision.form.select.select
 import io.kvision.form.text.Text
-import io.kvision.html.*
+import io.kvision.html.button
+import io.kvision.html.div
+import io.kvision.html.h1
+import io.kvision.html.p
 import io.kvision.routing.Routing
-import io.kvision.state.bind
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,23 +1,20 @@
 package cn.llonvne.site
 
-import cn.llonvne.AppScope
-import cn.llonvne.compoent.AlertType
-import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.observable.observableListOf
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.core.onClick
-import io.kvision.html.*
+import io.kvision.html.div
+import io.kvision.html.link
+import io.kvision.html.span
 import io.kvision.routing.Routing
-import io.kvision.state.ObservableListWrapper
 import io.kvision.state.bind
 import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
 import io.kvision.tabulator.TabulatorOptions
 import io.kvision.tabulator.tabulator
 import io.kvision.utils.px
-import kotlinx.coroutines.launch
 import kotlinx.serialization.serializer
 
 

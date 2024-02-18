@@ -1,6 +1,6 @@
 package cn.llonvne
 
-import  cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.constants.Frontend
 import cn.llonvne.model.RoutingModule
@@ -8,7 +8,6 @@ import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
 import cn.llonvne.site.share.share
 import io.kvision.*
-import io.kvision.html.div
 import io.kvision.navigo.Match
 import io.kvision.navigo.Navigo
 import io.kvision.routing.Routing

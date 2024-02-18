@@ -1,7 +1,9 @@
 package cn.llonvne.site
 
-import cn.llonvne.AppScope
-import cn.llonvne.compoent.*
+import cn.llonvne.compoent.NotFoundAble
+import cn.llonvne.compoent.circleCheck
+import cn.llonvne.compoent.loading
+import cn.llonvne.compoent.notFound
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.SubmissionStatus
@@ -13,11 +15,8 @@ import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.html.code
 import io.kvision.html.div
-import io.kvision.html.h4
 import io.kvision.routing.Routing
-import io.kvision.state.ObservableValue
 import io.kvision.state.bind
-import kotlinx.coroutines.launch
 
 fun Container.submissionDetail(routing: Routing, submissionId: Int) {
 

@@ -1,22 +1,16 @@
 package cn.llonvne.site.share
 
-import cn.llonvne.AppScope
 import cn.llonvne.compoent.NotFoundAble
 import cn.llonvne.compoent.notFound
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.share.Code.CodeType.Playground
 import cn.llonvne.entity.problem.share.Code.CodeType.Share
-import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.kvision.service.ICodeService.GetCodeResp
-import cn.llonvne.message.Messager
 import cn.llonvne.site.JudgeResultDisplay
 import io.kvision.core.Container
 import io.kvision.html.Div
 import io.kvision.html.div
-import io.kvision.state.ObservableValue
-import io.kvision.state.bind
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 interface ShareID {

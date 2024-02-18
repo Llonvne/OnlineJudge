@@ -1,25 +1,24 @@
 package cn.llonvne.site
 
-import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.*
-import cn.llonvne.kvision.service.ISubmissionService.*
+import cn.llonvne.kvision.service.CodeNotFound
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
+import cn.llonvne.kvision.service.ISubmissionService.SubmissionNotFound
+import cn.llonvne.kvision.service.JudgeResultParseError
+import cn.llonvne.kvision.service.LanguageNotFound
+import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.html.*
-import io.kvision.state.ObservableValue
-import io.kvision.state.bind
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 
 interface JudgeResultDisplay {
 

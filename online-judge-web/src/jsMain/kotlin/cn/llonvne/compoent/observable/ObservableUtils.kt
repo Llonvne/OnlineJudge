@@ -1,7 +1,6 @@
 package cn.llonvne.compoent.observable
 
 import cn.llonvne.AppScope
-import cn.llonvne.model.Storage
 import io.kvision.core.Container
 import io.kvision.state.*
 import kotlinx.coroutines.CoroutineScope

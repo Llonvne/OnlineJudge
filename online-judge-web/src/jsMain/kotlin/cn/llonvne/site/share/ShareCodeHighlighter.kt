@@ -1,6 +1,5 @@
 package cn.llonvne.site.share
 
-import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
@@ -9,10 +8,6 @@ import cn.llonvne.dtos.CodeDto
 import cn.llonvne.entity.problem.share.Code.CodeType.Playground
 import cn.llonvne.entity.problem.share.Code.CodeType.Share
 import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.CodeNotFound
-import cn.llonvne.kvision.service.ICodeService
-import cn.llonvne.kvision.service.ICodeService.GetCodeResp.SuccessfulGetCode
-import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.share.visisbility.CodeVisibilityChanger
@@ -23,7 +18,6 @@ import io.kvision.html.Div
 import io.kvision.html.h3
 import io.kvision.html.h4
 import io.kvision.html.p
-import kotlinx.coroutines.launch
 
 interface ShareCodeHighlighter {
 

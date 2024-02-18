@@ -1,7 +1,6 @@
 package cn.llonvne.site.share
 
 import cn.llonvne.AppScope
-import cn.llonvne.kvision.service.ICodeService
 import cn.llonvne.kvision.service.ICodeService.GetCodeResp
 import cn.llonvne.model.CodeModel
 import kotlinx.coroutines.Deferred
