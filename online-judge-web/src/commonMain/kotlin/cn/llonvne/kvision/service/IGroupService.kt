@@ -8,16 +8,14 @@ import cn.llonvne.kvision.service.Validatable.Companion.on
 import cn.llonvne.kvision.service.Validatable.Companion.validate
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @KVService
 interface IGroupService {
     @Serializable
     data class CreateGroupReq(
-        val groupName: String,
-        val groupShortName: String,
-        val teamVisibility: GroupVisibility,
-        val groupType: GroupType
+        val groupName: String, val groupShortName: String, val teamVisibility: GroupVisibility, val groupType: GroupType
     ) : Validatable {
         override fun validate() = validate {
             on(groupName, "队伍名称必须在 6..100 之间") {
@@ -37,14 +35,20 @@ interface IGroupService {
     }
 
     suspend fun createTeam(
-        authenticationToken: AuthenticationToken,
-        createGroupReq: CreateGroupReq
+        authenticationToken: AuthenticationToken, createGroupReq: CreateGroupReq
     ): CreateGroupResp
 
     @Serializable
     sealed interface LoadGroupResp {
         @Serializable
-        data class GuestLoadGroup(val group: Group) : LoadGroupResp
+        data class GuestLoadGroup(
+            val groupName: String,
+            val groupShortName: String,
+            val visibility: GroupVisibility,
+            @SerialName("groupType")
+            val type: GroupType,
+            val ownerName: String
+        ) : LoadGroupResp
     }
 
     suspend fun load(authenticationToken: AuthenticationToken?, groupId: GroupId): LoadGroupResp

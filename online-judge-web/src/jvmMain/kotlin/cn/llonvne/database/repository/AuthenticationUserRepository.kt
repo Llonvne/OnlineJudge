@@ -79,4 +79,12 @@ class AuthenticationUserRepository(
             userMeta.id eq authenticationUserId
         }.singleOrNull()
     }
+
+    internal suspend fun matchRoleStr(str: String): List<AuthenticationUser> {
+        return db.runQuery {
+            QueryDsl.from(userMeta).where {
+                userMeta.role contains str
+            }
+        }
+    }
 }

@@ -15,6 +15,13 @@ enum class GroupType {
             Team -> "学校附属的小组结构，不拥有管理员（管理权由对应的学校拥有）"
         }
 
+    val shortChinese
+        get() = when (this) {
+            Classic -> "经典小组"
+            College -> "学校"
+            Team -> "小队"
+        }
+
     companion object {
         val options: List<Pair<String, String>> = entries.map {
             it.ordinal.toString() to it.chinese

@@ -1,13 +1,13 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.repository.GroupRepository
+import cn.llonvne.database.resolver.GroupIdResolver
+import cn.llonvne.database.resolver.GroupLoadResolver
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.CreateGroup
 import cn.llonvne.entity.role.GroupManager
 import cn.llonvne.getLogger
-import cn.llonvne.kvision.service.IGroupService.CreateGroupReq
-import cn.llonvne.kvision.service.IGroupService.CreateGroupResp
+import cn.llonvne.kvision.service.IGroupService.*
 import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
@@ -22,10 +22,11 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class GroupService(
-    val authentication: RedisAuthenticationService,
-    val groupRepository: GroupRepository,
-    val authenticationUserRepository: AuthenticationUserRepository,
-    val roleService: RoleService
+    private val authentication: RedisAuthenticationService,
+    private val groupRepository: GroupRepository,
+    private val roleService: RoleService,
+    private val groupIdResolver: GroupIdResolver,
+    private val groupLoadResolver: GroupLoadResolver
 ) : IGroupService {
 
     private val logger = getLogger()
@@ -60,11 +61,11 @@ actual class GroupService(
     override suspend fun load(
         authenticationToken: AuthenticationToken?,
         groupId: GroupId
-    ): IGroupService.LoadGroupResp = logger.track(authenticationToken, groupId) {
-        when (groupId) {
-            is GroupId.HashGroupId -> TODO()
-            is GroupId.IntGroupId -> TODO()
-            is GroupId.ShortGroupName -> TODO()
-        }
+    ): LoadGroupResp = logger.track(authenticationToken, groupId) {
+        val id = groupIdResolver.resolve(groupId) ?: return@track GroupIdNotFound(groupId)
+
+        val user = authentication.getAuthenticationUser(authenticationToken)
+
+        return@track groupLoadResolver.resolve(id, user)
     }
 }

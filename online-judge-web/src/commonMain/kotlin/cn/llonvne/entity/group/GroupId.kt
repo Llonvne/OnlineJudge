@@ -1,10 +1,28 @@
 package cn.llonvne.entity.group
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed interface GroupId {
-    data class IntGroupId(val id: Int) : GroupId
+    @Serializable
+    data class IntGroupId(val id: Int) : GroupId {
+        override fun toString(): String {
+            return "<id-$id>"
+        }
+    }
 
-    data class HashGroupId(val id: String) : GroupId
+    @Serializable
+    data class HashGroupId(val id: String) : GroupId {
+        override fun toString(): String {
+            return "<hash-$id>"
+        }
+    }
 
-    data class ShortGroupName(val shortName: String) : GroupId
+    @Serializable
+    data class ShortGroupName(val shortName: String) : GroupId{
+        override fun toString(): String {
+            return "short-$shortName"
+        }
+    }
 }
 

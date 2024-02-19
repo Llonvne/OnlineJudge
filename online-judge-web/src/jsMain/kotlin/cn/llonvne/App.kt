@@ -3,6 +3,7 @@ package cn.llonvne
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.constants.Frontend
+import cn.llonvne.entity.group.GroupId
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
@@ -113,17 +114,17 @@ class App : Application() {
                     teamCreate(this, routing)
                 }
             }
-        }).on(RegExp("^/team/(.*)"), { match: Match ->
+        }).on(RegExp("^team/(.*)"), { match: Match ->
             failTo404(routing) {
                 layout(routing) {
                     val id = match.data[0] as String
                     val intId = id.toIntOrNull()
                     if (intId != null) {
-                        showTeam(div { }, TeamId.IntTeamId(intId), routing)
+                        showGroup(div { }, GroupId.IntGroupId(intId), routing)
                     } else if (id.length == 36) {
-                        showTeam(div { }, TeamId.HashTeamId(id), routing)
+                        showGroup(div { }, GroupId.HashGroupId(id), routing)
                     } else {
-                        showTeam(div { }, TeamId.ShortTeamName(id), routing)
+                        showGroup(div { }, GroupId.ShortGroupName(id), routing)
                     }
                 }
             }

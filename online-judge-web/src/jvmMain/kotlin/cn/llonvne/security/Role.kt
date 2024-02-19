@@ -22,6 +22,9 @@ inline fun <reified R : Role> List<Role>.check(required: R): Boolean {
     }.contains(true)
 }
 
+val Role.asJson: String
+    get() = json.encodeToString(this)
+
 inline fun <reified R : Role> AuthenticationUser.check(required: R): Boolean {
     return userRole.roles.check(required)
 }

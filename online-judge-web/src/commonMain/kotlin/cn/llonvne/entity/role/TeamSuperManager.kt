@@ -14,7 +14,7 @@ sealed interface TeamSuperManager : TeamIdRole, CreateGroup {
     override val teamTypes: List<GroupType>
         get() = GroupType.entries.toList()
 
-    private data object TeamSuperManagerImpl : TeamSuperManager {
+    data object TeamSuperManagerImpl : TeamSuperManager {
         override fun check(provide: Role): Boolean {
             return provide is TeamSuperManager
         }

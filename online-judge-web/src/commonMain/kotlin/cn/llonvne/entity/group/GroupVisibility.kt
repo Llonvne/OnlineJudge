@@ -13,6 +13,12 @@ enum class GroupVisibility {
             Restrict -> "公开的小组，加入者需要通过Hash或者由管理员审批"
         }
 
+    val shortChinese get() = when(this){
+        Public -> "公开"
+        Private -> "私有"
+        Restrict -> "受限制的"
+    }
+
     companion object {
         val options: List<Pair<String, String>> = entries.map {
             it.ordinal.toString() to it.chinese

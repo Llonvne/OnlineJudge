@@ -64,7 +64,11 @@ fun Application.judging(judgeContext: JudgeContext) {
 
                 globalAuth {
                     rateLimit(RACE_LIMIT_JUDGE_NAME) {
-
+                        get {
+                            call.respondText {
+                                "HelloWorld"
+                            }
+                        }
                     }
                 }
             }

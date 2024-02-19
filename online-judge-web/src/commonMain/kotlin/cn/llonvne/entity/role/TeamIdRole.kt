@@ -38,6 +38,17 @@ private inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Bool
 }
 
 @Serializable
+sealed interface TeamMember : TeamIdRole {
+    @Serializable
+    data class TeamMemberImpl(override val teamId: Int) : TeamMember {
+        override fun check(provide: Role): Boolean = checkInternal<TeamMember>(provide)
+        override fun toString(): String {
+            return simpleName(TeamMember::class)
+        }
+    }
+}
+
+@Serializable
 sealed interface DeleteTeam : TeamIdRole {
     @Serializable
     data class DeleteTeamImpl(override val teamId: Int) : DeleteTeam {
