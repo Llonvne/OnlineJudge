@@ -23,7 +23,7 @@ class GroupRoleResolver(
             is InviteMemberImpl -> 0
             is KickMemberImpl -> 0
             is TeamMemberImpl -> 50
-            TeamSuperManager.TeamSuperManagerImpl -> 1000
+            is TeamSuperManager -> 1000
         }
     }
 

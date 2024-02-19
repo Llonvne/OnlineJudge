@@ -18,6 +18,8 @@ sealed interface TeamIdRole : Role {
         fun TeamIdRole.simpleName(cls: KClass<*>): String {
             return "<${cls.simpleName}-id-$teamId>"
         }
+        @Serializable
+        class TeamIdRoleForSearch(val teamId: Int)
 
         override fun superRole(): Role {
             return TeamSuperManager.get()

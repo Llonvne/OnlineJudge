@@ -32,7 +32,6 @@ inline fun <reified R : Role> AuthenticationUser.check(required: R): Boolean {
 @Serializable
 data class UserRole(val roles: List<Role> = listOf()) {
 
-
     companion object {
         fun default() = UserRole(
             TeamRole.default()

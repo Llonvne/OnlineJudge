@@ -8,6 +8,8 @@ import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
 import cn.llonvne.site.share.CodeLoader
 import cn.llonvne.site.share.share
+import cn.llonvne.site.team.show.showGroup
+import cn.llonvne.site.team.teamCreate
 import io.kvision.*
 import io.kvision.html.div
 import io.kvision.navigo.Match

@@ -1,12 +1,15 @@
 package cn.llonvne.database.resolver
 
 import cn.llonvne.database.repository.GroupRepository
+import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.Group
 import cn.llonvne.entity.group.GroupId.IntGroupId
 import cn.llonvne.entity.role.*
 import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
+import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
+import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup.GroupMemberDto
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,6 +26,15 @@ class GroupLoadResolver(
 
         suspend fun ownerName(): String {
             return groupIdToUserResolver.resolve(GroupManager.GroupMangerImpl(id)).firstOrNull()?.username ?: "<未找到>"
+        }
+
+        suspend fun membersOfGuest(): List<GroupMemberDto> {
+            return groupIdToUserResolver.fromGroupId(id).mapNotNull {
+                GroupMemberDto(
+                    username = it.username,
+                    role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null
+                )
+            }
         }
     }
 
@@ -50,19 +62,21 @@ class GroupLoadResolver(
                 is InviteMember.InviteMemberImpl -> loadAsGuest()
                 is KickMember.KickMemberImpl -> loadAsGuest()
                 is TeamMember.TeamMemberImpl -> loadAsMember()
-                TeamSuperManager.TeamSuperManagerImpl -> loadAsSuperManager()
+                is TeamSuperManager -> loadAsSuperManager()
             }
         }
     }
 
     context(GroupInfoAware)
     suspend fun loadAsGuest(): LoadGroupResp {
-        return LoadGroupResp.GuestLoadGroup(
+        return GuestLoadGroup(
             groupName = group.groupName,
             groupShortName = group.groupShortName,
             visibility = group.visibility,
             type = group.type,
-            ownerName = ownerName()
+            ownerName = ownerName(),
+            members = membersOfGuest(),
+            description = group.description
         )
     }
 

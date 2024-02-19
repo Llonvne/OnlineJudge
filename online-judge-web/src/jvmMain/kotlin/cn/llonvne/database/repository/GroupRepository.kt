@@ -7,10 +7,12 @@ import cn.llonvne.kvision.service.IGroupService.CreateGroupReq
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
+import org.komapper.core.dsl.operator.lower
 import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 class GroupRepository(
@@ -28,7 +30,8 @@ class GroupRepository(
                     groupShortName = createGroupReq.groupShortName,
                     groupHash = groupHashService.hash(),
                     visibility = createGroupReq.teamVisibility,
-                    type = createGroupReq.groupType
+                    type = createGroupReq.groupType,
+                    description = createGroupReq.description
                 )
             ).returning()
         }
@@ -63,7 +66,7 @@ class GroupRepository(
     suspend fun fromShortname(shortname: String): Int? {
         return db.runQuery {
             QueryDsl.from(groupMeta).where {
-                groupMeta.groupShortName eq shortname
+                lower(groupMeta.groupShortName) eq shortname.lowercase(Locale.getDefault())
             }.select(groupMeta.groupId).singleOrNull()
         }
     }

@@ -57,7 +57,7 @@ fun <V> observableOf(
     updater: suspend () -> V? = { null },
     coroutineScope: CoroutineScope = AppScope,
     action: ObservableDsl<V>.() -> Unit,
-) {
+): ObservableDsl<V> {
     val observableDsl = ObservableDsl(
         obv = ObservableValue(initialValue),
         updater = updater,
@@ -68,6 +68,8 @@ fun <V> observableOf(
     coroutineScope.launch {
         observableDsl.setObv(observableDsl.getUpdater().invoke())
     }
+
+    return observableDsl
 }
 
 data class ObservableListDsl<V>(

@@ -21,6 +21,7 @@ private data class GroupDef(
     val groupHash: String,
     val visibility: GroupVisibility,
     val type: GroupType,
+    val description: String,
     @KomapperVersion
     val version: Int? = null,
     @KomapperCreatedAt

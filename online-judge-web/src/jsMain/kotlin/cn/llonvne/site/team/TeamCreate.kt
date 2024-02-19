@@ -1,4 +1,4 @@
-package cn.llonvne.site
+package cn.llonvne.site.team
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
@@ -19,15 +19,13 @@ import io.kvision.html.button
 import io.kvision.html.div
 import io.kvision.html.h1
 import io.kvision.html.p
+import io.kvision.i18n.tr
 import io.kvision.routing.Routing
 import kotlinx.serialization.Serializable
 
 @Serializable
 private data class CreateTeam(
-    val teamName: String,
-    val shortName: String,
-    val visibilityStr: String,
-    val typeStr: String
+    val teamName: String, val shortName: String, val visibilityStr: String, val typeStr: String, val description: String
 )
 
 fun teamCreate(root: Container, routing: Routing) {
@@ -67,18 +65,21 @@ fun teamCreate(root: Container, routing: Routing) {
 
                         add(
                             CreateTeam::visibilityStr, TomSelect(
-                                options = GroupVisibility.options,
-                                label = "小组可见性"
+                                options = GroupVisibility.options, label = "小组可见性"
                             ), required = true
                         )
 
                         add(
                             CreateTeam::typeStr, TomSelect(
-                                options = GroupType.options,
-                                label = "小组类型（对于个人用户，请选择经典小组）"
-                            ),
-                            required = true
+                                options = GroupType.options, label = "小组类型（对于个人用户，请选择经典小组）"
+                            ), required = true
                         )
+
+                        add(CreateTeam::description, Text {
+                            label = "描述"
+                            placeholder = "用一句话简单描述一下吧"
+                        }, required = true)
+
 
                         button("提交") {
                             onClickLaunch {
@@ -92,7 +93,8 @@ fun teamCreate(root: Container, routing: Routing) {
                                         groupName = createTeam.teamName,
                                         groupShortName = createTeam.shortName,
                                         teamVisibility = GroupVisibility.entries[createTeam.visibilityStr.toInt()],
-                                        groupType = GroupType.entries[createTeam.typeStr.toInt()]
+                                        groupType = GroupType.entries[createTeam.typeStr.toInt()],
+                                        description = createTeam.description
                                     )
                                 )
                                 when (resp) {

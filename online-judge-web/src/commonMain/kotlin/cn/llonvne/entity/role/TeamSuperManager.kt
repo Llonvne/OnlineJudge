@@ -8,19 +8,18 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface TeamSuperManager : TeamIdRole, CreateGroup {
-    override val teamId: Int
-        get() = 0
-
-    override val teamTypes: List<GroupType>
-        get() = GroupType.entries.toList()
-
-    data object TeamSuperManagerImpl : TeamSuperManager {
+    @Serializable
+    data class TeamSuperManagerImpl(
+        override val teamId: Int = 0,
+        override val teamTypes: List<GroupType> = GroupType.entries
+    ) :
+        TeamSuperManager {
         override fun check(provide: Role): Boolean {
             return provide is TeamSuperManager
         }
     }
 
     companion object {
-        fun get(): TeamSuperManager = TeamSuperManagerImpl
+        fun get(): TeamSuperManager = TeamSuperManagerImpl()
     }
 }

@@ -3,6 +3,8 @@ package cn.llonvne.database.repository
 import cn.llonvne.database.entity.def.code
 import cn.llonvne.database.entity.def.shareCodeComment
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Deleted
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
@@ -23,7 +25,7 @@ class CodeRepository(
     private val commentMeta = Meta.shareCodeComment.define {
         where {
             // 默认不查询被删除的评论
-            it.type notEq ShareCodeComment.Companion.ShareCodeCommentType.Deleted
+            it.type notEq Deleted
         }
     }
 
@@ -78,7 +80,7 @@ class CodeRepository(
     suspend fun deleteComment(ids: List<Int>): List<ShareCodeComment> {
         return db.runQuery {
             QueryDsl.update(commentMeta).set {
-                commentMeta.type eq ShareCodeComment.Companion.ShareCodeCommentType.Deleted
+                commentMeta.type eq Deleted
             }.where {
                 commentMeta.commentId inList ids
             }.returning()
@@ -123,7 +125,7 @@ class CodeRepository(
 
     suspend fun setShareCodeCommentVisibilityType(
         commentId: Int,
-        type: ShareCodeComment.Companion.ShareCodeCommentType
+        type: ShareCodeCommentType
     ) {
         db.runQuery {
             QueryDsl.update(commentMeta)

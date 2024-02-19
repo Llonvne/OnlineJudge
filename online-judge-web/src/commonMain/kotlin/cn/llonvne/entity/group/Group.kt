@@ -9,9 +9,10 @@ data class Group(
     val groupName: String,
     val groupShortName: String,
     val groupHash: String,
-    val version: Int? = null,
+    val description: String,
     val visibility: GroupVisibility,
     val type: GroupType,
+    val version: Int? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )
