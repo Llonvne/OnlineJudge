@@ -34,7 +34,7 @@ actual class JudgeService(
     }
 
     companion object {
-        fun default(judgeUrl: String): LanguageDispatcher {
+        private fun default(judgeUrl: String): LanguageDispatcher {
             return LanguageDispatcher.get(
                 LanguageFactory.get(
                     judgeUrl,

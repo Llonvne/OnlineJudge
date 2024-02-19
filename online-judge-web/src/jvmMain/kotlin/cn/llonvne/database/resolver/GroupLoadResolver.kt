@@ -1,9 +1,9 @@
 package cn.llonvne.database.resolver
 
 import cn.llonvne.database.repository.GroupRepository
-import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.Group
+import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.group.GroupId.IntGroupId
 import cn.llonvne.entity.role.*
 import cn.llonvne.kvision.service.GroupIdNotFound
@@ -16,20 +16,22 @@ import org.springframework.stereotype.Service
 class GroupLoadResolver(
     private val groupRepository: GroupRepository,
     private val groupRoleResolver: GroupRoleResolver,
-    private val groupIdToUserResolver: GroupIdToUserResolver
+    private val groupMembersResolver: GroupMembersResolver,
+    private val guestPasser: GroupGuestPassResolver
 ) {
 
     inner class GroupInfoAware(
+        val groupId: GroupId,
         val id: Int,
         val group: Group
     ) {
 
         suspend fun ownerName(): String {
-            return groupIdToUserResolver.resolve(GroupManager.GroupMangerImpl(id)).firstOrNull()?.username ?: "<未找到>"
+            return groupMembersResolver.fromRole(GroupManager.GroupMangerImpl(id)).firstOrNull()?.username ?: "<未找到>"
         }
 
         suspend fun membersOfGuest(): List<GroupMemberDto> {
-            return groupIdToUserResolver.fromGroupId(id).mapNotNull {
+            return groupMembersResolver.fromGroupId(id).mapNotNull {
                 GroupMemberDto(
                     username = it.username,
                     role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null
@@ -38,29 +40,31 @@ class GroupLoadResolver(
         }
     }
 
-    suspend fun <R> awareOf(id: Int, group: Group, action: suspend GroupInfoAware.() -> R): R {
-        return GroupInfoAware(id, group).action()
+    suspend fun <R> awareOf(groupId: GroupId, id: Int, group: Group, action: suspend GroupInfoAware.() -> R): R {
+        return GroupInfoAware(groupId, id, group).action()
     }
 
     suspend fun resolve(
+        originGroupId: GroupId,
         groupId: Int,
         authenticationUser: AuthenticationUser?
     ): LoadGroupResp {
 
         val group = groupRepository.fromId(groupId) ?: return GroupIdNotFound(IntGroupId(groupId))
 
-        return awareOf(groupId, group) {
+        return awareOf(originGroupId, groupId, group) {
             if (authenticationUser == null) {
-                return@awareOf loadAsGuest()
+                return@awareOf loadAsGuestOrReject()
             }
 
-            val teamRole = groupRoleResolver.resolve(groupId, authenticationUser) ?: return@awareOf loadAsGuest()
+            val teamRole = groupRoleResolver.resolve(groupId, authenticationUser)
+                ?: return@awareOf loadAsGuestOrReject()
 
             return@awareOf when (teamRole) {
-                is DeleteTeam.DeleteTeamImpl -> loadAsGuest()
+                is DeleteTeam.DeleteTeamImpl -> loadAsGuestOrReject()
                 is GroupManager.GroupMangerImpl -> loadAsGroupManager()
-                is InviteMember.InviteMemberImpl -> loadAsGuest()
-                is KickMember.KickMemberImpl -> loadAsGuest()
+                is InviteMember.InviteMemberImpl -> loadAsGuestOrReject()
+                is KickMember.KickMemberImpl -> loadAsGuestOrReject()
                 is TeamMember.TeamMemberImpl -> loadAsMember()
                 is TeamSuperManager -> loadAsSuperManager()
             }
@@ -68,16 +72,19 @@ class GroupLoadResolver(
     }
 
     context(GroupInfoAware)
-    suspend fun loadAsGuest(): LoadGroupResp {
-        return GuestLoadGroup(
-            groupName = group.groupName,
-            groupShortName = group.groupShortName,
-            visibility = group.visibility,
-            type = group.type,
-            ownerName = ownerName(),
-            members = membersOfGuest(),
-            description = group.description
-        )
+    suspend fun loadAsGuestOrReject(): LoadGroupResp {
+        return guestPasser.resolve {
+            return@resolve GuestLoadGroup(
+                groupName = group.groupName,
+                groupShortName = group.groupShortName,
+                visibility = group.visibility,
+                type = group.type,
+                ownerName = ownerName(),
+                members = membersOfGuest(),
+                description = group.description,
+                createAt = group.createdAt!!
+            )
+        }
     }
 
     context(GroupInfoAware)

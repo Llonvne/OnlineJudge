@@ -9,6 +9,7 @@ import cn.llonvne.kvision.service.Validatable.Companion.on
 import cn.llonvne.kvision.service.Validatable.Companion.validate
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -54,7 +55,8 @@ interface IGroupService {
             val type: GroupType,
             val ownerName: String,
             val description: String,
-            val members: List<GroupMemberDto>
+            val members: List<GroupMemberDto>,
+            val createAt: LocalDateTime
         ) : LoadGroupResp {
             @Serializable
             data class GroupMemberDto(val username: String, val role: TeamIdRole)

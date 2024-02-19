@@ -9,6 +9,9 @@ import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
+import cn.llonvne.kvision.service.PermissionDenied
+import cn.llonvne.message.Messager
+import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container
 import io.kvision.html.*
 import io.kvision.tabulator.ColumnDefinition
@@ -24,6 +27,7 @@ interface GroupMemberShower {
             val memberShower = when (resp) {
                 is GroupIdNotFound -> emptyMemberShower
                 is GuestLoadGroup -> GuestMemberShower(resp)
+                PermissionDenied -> emptyMemberShower
             }
             return memberShower
         }
@@ -37,6 +41,16 @@ interface GroupMemberShower {
 private class GuestMemberShower(private val resp: GuestLoadGroup) : GroupMemberShower {
     override fun show(target: Container) {
         target.alert(AlertType.Light) {
+
+            div {
+                button("现在加入") {
+                    onClick {
+                        if (AuthenticationModel.userToken.value == null) {
+                            Messager.toastInfo("登入后才可以加入小组")
+                        }
+                    }
+                }
+            }
 
             h4 {
                 +"成员列表"

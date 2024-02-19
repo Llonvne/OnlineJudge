@@ -4,6 +4,9 @@ import cn.llonvne.database.repository.GroupRepository
 import cn.llonvne.entity.group.GroupId
 import org.springframework.stereotype.Service
 
+/**
+ * 将 [GroupId] 转换为 数字ID 并保证该ID存在，否则返回 null
+ */
 @Service
 class GroupIdResolver(
     private val groupRepository: GroupRepository
@@ -17,7 +20,6 @@ class GroupIdResolver(
         }
         return validateGroupId(intId)
     }
-
 
     private suspend fun validateGroupId(id: Int?): Int? {
         if (id == null) {

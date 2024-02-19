@@ -8,6 +8,8 @@ import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.*
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
+import cn.llonvne.kvision.service.PermissionDenied
+import cn.llonvne.ll
 import io.kvision.core.Container
 import io.kvision.html.h4
 import io.kvision.html.p
@@ -19,18 +21,19 @@ sealed interface GroupHeaderShower {
     companion object {
         fun from(resp: LoadGroupResp): GroupHeaderShower {
             return when (resp) {
-                is GroupIdNotFound -> GroupIdNotFoundShower(resp)
+                is GroupIdNotFound -> GroupIdNotFoundShower
                 is GuestLoadGroup -> GuestGroupHeaderShower(resp)
+                PermissionDenied -> GroupIdNotFoundShower
             }
         }
     }
 }
 
-private class GroupIdNotFoundShower(private val resp: GroupIdNotFound) : GroupHeaderShower {
+private data object GroupIdNotFoundShower : GroupHeaderShower {
     override fun load(root: Container) {
         root.alert(AlertType.Danger) {
             h4 {
-                +"Id 为 ${resp.groupId} 未找到"
+                +"对应小组未找到"
             }
 
             p {
@@ -66,6 +69,12 @@ private class GuestGroupHeaderShower(private val resp: GuestLoadGroup) : GroupHe
             badge(BadgeColor.Blue) {
                 +resp.type.shortChinese
             }
+
+            badge(BadgeColor.White) {
+                +"创建于:${resp.createAt.ll()}"
+            }
+
+
         }
     }
 }

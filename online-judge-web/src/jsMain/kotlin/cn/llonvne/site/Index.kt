@@ -2,7 +2,9 @@ package cn.llonvne.site
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
+import cn.llonvne.message.Messager
 import io.kvision.core.Container
+import io.kvision.core.onClick
 import io.kvision.form.select.tomSelect
 import io.kvision.form.text.text
 import io.kvision.html.*
@@ -60,8 +62,21 @@ fun Container.index(routing: Routing) {
                     +"输入您的通行凭证(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
                 }
 
-                text(InputType.TEXT) {
+                val text = text(InputType.TEXT)
+
+                div {
+                    button("转到", style = ButtonStyle.OUTLINESECONDARY) {
+                        onClick {
+                            if (text.value?.length == 36) {
+                                routing.navigate("/team/${text.value}")
+                            } else {
+                                Messager.toastInfo("不是合法的凭证")
+                            }
+                        }
+                    }
                 }
+
+                br { }
 
                 h6 {
                     +"查找您的组织"
@@ -79,12 +94,16 @@ fun Container.index(routing: Routing) {
                     +"新建团队/学校"
                 }
 
-
-                text(label = "团队/学校姓名") {
-                    width = 400.px
+                label {
+                    +"建立您自己的团队/学校"
                 }
 
+                br { }
+
                 button("新建", style = ButtonStyle.OUTLINESECONDARY) {
+                    onClick {
+                        routing.navigate("/team/create")
+                    }
                 }
             }
         }

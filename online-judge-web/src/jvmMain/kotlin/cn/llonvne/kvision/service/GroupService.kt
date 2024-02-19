@@ -66,6 +66,6 @@ actual class GroupService(
 
         val user = authentication.getAuthenticationUser(authenticationToken)
 
-        return@track groupLoadResolver.resolve(id, user)
+        return@track groupLoadResolver.resolve(groupId, id, user)
     }
 }

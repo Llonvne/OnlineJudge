@@ -2,11 +2,15 @@ package cn.llonvne.security
 
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.Role
+import cn.llonvne.getLogger
 import cn.llonvne.redis.Redis
 import cn.llonvne.redis.get
 import cn.llonvne.redis.set
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Env
+import org.springframework.core.env.Environment
+import org.springframework.core.env.get
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
@@ -20,10 +24,13 @@ import java.util.*
 class RedisAuthenticationService(
     private val redis: Redis,
     private val passwordEncoder: PasswordEncoder,
+    env: Environment,
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    private val redisKeyPrefix: String = env.getProperty("oj.redis.user.prefix") ?: "user-id"
 ) {
 
-    val log: Logger = getLogger(this::class.java)
-    private val AuthenticationUser.asRedisKey get() = "user-id-$id-" + UUID.randomUUID()
+    val log: Logger = getLogger()
+    private val AuthenticationUser.asRedisKey get() = "$redisKeyPrefix-$id-" + UUID.randomUUID()
 
     suspend fun login(user: AuthenticationUser): AuthenticationToken {
 

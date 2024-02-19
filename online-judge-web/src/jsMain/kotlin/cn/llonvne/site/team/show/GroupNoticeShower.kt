@@ -5,6 +5,7 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
+import cn.llonvne.kvision.service.PermissionDenied
 import io.kvision.core.Container
 import io.kvision.html.h4
 import io.kvision.panel.Root
@@ -17,6 +18,7 @@ interface GroupNoticeShower {
             return when (resp) {
                 is GroupIdNotFound -> emptyNoticeShower
                 is GuestLoadGroup -> GuestGroupNoticeShower(resp)
+                PermissionDenied -> emptyNoticeShower
             }
         }
 
