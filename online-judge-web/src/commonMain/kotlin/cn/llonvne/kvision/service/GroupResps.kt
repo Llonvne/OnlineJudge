@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 data object GroupShortNameUnavailable : IGroupService.CreateGroupResp
 
 @Serializable
-data class GroupIdNotFound(val groupId: GroupId) : IGroupService.LoadGroupResp
+data class GroupIdNotFound(val groupId: GroupId) : IGroupService.LoadGroupResp, IGroupService.JoinGroupResp

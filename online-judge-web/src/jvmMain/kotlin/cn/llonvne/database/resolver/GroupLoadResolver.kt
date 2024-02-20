@@ -1,48 +1,23 @@
 package cn.llonvne.database.resolver
 
+import cn.llonvne.database.aware.GroupInfoAwareProvider
+import cn.llonvne.database.aware.GroupInfoAwareProvider.GroupInfoAware
 import cn.llonvne.database.repository.GroupRepository
 import cn.llonvne.entity.AuthenticationUser
-import cn.llonvne.entity.group.Group
 import cn.llonvne.entity.group.GroupId
-import cn.llonvne.entity.group.GroupId.IntGroupId
 import cn.llonvne.entity.role.*
 import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
-import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
-import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup.GroupMemberDto
+import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.*
 import org.springframework.stereotype.Service
 
 @Service
 class GroupLoadResolver(
     private val groupRepository: GroupRepository,
     private val groupRoleResolver: GroupRoleResolver,
-    private val groupMembersResolver: GroupMembersResolver,
-    private val guestPasser: GroupGuestPassResolver
+    private val guestPasser: GroupGuestPassResolver,
+    private val groupInfoAwareProvider: GroupInfoAwareProvider
 ) {
-
-    inner class GroupInfoAware(
-        val groupId: GroupId,
-        val id: Int,
-        val group: Group
-    ) {
-
-        suspend fun ownerName(): String {
-            return groupMembersResolver.fromRole(GroupManager.GroupMangerImpl(id)).firstOrNull()?.username ?: "<未找到>"
-        }
-
-        suspend fun membersOfGuest(): List<GroupMemberDto> {
-            return groupMembersResolver.fromGroupId(id).mapNotNull {
-                GroupMemberDto(
-                    username = it.username,
-                    role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null
-                )
-            }
-        }
-    }
-
-    suspend fun <R> awareOf(groupId: GroupId, id: Int, group: Group, action: suspend GroupInfoAware.() -> R): R {
-        return GroupInfoAware(groupId, id, group).action()
-    }
 
     suspend fun resolve(
         originGroupId: GroupId,
@@ -50,9 +25,9 @@ class GroupLoadResolver(
         authenticationUser: AuthenticationUser?
     ): LoadGroupResp {
 
-        val group = groupRepository.fromId(groupId) ?: return GroupIdNotFound(IntGroupId(groupId))
+        val group = groupRepository.fromId(groupId) ?: return GroupIdNotFound(originGroupId)
 
-        return awareOf(originGroupId, groupId, group) {
+        return groupInfoAwareProvider.awareOf(originGroupId, groupId, group) {
             if (authenticationUser == null) {
                 return@awareOf loadAsGuestOrReject()
             }
@@ -75,6 +50,7 @@ class GroupLoadResolver(
     suspend fun loadAsGuestOrReject(): LoadGroupResp {
         return guestPasser.resolve {
             return@resolve GuestLoadGroup(
+                groupId = groupId,
                 groupName = group.groupName,
                 groupShortName = group.groupShortName,
                 visibility = group.visibility,
@@ -89,7 +65,17 @@ class GroupLoadResolver(
 
     context(GroupInfoAware)
     suspend fun loadAsGroupManager(): LoadGroupResp {
-        TODO()
+        return ManagerLoadGroup(
+            groupId = groupId,
+            groupName = group.groupName,
+            groupShortName = group.groupShortName,
+            visibility = group.visibility,
+            type = group.type,
+            ownerName = ownerName(),
+            members = memberOfManager(),
+            description = group.description,
+            createAt = group.createdAt!!
+        )
     }
 
     context(GroupInfoAware)

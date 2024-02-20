@@ -13,7 +13,8 @@ class RoleService(
     suspend fun addRole(userId: Int, vararg role: Role): Boolean {
         val userRoleStr = roleRepository.getRoleStrByUserId(userId) ?: return false
         val userRole = fromUserRoleString(userRoleStr) ?: UserRole.default()
-        roleRepository.setRoleStrByUserId(userId, UserRole(userRole.roles + role))
+        val roles = (userRole.roles + role).toSet().toList()
+        roleRepository.setRoleStrByUserId(userId, UserRole(roles))
         return true
     }
 

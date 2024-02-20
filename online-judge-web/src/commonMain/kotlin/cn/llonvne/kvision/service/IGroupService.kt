@@ -46,22 +46,67 @@ interface IGroupService {
 
     @Serializable
     sealed interface LoadGroupResp {
+        sealed interface LoadGroupSuccessResp : LoadGroupResp {
+            val groupId: GroupId
+            val groupName: String
+            val groupShortName: String
+            val visibility: GroupVisibility
+
+            @SerialName("groupType")
+            val type: GroupType
+            val ownerName: String
+            val description: String
+            val members: List<GroupMemberDto>
+            val createAt: LocalDateTime
+        }
+
         @Serializable
         data class GuestLoadGroup(
-            val groupName: String,
-            val groupShortName: String,
-            val visibility: GroupVisibility,
+            override val groupId: GroupId,
+            override val groupName: String,
+            override val groupShortName: String,
+            override val visibility: GroupVisibility,
             @SerialName("groupType")
-            val type: GroupType,
-            val ownerName: String,
-            val description: String,
-            val members: List<GroupMemberDto>,
-            val createAt: LocalDateTime
-        ) : LoadGroupResp {
-            @Serializable
-            data class GroupMemberDto(val username: String, val role: TeamIdRole)
+            override val type: GroupType,
+            override val ownerName: String,
+            override val description: String,
+            override val members: List<GroupMemberDtoImpl>,
+            override val createAt: LocalDateTime,
+        ) : LoadGroupSuccessResp
+
+        @Serializable
+        data class ManagerLoadGroup(
+            override val groupId: GroupId,
+            override val groupName: String,
+            override val groupShortName: String,
+            override val visibility: GroupVisibility,
+            @SerialName("groupType") override val type: GroupType,
+            override val ownerName: String,
+            override val description: String,
+            override val members: List<GroupMemberDtoImpl>,
+            override val createAt: LocalDateTime
+        ) : LoadGroupSuccessResp
+
+        @Serializable
+        sealed interface GroupMemberDto {
+            val username: String
+            val role: TeamIdRole
         }
+
+        @Serializable
+        data class GroupMemberDtoImpl(override val username: String, override val role: TeamIdRole) : GroupMemberDto
     }
 
     suspend fun load(authenticationToken: AuthenticationToken?, groupId: GroupId): LoadGroupResp
+
+    @Serializable
+    sealed interface JoinGroupResp {
+        @Serializable
+        data class Joined(val groupId: GroupId) : JoinGroupResp
+
+        @Serializable
+        data class Reject(val groupId: GroupId) : JoinGroupResp
+    }
+
+    suspend fun join(groupId: GroupId, authenticationToken: AuthenticationToken): JoinGroupResp
 }

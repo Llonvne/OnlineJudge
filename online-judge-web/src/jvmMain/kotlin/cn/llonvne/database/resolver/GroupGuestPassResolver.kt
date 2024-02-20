@@ -1,5 +1,7 @@
 package cn.llonvne.database.resolver
 
+import cn.llonvne.database.aware.GroupInfoAwareProvider
+import cn.llonvne.database.aware.GroupInfoAwareProvider.GroupInfoAware
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.entity.group.GroupVisibility.*
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class GroupGuestPassResolver {
-    context(GroupLoadResolver.GroupInfoAware)
+    context(GroupInfoAware)
     suspend fun resolve(
         loadAsGuest: suspend () -> LoadGroupResp
     ): LoadGroupResp {

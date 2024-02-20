@@ -1,4 +1,5 @@
 package cn.llonvne.kvision.service
 
-object JudgeResultParseError : ISubmissionService.GetOutputByCodeIdResp {
-}
+import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp
+
+object JudgeResultParseError : GetOutputByCodeIdResp

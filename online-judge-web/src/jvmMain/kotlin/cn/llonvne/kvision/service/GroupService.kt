@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.GroupRepository
 import cn.llonvne.database.resolver.GroupIdResolver
 import cn.llonvne.database.resolver.GroupLoadResolver
+import cn.llonvne.database.resolver.JoinGroupResolver
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.CreateGroup
 import cn.llonvne.entity.role.GroupManager
@@ -26,14 +27,14 @@ actual class GroupService(
     private val groupRepository: GroupRepository,
     private val roleService: RoleService,
     private val groupIdResolver: GroupIdResolver,
-    private val groupLoadResolver: GroupLoadResolver
+    private val groupLoadResolver: GroupLoadResolver,
+    private val joinGroupResolver: JoinGroupResolver
 ) : IGroupService {
 
     private val logger = getLogger()
 
     override suspend fun createTeam(
-        authenticationToken: AuthenticationToken,
-        createGroupReq: CreateGroupReq
+        authenticationToken: AuthenticationToken, createGroupReq: CreateGroupReq
     ): CreateGroupResp {
         val user = authentication.validate(authenticationToken) {
             check(CreateGroup.require(createGroupReq.groupType))
@@ -59,13 +60,24 @@ actual class GroupService(
     }
 
     override suspend fun load(
-        authenticationToken: AuthenticationToken?,
-        groupId: GroupId
+        authenticationToken: AuthenticationToken?, groupId: GroupId
     ): LoadGroupResp = logger.track(authenticationToken, groupId) {
         val id = groupIdResolver.resolve(groupId) ?: return@track GroupIdNotFound(groupId)
 
         val user = authentication.getAuthenticationUser(authenticationToken)
 
         return@track groupLoadResolver.resolve(groupId, id, user)
+    }
+
+    override suspend fun join(groupId: GroupId, authenticationToken: AuthenticationToken): JoinGroupResp {
+        val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
+
+        val user = authentication.validate(authenticationToken) { requireLogin() }
+
+        if (user == null) {
+            return PermissionDenied
+        }
+
+        return joinGroupResolver.resolve(groupId, id, user)
     }
 }
