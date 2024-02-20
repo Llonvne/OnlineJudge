@@ -21,6 +21,7 @@ interface GroupNoticeShower {
                 is GuestLoadGroup -> GuestGroupNoticeShower(resp)
                 PermissionDenied -> emptyNoticeShower
                 is ManagerLoadGroup -> ManagerGroupNoticeShower(resp)
+                is MemberLoadGroup -> MemberGroupNoticeShower(resp)
             }
         }
 
@@ -45,3 +46,5 @@ private abstract class AbstractGroupNoticeShower(private val resp: LoadGroupSucc
 private class GuestGroupNoticeShower(private val resp: GuestLoadGroup) : AbstractGroupNoticeShower(resp)
 
 private class ManagerGroupNoticeShower(private val resp: ManagerLoadGroup) : AbstractGroupNoticeShower(resp)
+
+private class MemberGroupNoticeShower(private val resp: MemberLoadGroup) : AbstractGroupNoticeShower(resp)

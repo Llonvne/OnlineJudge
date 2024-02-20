@@ -1,8 +1,10 @@
 package cn.llonvne.kvision.service
 
+import cn.llonvne.kvision.service.ICodeService.*
+import cn.llonvne.kvision.service.ISubmissionService.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object CodeNotFound : ICodeService.GetCodeResp, ICodeService.GetCommitsOnCodeResp,
-    ICodeService.SetCodeVisibilityResp, ICodeService.SetCodeCommentTypeResp, ISubmissionService.ViewCodeGetByIdResp,
-    ISubmissionService.SubmissionGetByIdResp, ISubmissionService.GetOutputByCodeIdResp
+data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp,
+    SetCodeVisibilityResp, SetCodeCommentTypeResp, ViewCodeGetByIdResp,
+    SubmissionGetByIdResp, GetOutputByCodeIdResp

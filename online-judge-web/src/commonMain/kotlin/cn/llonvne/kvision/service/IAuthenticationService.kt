@@ -30,9 +30,6 @@ interface IAuthenticationService {
 
     @Serializable
     sealed interface LoginResult {
-
-        fun isOk() = this is SuccessfulLogin
-
         val message: Message
 
         @Serializable
@@ -74,5 +71,5 @@ interface IAuthenticationService {
         data object Logout : GetLogoutResp
     }
 
-    suspend fun logout(token: AuthenticationToken?):GetLogoutResp
+    suspend fun logout(token: AuthenticationToken?): GetLogoutResp
 }

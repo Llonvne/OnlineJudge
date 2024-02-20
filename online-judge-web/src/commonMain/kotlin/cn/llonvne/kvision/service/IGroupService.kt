@@ -88,6 +88,19 @@ interface IGroupService {
         ) : LoadGroupSuccessResp
 
         @Serializable
+        data class MemberLoadGroup(
+            override val groupId: GroupId,
+            override val groupName: String,
+            override val groupShortName: String,
+            override val visibility: GroupVisibility,
+            @SerialName("groupType") override val type: GroupType,
+            override val ownerName: String,
+            override val description: String,
+            override val members: List<GroupMemberDtoImpl>,
+            override val createAt: LocalDateTime
+        ) : LoadGroupSuccessResp
+
+        @Serializable
         sealed interface GroupMemberDto {
             val username: String
             val role: TeamIdRole
@@ -106,7 +119,18 @@ interface IGroupService {
 
         @Serializable
         data class Reject(val groupId: GroupId) : JoinGroupResp
+
+        @Serializable
+        data class NoManagersFound(val groupId: GroupId) : JoinGroupResp
     }
 
     suspend fun join(groupId: GroupId, authenticationToken: AuthenticationToken): JoinGroupResp
+
+    @Serializable
+    sealed interface QuitGroupResp
+
+    @Serializable
+    data object QuitOk : QuitGroupResp
+
+    suspend fun quit(groupId: GroupId, value: AuthenticationToken?): QuitGroupResp
 }

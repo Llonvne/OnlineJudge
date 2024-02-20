@@ -44,5 +44,9 @@ class GroupInfoAwareProvider(
         suspend fun memberOfManager(): List<GroupMemberDtoImpl> {
             return membersOfGuest()
         }
+
+        suspend fun membersOfMember(): List<GroupMemberDtoImpl> {
+            return membersOfGuest()
+        }
     }
 }

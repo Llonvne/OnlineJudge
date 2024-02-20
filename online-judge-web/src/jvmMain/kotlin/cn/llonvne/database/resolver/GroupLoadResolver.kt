@@ -80,7 +80,17 @@ class GroupLoadResolver(
 
     context(GroupInfoAware)
     suspend fun loadAsMember(): LoadGroupResp {
-        TODO()
+        return MemberLoadGroup(
+            groupId = groupId,
+            groupName = group.groupName,
+            groupShortName = group.groupShortName,
+            visibility = group.visibility,
+            type = group.type,
+            ownerName = ownerName(),
+            members = membersOfMember(),
+            description = group.description,
+            createAt = group.createdAt!!
+        )
     }
 
     context(GroupInfoAware)

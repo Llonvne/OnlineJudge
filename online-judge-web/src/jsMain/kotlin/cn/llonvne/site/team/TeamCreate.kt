@@ -100,9 +100,9 @@ fun teamCreate(root: Container, routing: Routing) {
                                 when (resp) {
                                     is ClientError -> Messager.toastInfo(resp.message)
                                     is CreateGroupOk -> Messager.toastInfo("成功创建小组,小组ID为${resp.group.groupId}")
-                                    GroupShortNameUnavailable -> Messager.toastInfo("小组短名称已经在被占用")
                                     PermissionDenied -> Messager.toastInfo("你没有创建改小组的权限，或者你还未登入")
                                     is InternalError -> Messager.toastInfo(resp.reason)
+                                    is GroupShortNameUnavailable -> Messager.toastInfo("小组短名称${resp.shortName}已被占用")
                                 }
                             }
                         }

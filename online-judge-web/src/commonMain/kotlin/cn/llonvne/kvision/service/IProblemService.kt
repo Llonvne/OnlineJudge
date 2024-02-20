@@ -21,8 +21,6 @@ interface IProblemService {
 
     @Serializable
     sealed interface CreateProblemResp {
-        fun isOk() = this is Ok
-
         @Serializable
         data class Ok(val problemId: Int) : CreateProblemResp
 

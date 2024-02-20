@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.problem.ShareCodeComment
+import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeVisibilityType
@@ -12,7 +13,6 @@ import kotlinx.serialization.Serializable
 
 @KVService
 interface ICodeService {
-
     @Serializable
     data class SaveCodeReq(
         val code: String,
@@ -56,7 +56,7 @@ interface ICodeService {
         val token: AuthenticationToken?,
         val content: String,
         val codeId: Int,
-        val type: ShareCodeComment.Companion.ShareCodeCommentType
+        val type: ShareCodeCommentType
     )
 
     @Serializable
@@ -117,7 +117,7 @@ interface ICodeService {
         token: AuthenticationToken?,
         shareId: Int,
         commentId: Int,
-        type: ShareCodeComment.Companion.ShareCodeCommentType
+        type: ShareCodeCommentType
     ): SetCodeCommentVisibilityTypeResp
 }
 

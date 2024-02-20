@@ -2,6 +2,9 @@ package cn.llonvne.kvision.service
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 标识数据需要被校验
+ */
 interface Validatable {
     fun validate(): ValidateResult
 
@@ -44,7 +47,9 @@ interface Validatable {
             }
         }
 
-        data class ValidatorDslImpl(private val validators: MutableList<Validator> = mutableListOf()) : ValidatorDsl {
+        private data class ValidatorDslImpl
+            (private val validators: MutableList<Validator> = mutableListOf()) :
+            ValidatorDsl {
             override fun add(validator: Validator) {
                 validators.add(validator)
             }
@@ -62,6 +67,9 @@ interface Validatable {
             }
         }
 
+        /**
+         * 校验数据 DSL 入口
+         */
         fun validate(action: ValidatorDsl.() -> Unit): ValidateResult {
             val validatorDsl = ValidatorDslImpl()
 

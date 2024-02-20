@@ -7,11 +7,15 @@ import cn.llonvne.database.resolver.JoinGroupResolver
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.CreateGroup
 import cn.llonvne.entity.role.GroupManager
+import cn.llonvne.entity.role.TeamIdRole
+import cn.llonvne.entity.role.TeamMember
+import cn.llonvne.entity.role.TeamMember.TeamMemberImpl
 import cn.llonvne.getLogger
 import cn.llonvne.kvision.service.IGroupService.*
 import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.userRole
 import cn.llonvne.track
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -41,7 +45,7 @@ actual class GroupService(
         } ?: return PermissionDenied
 
         if (!groupRepository.shortNameAvailable(createGroupReq.groupShortName)) {
-            return GroupShortNameUnavailable
+            return GroupShortNameUnavailable(createGroupReq.groupShortName)
         }
 
         return logger.track(authenticationToken, createGroupReq.groupName, createGroupReq.groupShortName) {
@@ -79,5 +83,15 @@ actual class GroupService(
         }
 
         return joinGroupResolver.resolve(groupId, id, user)
+    }
+
+    override suspend fun quit(groupId: GroupId, value: AuthenticationToken?): QuitGroupResp {
+        val user = authentication.validate(value) { requireLogin() } ?: return PermissionDenied
+
+        val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
+
+        roleService.removeRole(user, user.userRole.teamIdRoles(id))
+
+        return QuitOk
     }
 }

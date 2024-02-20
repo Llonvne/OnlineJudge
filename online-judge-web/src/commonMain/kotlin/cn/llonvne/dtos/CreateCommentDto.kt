@@ -15,6 +15,9 @@ data class CreateCommentDto(
     val visibilityType: ShareCodeCommentType
 )
 
+/**
+ * 获取评论的可见性中文描述
+ */
 fun CreateCommentDto.getVisibilityDecr(): String = when (visibilityType) {
     Deleted -> "已被删除"
     Public -> "对所有人可见"

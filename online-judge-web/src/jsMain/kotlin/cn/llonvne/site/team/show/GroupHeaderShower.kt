@@ -26,6 +26,7 @@ sealed interface GroupHeaderShower {
                 is GuestLoadGroup -> GuestGroupHeaderShower(resp)
                 PermissionDenied -> GroupIdNotFoundShower
                 is LoadGroupResp.ManagerLoadGroup -> ManagerGroupHeaderShower(resp)
+                is LoadGroupResp.MemberLoadGroup -> MemberGroupHeaderShower(resp)
             }
         }
     }
@@ -95,3 +96,5 @@ private abstract class AbstractGroupHeaderShower(private val resp: LoadGroupResp
 private open class GuestGroupHeaderShower(private val resp: GuestLoadGroup) : AbstractGroupHeaderShower(resp)
 
 private class ManagerGroupHeaderShower(val resp: LoadGroupResp.ManagerLoadGroup) : AbstractGroupHeaderShower(resp)
+
+private class MemberGroupHeaderShower(val resp: LoadGroupResp.MemberLoadGroup) : AbstractGroupHeaderShower(resp)

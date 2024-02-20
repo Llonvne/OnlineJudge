@@ -4,6 +4,7 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.defineColumn
+import cn.llonvne.compoent.team.GroupMemberQuitResolver
 import cn.llonvne.compoent.team.JoinGroupResolver
 import cn.llonvne.entity.role.*
 import cn.llonvne.entity.role.GroupManager.GroupMangerImpl
@@ -19,6 +20,7 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.RoutingModule
+import cn.llonvne.model.TeamModel
 import io.kvision.core.Container
 import io.kvision.html.*
 import io.kvision.tabulator.ColumnDefinition
@@ -36,6 +38,7 @@ interface GroupMemberShower {
                 is GuestLoadGroup -> GuestMemberShower(resp)
                 PermissionDenied -> emptyMemberShower
                 is ManagerLoadGroup -> ManagerMemberShower(resp)
+                is MemberLoadGroup -> MemberMemberShower(resp)
             }
             return memberShower
         }
@@ -127,4 +130,10 @@ private class ManagerMemberShower(private val resp: ManagerLoadGroup) : Abstract
             }
         }
     )
+}
+
+private class MemberMemberShower(private val resp: MemberLoadGroup) : AbstractMemberShower(resp){
+    override fun Container.loadButtons() {
+        GroupMemberQuitResolver(resp.groupId).load(this)
+    }
 }

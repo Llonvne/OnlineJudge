@@ -1,5 +1,7 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp
+import kotlinx.serialization.Serializable
 
-object JudgeResultParseError : GetOutputByCodeIdResp
+@Serializable
+data object JudgeResultParseError : GetOutputByCodeIdResp

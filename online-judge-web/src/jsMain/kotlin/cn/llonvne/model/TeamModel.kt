@@ -40,4 +40,8 @@ object TeamModel {
     suspend fun join(authenticationToken: AuthenticationToken, groupId: GroupId): JoinGroupResp {
         return teamService.join(groupId, authenticationToken)
     }
+
+    suspend fun quit(groupId: GroupId): QuitGroupResp {
+        return teamService.quit(groupId, AuthenticationModel.userToken.value)
+    }
 }

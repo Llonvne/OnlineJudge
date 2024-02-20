@@ -35,7 +35,13 @@ object AuthenticationModel {
                 save()
             }
 
-            else -> {}
+            LoginResult.IncorrectUsernameOrPassword -> {
+                Messager.toastInfo("用户名或密码错误")
+            }
+
+            LoginResult.UserDoNotExist -> {
+                Messager.toastInfo("用户不存在")
+            }
         }
 
         return result
@@ -68,19 +74,17 @@ object AuthenticationModel {
 
     private fun restore() {
         val tokenStr = localStorage.getItem(key)
-        if (tokenStr != null && tokenStr != "") {
-            userToken.value = Json.decodeFromString<AuthenticationToken?>(tokenStr)
+        if (tokenStr.isNullOrEmpty()) {
+            return
+        }
+        userToken.value = Json.decodeFromString<AuthenticationToken?>(tokenStr)
 
-            AppScope.launch {
-                val info = info()
-                if (info == null) {
-                    userToken.value = null
-                } else {
-                    Messager.toastInfo("欢迎回来，${info.username}")
-                }
-            }
+        AppScope.launch {
+            info()?.let { Messager.toastInfo("欢迎回来，${it.username}") }
+                ?: run { userToken.value = null }
         }
     }
+
 
     suspend fun info(): Login? {
         return when (val resp = authenticationService.getLoginInfo(this.userToken.value)) {

@@ -48,9 +48,7 @@ interface JudgeResultDisplay {
         }
 
         fun playground(codeId: Int, root: Container): JudgeResultDisplay = PlaygroundJudgeResultDisplay(codeId)
-            .also {
-                it.load(root)
-            }
+            .also { it.load(root) }
     }
 }
 
