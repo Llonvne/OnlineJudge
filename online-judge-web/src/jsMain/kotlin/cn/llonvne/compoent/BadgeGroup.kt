@@ -6,11 +6,12 @@ import cn.llonvne.entity.types.badge.cssClass
 import io.kvision.core.Container
 import io.kvision.html.Span
 import io.kvision.html.span
+import io.kvision.state.ObservableValue
+import io.kvision.state.bind
 
 
 fun <E : BadgeColorGetter> Container.badgeGroup(
-    lst: Collection<E>,
-    display: Span.(E) -> Unit
+    lst: Collection<E>, display: Span.(E) -> Unit
 ) {
     span {
         lst.forEach { tag ->
@@ -39,4 +40,31 @@ fun Container.badge(badgeColor: BadgeColor, display: Span.() -> Unit) = span {
     addCssClass(
         badgeColor.cssClass
     )
+}
+
+interface BadgesDsl {
+    fun add(action: Span.() -> Unit)
+
+    fun <V> addBind(observableValue: ObservableValue<V>, action: Span.(V) -> Unit)
+}
+
+private class BadgesImpl(private val target: Container) : BadgesDsl {
+
+    private var index = 0
+
+    override fun add(action: Span.() -> Unit) {
+        target.badge(BadgeColor.entries[index++ % BadgeColor.entries.size]) {
+            action()
+        }
+    }
+
+    override fun <V> addBind(observableValue: ObservableValue<V>, action: Span.(V) -> Unit) {
+        target.badge(BadgeColor.entries[index++ % BadgeColor.entries.size]) {}.bind(observableValue) {
+            action(it)
+        }
+    }
+}
+
+fun Container.badges(action: BadgesDsl.() -> Unit) {
+    BadgesImpl(this).action()
 }
