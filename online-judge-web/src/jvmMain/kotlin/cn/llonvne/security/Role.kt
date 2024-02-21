@@ -52,12 +52,12 @@ data class UserRole(val roles: List<Role> = listOf()) {
      * 获取所有的 [TeamIdRole]
      * @param teamId 如果为 null 则返回所有的 [TeamIdRole],否则返回 [TeamIdRole.teamId] 为 [teamId] 的 [TeamIdRole]
      */
-    fun teamIdRoles(teamId: Int? = null): List<TeamIdRole> {
+    fun groupIdRoles(teamId: Int? = null): List<TeamIdRole> {
         val teamIdRoles = roles.filterIsInstance<TeamIdRole>()
-        if (teamId == null) {
-            return teamIdRoles
+        return if (teamId == null) {
+            teamIdRoles
         } else {
-            return teamIdRoles.filter { it.teamId == teamId }
+            teamIdRoles.filter { it.teamId == teamId }
         }
     }
 }

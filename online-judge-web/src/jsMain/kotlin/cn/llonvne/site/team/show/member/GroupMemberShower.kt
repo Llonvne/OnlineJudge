@@ -1,4 +1,4 @@
-package cn.llonvne.site.team.show
+package cn.llonvne.site.team.show.member
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
@@ -6,6 +6,8 @@ import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.defineColumn
 import cn.llonvne.compoent.team.GroupMemberQuitResolver
 import cn.llonvne.compoent.team.JoinGroupResolver
+import cn.llonvne.compoent.team.KickMemberResolver
+import cn.llonvne.compoent.team.UpgradeToGroupManagerResolver
 import cn.llonvne.entity.role.*
 import cn.llonvne.entity.role.GroupManager.GroupMangerImpl
 import cn.llonvne.entity.role.InviteMember.InviteMemberImpl
@@ -20,8 +22,8 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.RoutingModule
-import cn.llonvne.model.TeamModel
 import io.kvision.core.Container
+import io.kvision.core.onClickLaunch
 import io.kvision.html.*
 import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
@@ -39,6 +41,7 @@ interface GroupMemberShower {
                 PermissionDenied -> emptyMemberShower
                 is ManagerLoadGroup -> ManagerMemberShower(resp)
                 is MemberLoadGroup -> MemberMemberShower(resp)
+                is OwnerLoadGroup -> OwnerMemberShower(resp)
             }
             return memberShower
         }
@@ -49,6 +52,9 @@ interface GroupMemberShower {
     }
 }
 
+/**
+ * 读取小组成功后[LoadGroupSuccessResp]用于显示的基类
+ */
 private abstract class AbstractMemberShower(private val resp: LoadGroupSuccessResp) : GroupMemberShower {
 
     override fun show(target: Container) {
@@ -86,7 +92,8 @@ private abstract class AbstractMemberShower(private val resp: LoadGroupSuccessRe
     protected open fun Div.displayRole(e: GroupMemberDto) = span {
         when (e.role) {
             is DeleteTeam.DeleteTeamImpl -> {}
-            is GroupMangerImpl -> badge(BadgeColor.Red) { +"所有者" }
+            is GroupMangerImpl -> badge(BadgeColor.Red) { +"管理员" }
+            is GroupOwner.GroupOwnerImpl -> badge(BadgeColor.Red) { +"所有者" }
             is InviteMemberImpl -> {}
             is KickMemberImpl -> {}
             is TeamMemberImpl -> {
@@ -122,17 +129,48 @@ private class GuestMemberShower(private val resp: GuestLoadGroup) : AbstractMemb
 }
 
 private class ManagerMemberShower(private val resp: ManagerLoadGroup) : AbstractMemberShower(resp) {
+
+    private val kickMemberResolver = KickMemberResolver(groupId = resp.groupId)
+
     override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> = listOf(
-        defineColumn("操作") {
+        defineColumn("操作") { user ->
             span {
-                badge(BadgeColor.Red) { +"踢出" }
-                badge(BadgeColor.Golden) { +"升级为管理员" }
+                KickOp.from(resp).load(this, user, kickMemberResolver)
             }
         }
     )
 }
 
-private class MemberMemberShower(private val resp: MemberLoadGroup) : AbstractMemberShower(resp){
+
+private fun Span.upgradeToGroupMangerOp(
+    user: GroupMemberDto,
+    upgradeToGroupManagerResolver: UpgradeToGroupManagerResolver
+) = onNotSelf(user) {
+    onNotManager(user) {
+        badge(BadgeColor.Red) {
+            onClickLaunch {
+                upgradeToGroupManagerResolver.resolve(user)
+            }
+            +"升级为管理员"
+        }
+    }
+}
+
+
+
+
+private class OwnerMemberShower(private val resp: OwnerLoadGroup) : AbstractMemberShower(resp) {
+    override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> = listOf(
+        defineColumn("操作") { user ->
+            span {
+                KickOp.from(resp).load(this, user, KickMemberResolver(groupId = resp.groupId))
+                upgradeToGroupMangerOp(user, UpgradeToGroupManagerResolver(groupId = resp.groupId))
+            }
+        }
+    )
+}
+
+private class MemberMemberShower(private val resp: MemberLoadGroup) : AbstractMemberShower(resp) {
     override fun Container.loadButtons() {
         GroupMemberQuitResolver(resp.groupId).load(this)
     }

@@ -44,4 +44,12 @@ object TeamModel {
     suspend fun quit(groupId: GroupId): QuitGroupResp {
         return teamService.quit(groupId, AuthenticationModel.userToken.value)
     }
+
+    suspend fun kick(groupId: GroupId, kickMemberId: Int): KickGroupResp {
+        return teamService.kick(AuthenticationModel.userToken.value, groupId, kickMemberId)
+    }
+
+    suspend fun upgradeGroupManger(groupId: GroupId, userId: Int): UpgradeGroupManagerResp {
+        return teamService.upgradeGroupManager(AuthenticationModel.userToken.value, groupId, userId)
+    }
 }

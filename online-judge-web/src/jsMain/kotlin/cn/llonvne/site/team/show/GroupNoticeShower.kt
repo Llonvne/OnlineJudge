@@ -11,7 +11,7 @@ import io.kvision.core.Container
 import io.kvision.html.h4
 import io.kvision.panel.Root
 
-interface GroupNoticeShower {
+fun interface GroupNoticeShower {
     fun load(root: Container)
 
     companion object {
@@ -22,13 +22,11 @@ interface GroupNoticeShower {
                 PermissionDenied -> emptyNoticeShower
                 is ManagerLoadGroup -> ManagerGroupNoticeShower(resp)
                 is MemberLoadGroup -> MemberGroupNoticeShower(resp)
+                is OwnerLoadGroup -> OwnerGroupNoticeShower(resp)
             }
         }
 
-        private val emptyNoticeShower = object : GroupNoticeShower {
-            override fun load(root: Container) {
-            }
-        }
+        private val emptyNoticeShower = GroupNoticeShower { }
     }
 }
 
@@ -48,3 +46,5 @@ private class GuestGroupNoticeShower(private val resp: GuestLoadGroup) : Abstrac
 private class ManagerGroupNoticeShower(private val resp: ManagerLoadGroup) : AbstractGroupNoticeShower(resp)
 
 private class MemberGroupNoticeShower(private val resp: MemberLoadGroup) : AbstractGroupNoticeShower(resp)
+
+private class OwnerGroupNoticeShower(private val resp: OwnerLoadGroup) : AbstractGroupNoticeShower(resp)

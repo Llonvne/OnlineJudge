@@ -3,6 +3,7 @@ package cn.llonvne.database.resolver
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.DeleteTeam.DeleteTeamImpl
 import cn.llonvne.entity.role.GroupManager.GroupMangerImpl
+import cn.llonvne.entity.role.GroupOwner
 import cn.llonvne.entity.role.InviteMember.InviteMemberImpl
 import cn.llonvne.entity.role.KickMember.KickMemberImpl
 import cn.llonvne.entity.role.TeamIdRole
@@ -24,6 +25,7 @@ class GroupRoleResolver(
             is KickMemberImpl -> 0
             is TeamMemberImpl -> 50
             is TeamSuperManager -> 1000
+            is GroupOwner -> 10000
         }
     }
 

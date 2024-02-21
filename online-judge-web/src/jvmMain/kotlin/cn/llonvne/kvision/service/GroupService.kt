@@ -1,18 +1,16 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.database.repository.GroupRepository
-import cn.llonvne.database.resolver.GroupIdResolver
-import cn.llonvne.database.resolver.GroupLoadResolver
-import cn.llonvne.database.resolver.JoinGroupResolver
+import cn.llonvne.database.resolver.*
+import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.*
+import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.UpdateToIdNotMatchToGroupId
+import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.UserAlreadyHasThisRole
 import cn.llonvne.entity.group.GroupId
-import cn.llonvne.entity.role.CreateGroup
-import cn.llonvne.entity.role.GroupManager
-import cn.llonvne.entity.role.TeamIdRole
-import cn.llonvne.entity.role.TeamMember
-import cn.llonvne.entity.role.TeamMember.TeamMemberImpl
+import cn.llonvne.entity.role.*
 import cn.llonvne.getLogger
 import cn.llonvne.kvision.service.IGroupService.*
 import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
+import cn.llonvne.kvision.service.IGroupService.UpgradeGroupManagerResp.*
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
 import cn.llonvne.security.userRole
@@ -32,7 +30,9 @@ actual class GroupService(
     private val roleService: RoleService,
     private val groupIdResolver: GroupIdResolver,
     private val groupLoadResolver: GroupLoadResolver,
-    private val joinGroupResolver: JoinGroupResolver
+    private val joinGroupResolver: JoinGroupResolver,
+    private val groupKickResolver: GroupKickResolver,
+    private val memberUpgradeResolver: GroupMemberUpgradeResolver
 ) : IGroupService {
 
     private val logger = getLogger()
@@ -54,7 +54,7 @@ actual class GroupService(
             info("$authenticationToken created ${createGroupReq.groupName},id is ${group.groupId}")
 
             roleService.addRole(
-                user.id, GroupManager.GroupMangerImpl(
+                user.id, GroupOwner.GroupOwnerImpl(
                     group.groupId ?: return@track InternalError("创建小组后仍然 id 为空")
                 )
             )
@@ -90,8 +90,37 @@ actual class GroupService(
 
         val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
 
-        roleService.removeRole(user, user.userRole.teamIdRoles(id))
+        roleService.removeRole(user, user.userRole.groupIdRoles(id))
 
         return QuitOk
+    }
+
+    override suspend fun kick(token: AuthenticationToken?, groupId: GroupId, kickMemberId: Int): KickGroupResp {
+        val groupIntId = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
+
+        val kicker = authentication.validate(token) {
+            check(KickMember.KickMemberImpl(groupIntId))
+        } ?: return PermissionDeniedWithMessage("你没有权限踢人哦")
+
+        return groupKickResolver.resolve(groupId, groupIntId, kicker, kickMemberId)
+    }
+
+    override suspend fun upgradeGroupManager(
+        token: AuthenticationToken?,
+        groupId: GroupId,
+        updatee: Int
+    ): UpgradeGroupManagerResp {
+        val groupIntId = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
+        val owner = authentication.validate(token) {
+            check(GroupOwner.GroupOwnerImpl(groupIntId))
+        } ?: return PermissionDeniedWithMessage("你没有权限升级管理员哦")
+        val result =
+            memberUpgradeResolver.resolve(groupId, groupIntId, owner, updatee, GroupManager.GroupMangerImpl(groupIntId))
+        return when (result) {
+            UpdateToIdNotMatchToGroupId -> UpgradeGroupManagerResp.UpdateToIdNotMatchToGroupId(updatee)
+            UserAlreadyHasThisRole -> UpgradeGroupManagerResp.UserAlreadyHasThisRole(updatee)
+            BeUpdatedUserNotFound -> BeManagerNotFound(updatee)
+            Success -> UpgradeManagerOk
+        }
     }
 }

@@ -1,16 +1,11 @@
 package cn.llonvne.site.team.show
 
-import cn.llonvne.compoent.AlertType
-import cn.llonvne.compoent.alert
-import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.group.GroupLoader
-import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
-import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
 import cn.llonvne.model.TeamModel.of
+import cn.llonvne.site.team.show.member.GroupMemberShower
 import io.kvision.core.Container
 import io.kvision.html.*
 import io.kvision.routing.Routing

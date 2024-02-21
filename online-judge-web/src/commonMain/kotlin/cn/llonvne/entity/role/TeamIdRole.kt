@@ -25,7 +25,8 @@ sealed interface TeamIdRole : Role {
 
         fun getManagerRoles(groupId: Int): List<TeamIdRole> {
             return listOf(
-                GroupManager.GroupMangerImpl(groupId)
+                GroupManager.GroupMangerImpl(groupId),
+                GroupOwner.GroupOwnerImpl(groupId)
             )
         }
     }
@@ -94,6 +95,17 @@ sealed interface GroupManager : DeleteTeam, InviteMember, KickMember {
         override fun check(provide: Role): Boolean = checkInternal<GroupManager>(provide)
         override fun toString(): String {
             return simpleName(GroupManager::class)
+        }
+    }
+}
+
+@Serializable
+sealed interface GroupOwner : GroupManager {
+    @Serializable
+    data class GroupOwnerImpl(override val teamId: Int) : GroupOwner {
+        override fun check(provide: Role): Boolean = checkInternal<GroupOwner>(provide)
+        override fun toString(): String {
+            return simpleName(GroupOwner::class)
         }
     }
 }

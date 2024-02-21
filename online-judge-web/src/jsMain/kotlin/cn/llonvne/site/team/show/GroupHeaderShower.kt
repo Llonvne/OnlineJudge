@@ -6,7 +6,7 @@ import cn.llonvne.compoent.badge
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService.*
-import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GuestLoadGroup
+import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.*
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.ll
 import cn.llonvne.message.Messager
@@ -25,8 +25,9 @@ sealed interface GroupHeaderShower {
                 is GroupIdNotFound -> GroupIdNotFoundShower
                 is GuestLoadGroup -> GuestGroupHeaderShower(resp)
                 PermissionDenied -> GroupIdNotFoundShower
-                is LoadGroupResp.ManagerLoadGroup -> ManagerGroupHeaderShower(resp)
-                is LoadGroupResp.MemberLoadGroup -> MemberGroupHeaderShower(resp)
+                is ManagerLoadGroup -> ManagerGroupHeaderShower(resp)
+                is MemberLoadGroup -> MemberGroupHeaderShower(resp)
+                is OwnerLoadGroup -> OwnerLoadGroupShower(resp)
             }
         }
     }
@@ -95,6 +96,8 @@ private abstract class AbstractGroupHeaderShower(private val resp: LoadGroupResp
 
 private open class GuestGroupHeaderShower(private val resp: GuestLoadGroup) : AbstractGroupHeaderShower(resp)
 
-private class ManagerGroupHeaderShower(val resp: LoadGroupResp.ManagerLoadGroup) : AbstractGroupHeaderShower(resp)
+private open class ManagerGroupHeaderShower(val resp: ManagerLoadGroup) : AbstractGroupHeaderShower(resp)
 
-private class MemberGroupHeaderShower(val resp: LoadGroupResp.MemberLoadGroup) : AbstractGroupHeaderShower(resp)
+private class OwnerLoadGroupShower(resp: OwnerLoadGroup) : AbstractGroupHeaderShower(resp)
+
+private class MemberGroupHeaderShower(val resp: MemberLoadGroup) : AbstractGroupHeaderShower(resp)

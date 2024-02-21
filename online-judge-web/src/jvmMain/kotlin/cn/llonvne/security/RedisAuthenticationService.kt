@@ -7,10 +7,7 @@ import cn.llonvne.redis.Redis
 import cn.llonvne.redis.get
 import cn.llonvne.redis.set
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory.getLogger
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Env
 import org.springframework.core.env.Environment
-import org.springframework.core.env.get
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
@@ -43,6 +40,10 @@ class RedisAuthenticationService(
 
     suspend fun isLogin(token: AuthenticationToken?): Boolean {
         return getAuthenticationUser(token) != null
+    }
+
+    suspend fun getAuthenticationUser(id: Int): AuthenticationUser? {
+        return redis.keys("$redisKeyPrefix-$id-*").firstOrNull()?.let { redis.get(it) }
     }
 
     suspend fun getAuthenticationUser(token: AuthenticationToken?): AuthenticationUser? {
@@ -125,5 +126,12 @@ class RedisAuthenticationService(
             log.info("[${userValidatorDsl.validateId}] pass")
             getAuthenticationUser(authenticationToken)
         }
+    }
+
+    suspend fun update(user: AuthenticationUser) {
+        redis.keys("$redisKeyPrefix-${user.id}-*").singleOrNull()
+            ?.let {
+                redis.set(it, user)
+            }
     }
 }

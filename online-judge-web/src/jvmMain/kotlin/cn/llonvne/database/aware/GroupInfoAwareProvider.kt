@@ -5,6 +5,7 @@ import cn.llonvne.database.resolver.GroupRoleResolver
 import cn.llonvne.entity.group.Group
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.GroupManager
+import cn.llonvne.entity.role.GroupOwner
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GroupMemberDtoImpl
 import org.springframework.stereotype.Service
 
@@ -29,14 +30,15 @@ class GroupInfoAwareProvider(
     ) {
 
         suspend fun ownerName(): String {
-            return groupMembersResolver.fromRole(GroupManager.GroupMangerImpl(id)).firstOrNull()?.username ?: "<未找到>"
+            return groupMembersResolver.fromRole(GroupOwner.GroupOwnerImpl(id)).firstOrNull()?.username ?: "<未找到>"
         }
 
         suspend fun membersOfGuest(): List<GroupMemberDtoImpl> {
             return groupMembersResolver.fromGroupId(id).mapNotNull {
                 GroupMemberDtoImpl(
                     username = it.username,
-                    role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null
+                    role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null,
+                    userId = it.id
                 )
             }
         }
@@ -48,5 +50,7 @@ class GroupInfoAwareProvider(
         suspend fun membersOfMember(): List<GroupMemberDtoImpl> {
             return membersOfGuest()
         }
+
+        suspend fun membersOfOwner() = membersOfMember()
     }
 }

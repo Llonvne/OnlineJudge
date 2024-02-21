@@ -42,6 +42,8 @@ class GroupLoadResolver(
                 is KickMember.KickMemberImpl -> loadAsGuestOrReject()
                 is TeamMember.TeamMemberImpl -> loadAsMember()
                 is TeamSuperManager -> loadAsSuperManager()
+                is GroupOwner -> loadAsOwner()
+                is GroupManager -> loadAsGroupManager()
             }
         }
     }
@@ -96,5 +98,20 @@ class GroupLoadResolver(
     context(GroupInfoAware)
     suspend fun loadAsSuperManager(): LoadGroupResp {
         TODO()
+    }
+
+    context(GroupInfoAware)
+    suspend fun loadAsOwner(): LoadGroupResp {
+        return OwnerLoadGroup(
+            groupId = groupId,
+            groupName = group.groupName,
+            groupShortName = group.groupShortName,
+            visibility = group.visibility,
+            type = group.type,
+            ownerName = ownerName(),
+            members = membersOfOwner(),
+            description = group.description,
+            createAt = group.createdAt!!
+        )
     }
 }

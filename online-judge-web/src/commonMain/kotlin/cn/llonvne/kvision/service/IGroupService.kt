@@ -10,6 +10,7 @@ import cn.llonvne.kvision.service.Validatable.Companion.validate
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -101,13 +102,30 @@ interface IGroupService {
         ) : LoadGroupSuccessResp
 
         @Serializable
+        data class OwnerLoadGroup(
+            override val groupId: GroupId,
+            override val groupName: String,
+            override val groupShortName: String,
+            override val visibility: GroupVisibility,
+            @SerialName("groupType") override val type: GroupType,
+            override val ownerName: String,
+            override val description: String,
+            override val members: List<GroupMemberDtoImpl>,
+            override val createAt: LocalDateTime
+        ) : LoadGroupSuccessResp
+
+        @Serializable
         sealed interface GroupMemberDto {
             val username: String
             val role: TeamIdRole
+            val userId: Int
         }
 
         @Serializable
-        data class GroupMemberDtoImpl(override val username: String, override val role: TeamIdRole) : GroupMemberDto
+        data class GroupMemberDtoImpl(
+            override val username: String, override val role: TeamIdRole,
+            override val userId: Int
+        ) : GroupMemberDto
     }
 
     suspend fun load(authenticationToken: AuthenticationToken?, groupId: GroupId): LoadGroupResp
@@ -133,4 +151,39 @@ interface IGroupService {
     data object QuitOk : QuitGroupResp
 
     suspend fun quit(groupId: GroupId, value: AuthenticationToken?): QuitGroupResp
+
+    @Serializable
+    sealed interface KickGroupResp {
+        @Serializable
+        data class KickMemberNotFound(val memberId: Int) : KickGroupResp
+
+        @Serializable
+        data class KickMemberGroupIdRoleFound(val memberId: Int, val groupId: GroupId) : KickGroupResp
+
+        @Serializable
+        data object Kicked : KickGroupResp
+    }
+
+    suspend fun kick(token: AuthenticationToken?, groupId: GroupId, kickMemberId: Int): KickGroupResp
+
+    @Serializable
+    sealed interface UpgradeGroupManagerResp {
+        @Serializable
+        data object UpgradeManagerOk : UpgradeGroupManagerResp
+
+        @Serializable
+        data class BeManagerNotFound(val userId: Int) : UpgradeGroupManagerResp
+
+        @Serializable
+        data class UserAlreadyHasThisRole(val userId: Int) : UpgradeGroupManagerResp
+
+        @Serializable
+        data class UpdateToIdNotMatchToGroupId(val userId: Int) : UpgradeGroupManagerResp
+    }
+
+    suspend fun upgradeGroupManager(
+        token: AuthenticationToken?,
+        groupId: GroupId,
+        updatee: Int
+    ): UpgradeGroupManagerResp
 }

@@ -14,6 +14,8 @@ interface Redis {
     suspend fun set(key: String, value: String): String
 
     suspend fun clear(key: String)
+
+    suspend fun keys(pattern: String): Set<String>
 }
 
 @OptIn(ExperimentalTypeInference::class)
@@ -52,5 +54,9 @@ private class RedisImpl : Redis {
     override suspend fun clear(key: String) = onRedis {
         del(key).await()
         Unit
+    }
+
+    override suspend fun keys(pattern: String): Set<String> = onRedis {
+        keys(pattern).await().toSet()
     }
 }
