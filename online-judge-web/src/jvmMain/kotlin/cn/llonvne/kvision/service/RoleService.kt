@@ -42,4 +42,13 @@ class RoleService(
         saveToRedis(userId = user.id, newRoles)
         return true
     }
+
+    suspend fun removeRole(userId: Int, roles: List<Role>): Boolean {
+        val userRoleStr = roleRepository.getRoleStrByUserId(userId) ?: return false
+        val originRole = fromUserRoleString(userRoleStr) ?: UserRole.default()
+        val newRole = UserRole((originRole.roles - roles.toSet()).toList())
+        roleRepository.setRoleStrByUserId(userId, newRole)
+        saveToRedis(userId, newRole)
+        return true
+    }
 }

@@ -10,7 +10,6 @@ import cn.llonvne.kvision.service.Validatable.Companion.validate
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -167,18 +166,18 @@ interface IGroupService {
     suspend fun kick(token: AuthenticationToken?, groupId: GroupId, kickMemberId: Int): KickGroupResp
 
     @Serializable
+    data class BeUpOrDowngradedUserNotfound(val userId: Int) : UpgradeGroupManagerResp, DowngradeToMemberResp
+
+    @Serializable
+    data class UserAlreadyHasThisRole(val userId: Int) : UpgradeGroupManagerResp, DowngradeToMemberResp
+
+    @Serializable
+    data class UpOrDowngradeToIdNotMatchToGroupId(val userId: Int) : UpgradeGroupManagerResp
+
+    @Serializable
     sealed interface UpgradeGroupManagerResp {
         @Serializable
         data object UpgradeManagerOk : UpgradeGroupManagerResp
-
-        @Serializable
-        data class BeManagerNotFound(val userId: Int) : UpgradeGroupManagerResp
-
-        @Serializable
-        data class UserAlreadyHasThisRole(val userId: Int) : UpgradeGroupManagerResp
-
-        @Serializable
-        data class UpdateToIdNotMatchToGroupId(val userId: Int) : UpgradeGroupManagerResp
     }
 
     suspend fun upgradeGroupManager(
@@ -186,4 +185,16 @@ interface IGroupService {
         groupId: GroupId,
         updatee: Int
     ): UpgradeGroupManagerResp
+
+    @Serializable
+    sealed interface DowngradeToMemberResp {
+        @Serializable
+        data class DowngradeToMemberOk(val userId: Int) : DowngradeToMemberResp
+    }
+
+    suspend fun downgradeToMember(
+        authenticationToken: AuthenticationToken?,
+        groupId: GroupId,
+        userId: Int
+    ): DowngradeToMemberResp
 }

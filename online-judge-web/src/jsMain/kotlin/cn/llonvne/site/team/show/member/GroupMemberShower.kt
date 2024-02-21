@@ -4,10 +4,7 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.defineColumn
-import cn.llonvne.compoent.team.GroupMemberQuitResolver
-import cn.llonvne.compoent.team.JoinGroupResolver
-import cn.llonvne.compoent.team.KickMemberResolver
-import cn.llonvne.compoent.team.UpgradeToGroupManagerResolver
+import cn.llonvne.compoent.team.*
 import cn.llonvne.entity.role.*
 import cn.llonvne.entity.role.GroupManager.GroupMangerImpl
 import cn.llonvne.entity.role.InviteMember.InviteMemberImpl
@@ -157,6 +154,19 @@ private fun Span.upgradeToGroupMangerOp(
 }
 
 
+private fun Span.downgradeToGroupMemberOp(
+    user: GroupMemberDto,
+    downgradeToGroupMemberResolver: DowngradeToGroupMemberResolver
+) = onNotSelf(user) {
+    onManager(user) {
+        badge(BadgeColor.Red) {
+            onClickLaunch {
+                downgradeToGroupMemberResolver.resolve(user)
+            }
+            +"降级为成员"
+        }
+    }
+}
 
 
 private class OwnerMemberShower(private val resp: OwnerLoadGroup) : AbstractMemberShower(resp) {
@@ -165,6 +175,7 @@ private class OwnerMemberShower(private val resp: OwnerLoadGroup) : AbstractMemb
             span {
                 KickOp.from(resp).load(this, user, KickMemberResolver(groupId = resp.groupId))
                 upgradeToGroupMangerOp(user, UpgradeToGroupManagerResolver(groupId = resp.groupId))
+                downgradeToGroupMemberOp(user, DowngradeToGroupMemberResolver(resp.groupId))
             }
         }
     )

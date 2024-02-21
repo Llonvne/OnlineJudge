@@ -18,4 +18,4 @@ data object PermissionDenied : CreateProblemResp,
 
 @Serializable
 data class PermissionDeniedWithMessage(val message: String) : IGroupService.KickGroupResp,
-    IGroupService.UpgradeGroupManagerResp
+    IGroupService.UpgradeGroupManagerResp, IGroupService.DowngradeToMemberResp

@@ -9,4 +9,4 @@ data class GroupShortNameUnavailable(val shortName: String) : CreateGroupResp
 
 @Serializable
 data class GroupIdNotFound(val groupId: GroupId) : LoadGroupResp, JoinGroupResp, QuitGroupResp, KickGroupResp,
-    UpgradeGroupManagerResp
+    UpgradeGroupManagerResp, DowngradeToMemberResp

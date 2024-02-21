@@ -2,6 +2,9 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.database.repository.GroupRepository
 import cn.llonvne.database.resolver.*
+import cn.llonvne.database.resolver.GroupMangerDowngradeResolver.GroupManagerDowngradeResult
+import cn.llonvne.database.resolver.GroupMangerDowngradeResolver.GroupManagerDowngradeResult.BeDowngradeUserNotFound
+import cn.llonvne.database.resolver.GroupMangerDowngradeResolver.GroupManagerDowngradeResult.DowngradeToIdNotMatchToGroupId
 import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.*
 import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.UpdateToIdNotMatchToGroupId
 import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.UserAlreadyHasThisRole
@@ -32,7 +35,8 @@ actual class GroupService(
     private val groupLoadResolver: GroupLoadResolver,
     private val joinGroupResolver: JoinGroupResolver,
     private val groupKickResolver: GroupKickResolver,
-    private val memberUpgradeResolver: GroupMemberUpgradeResolver
+    private val memberUpgradeResolver: GroupMemberUpgradeResolver,
+    private val groupMangerDowngradeResolver: GroupMangerDowngradeResolver
 ) : IGroupService {
 
     private val logger = getLogger()
@@ -117,10 +121,33 @@ actual class GroupService(
         val result =
             memberUpgradeResolver.resolve(groupId, groupIntId, owner, updatee, GroupManager.GroupMangerImpl(groupIntId))
         return when (result) {
-            UpdateToIdNotMatchToGroupId -> UpgradeGroupManagerResp.UpdateToIdNotMatchToGroupId(updatee)
-            UserAlreadyHasThisRole -> UpgradeGroupManagerResp.UserAlreadyHasThisRole(updatee)
-            BeUpdatedUserNotFound -> BeManagerNotFound(updatee)
+            UpdateToIdNotMatchToGroupId -> UpOrDowngradeToIdNotMatchToGroupId(updatee)
+            UserAlreadyHasThisRole -> IGroupService.UserAlreadyHasThisRole(updatee)
+            BeUpdatedUserNotFound -> BeUpOrDowngradedUserNotfound(updatee)
             Success -> UpgradeManagerOk
+        }
+    }
+
+    override suspend fun downgradeToMember(
+        authenticationToken: AuthenticationToken?,
+        groupId: GroupId,
+        userId: Int
+    ): DowngradeToMemberResp {
+        val groupIntid = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
+        val owner = authentication.validate(authenticationToken) {
+            check(GroupOwner.GroupOwnerImpl(groupIntid))
+        } ?: return PermissionDeniedWithMessage("你没有权限降级管理员哦")
+
+        return when (groupMangerDowngradeResolver.resolve(
+            groupId,
+            groupIntid,
+            owner,
+            userId,
+        )) {
+            DowngradeToIdNotMatchToGroupId -> IGroupService.UserAlreadyHasThisRole(userId)
+            BeDowngradeUserNotFound -> BeUpOrDowngradedUserNotfound(userId)
+            GroupManagerDowngradeResult.Success -> DowngradeToMemberResp.DowngradeToMemberOk(userId)
+            GroupManagerDowngradeResult.UserAlreadyHasThisRole -> IGroupService.UserAlreadyHasThisRole(userId)
         }
     }
 }
