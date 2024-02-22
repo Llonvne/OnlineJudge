@@ -1,4 +1,4 @@
-package cn.llonvne.entity.problem
+package cn.llonvne.entity.problem.context
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
@@ -18,6 +18,9 @@ data class Problem(
     val timeLimit: Long,
     // 内存限制
     val memoryLimit: Long,
+    val visibility: ProblemVisibility,
+    val type: ProblemType,
+    val contextJson: String,
 
     //--- 数据库信息区 ---//
     val version: Int? = null,

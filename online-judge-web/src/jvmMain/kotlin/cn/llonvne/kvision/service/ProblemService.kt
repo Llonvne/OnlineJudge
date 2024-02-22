@@ -5,7 +5,8 @@ import cn.llonvne.database.repository.AuthorRepository
 import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.database.repository.SubmissionRepository
 import cn.llonvne.dtos.ProblemListDto
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
+import cn.llonvne.kvision.service.IProblemService.CreateProblemResp.AuthorIdNotExist
 import cn.llonvne.kvision.service.exception.ProblemIdDoNotExistAfterCreation
 import cn.llonvne.security.AuthenticationToken
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -38,7 +39,7 @@ actual class ProblemService(
         }
 
         if (!authorRepository.isAuthorIdExist(createProblemReq.authorId)) {
-            return IProblemService.CreateProblemResp.AuthorIdNotExist(createProblemReq.authorId)
+            return AuthorIdNotExist(createProblemReq.authorId)
         }
 
         val problem = problemRepository.create(Problem.fromCreateReq(createProblemReq))
@@ -46,7 +47,6 @@ actual class ProblemService(
         if (problem.problemId == null) {
             throw ProblemIdDoNotExistAfterCreation()
         }
-
 
         return IProblemService.CreateProblemResp.Ok(problem.problemId)
     }

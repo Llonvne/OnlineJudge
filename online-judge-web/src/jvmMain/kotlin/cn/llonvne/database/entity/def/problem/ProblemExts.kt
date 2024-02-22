@@ -1,12 +1,23 @@
 package cn.llonvne.database.entity.def.problem
 
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
+import cn.llonvne.entity.problem.context.ProblemContext
+import cn.llonvne.entity.problem.context.ProblemTestCases
 import cn.llonvne.kvision.service.IProblemService
+import cn.llonvne.kvision.service.IProblemService.CreateProblemReq
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-fun Problem.Companion.fromCreateReq(createProblemReq: IProblemService.CreateProblemReq) = Problem(
-    authorId = createProblemReq.authorId,
-    problemName = createProblemReq.problemName,
-    memoryLimit = createProblemReq.memoryLimit,
-    timeLimit = createProblemReq.timeLimit,
-    problemDescription = createProblemReq.problemDescription
-)
+private val json = Json
+
+fun Problem.Companion.fromCreateReq(createProblemReq: CreateProblemReq) =
+    Problem(
+        authorId = createProblemReq.authorId,
+        problemName = createProblemReq.problemName,
+        memoryLimit = createProblemReq.memoryLimit,
+        timeLimit = createProblemReq.timeLimit,
+        problemDescription = createProblemReq.problemDescription,
+        visibility = createProblemReq.visibility,
+        type = createProblemReq.type,
+        contextJson = json.encodeToString(createProblemReq.problemContext)
+    )

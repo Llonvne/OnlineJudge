@@ -5,7 +5,7 @@ import cn.llonvne.database.entity.def.problem.problem
 import cn.llonvne.database.entity.def.problem.tag.problemTag
 import cn.llonvne.database.entity.problemSupportLanguage
 import cn.llonvne.entity.problem.Language
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.ProblemTag
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl

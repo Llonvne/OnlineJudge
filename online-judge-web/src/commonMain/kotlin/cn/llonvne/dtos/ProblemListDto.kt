@@ -1,7 +1,7 @@
 package cn.llonvne.dtos
 
 import cn.llonvne.entity.Author
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.ProblemTag
 import cn.llonvne.entity.types.ProblemStatus
 import kotlinx.serialization.Serializable

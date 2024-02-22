@@ -10,6 +10,7 @@ import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.ICodeService.SaveCodeResp.SuccessfulSaveCode
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.Ok
+import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.ProblemNotFound
 import cn.llonvne.kvision.service.LanguageNotFound
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.ll
@@ -34,6 +35,36 @@ data class SubmissionSubmit(
     val code: String?,
     val visibilityTypeStr: String
 )
+
+
+fun detail(root: Container, routing: Routing, problemId: Int) {
+
+}
+
+fun interface ProblemDetailShower {
+    fun show(root: Container)
+
+    companion object {
+
+        private fun problemNotFoundDetailShower(problemId: Int) = ProblemDetailShower { root ->
+            root.notFound(object : NotFoundAble {
+                override val header: String
+                    get() = "题目未找到"
+                override val notice: String
+                    get() = "请确认题目ID正确，如果确认题目ID正确，请联系我们 ^_^"
+                override val errorCode: String = "ProblemNotFound-$problemId"
+            })
+        }
+
+        fun from(problemId: Int, resp: ProblemGetByIdResult) {
+            when (resp) {
+                is Ok -> TODO()
+                ProblemNotFound -> problemNotFoundDetailShower(problemId = problemId)
+            }
+        }
+    }
+}
+
 
 fun Container.detail(routing: Routing, id: Int) {
     observableProblemOf(id) { resp ->
@@ -64,7 +95,7 @@ fun Container.detail(routing: Routing, id: Int) {
                     }
                 }
 
-                ProblemGetByIdResult.ProblemNotFound -> {
+                ProblemNotFound -> {
                     notFound(object : NotFoundAble {
                         override val header: String
                             get() = "题目未找到"
@@ -82,7 +113,11 @@ fun Container.detail(routing: Routing, id: Int) {
             div(className = "col") {
                 alert(AlertType.Light) {
                     h4 {
-                        +"题目描述"
+                        +"题目任务"
+                    }
+
+                    p {
+
                     }
                 }
             }

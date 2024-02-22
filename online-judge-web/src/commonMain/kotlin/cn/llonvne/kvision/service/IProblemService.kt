@@ -1,8 +1,10 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.ProblemListDto
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemContext
+import cn.llonvne.entity.problem.context.ProblemType
+import cn.llonvne.entity.problem.context.ProblemVisibility
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -16,7 +18,9 @@ interface IProblemService {
         val problemContext: ProblemContext,
         val authorId: Int,
         val timeLimit: Long,
-        val memoryLimit: Long
+        val memoryLimit: Long,
+        val visibility: ProblemVisibility,
+        val type: ProblemType,
     )
 
     @Serializable

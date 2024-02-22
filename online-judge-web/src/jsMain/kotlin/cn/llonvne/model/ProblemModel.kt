@@ -2,6 +2,11 @@ package cn.llonvne.model
 
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.context.ProblemContext
+import cn.llonvne.entity.problem.context.ProblemTestCases
+import cn.llonvne.entity.problem.context.ProblemType
+import cn.llonvne.entity.problem.context.ProblemVisibility
+import cn.llonvne.entity.problem.context.passer.ProblemPasser.Companion
+import cn.llonvne.entity.problem.context.passer.ProblemPasser.PassAllCases
 import cn.llonvne.kvision.service.IProblemService
 import cn.llonvne.kvision.service.IProblemService.CreateProblemReq
 import cn.llonvne.kvision.service.IProblemService.CreateProblemResp
@@ -29,10 +34,25 @@ object ProblemModel {
             CreateProblemReq(
                 problemForm.problemName,
                 problemForm.problemDescription,
-                ProblemContext(context = ""),
+                ProblemContext(
+                    inputDescription = problemForm.inputDescr,
+                    outputDescription = problemForm.outputDescr,
+                    hint = problemForm.hint,
+                    testCases = ProblemTestCases(
+                        testCases = listOf(),
+                        passer = PassAllCases
+                    ),
+                    overall = problemForm.overall
+                ),
                 authorId = problemForm.authorId,
                 memoryLimit = problemForm.memoryLimit,
-                timeLimit = problemForm.timeLimit
+                timeLimit = problemForm.timeLimit,
+                visibility = problemForm.problemVisibilityInt.let {
+                    ProblemVisibility.entries[it.toInt()]
+                },
+                type = problemForm.problemTypeInt.let {
+                    ProblemType.entries[it.toInt()]
+                }
             )
         )
     }

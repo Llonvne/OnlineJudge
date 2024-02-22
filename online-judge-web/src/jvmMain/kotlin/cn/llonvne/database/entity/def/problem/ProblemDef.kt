@@ -1,6 +1,8 @@
 package cn.llonvne.database.entity.def.problem
 
-import cn.llonvne.entity.problem.Problem
+import cn.llonvne.entity.problem.context.Problem
+import cn.llonvne.entity.problem.context.ProblemType
+import cn.llonvne.entity.problem.context.ProblemVisibility
 import org.komapper.annotation.*
 
 @KomapperEntityDef(Problem::class)
@@ -20,6 +22,9 @@ private data class ProblemDef(
     val timeLimit: Nothing,
     // 内存限制
     val memoryLimit: Nothing,
+    val visibility: ProblemVisibility,
+    val type: ProblemType,
+    val contextJson: String,
 
     //--- 数据库信息区 ---//
     @KomapperVersion
