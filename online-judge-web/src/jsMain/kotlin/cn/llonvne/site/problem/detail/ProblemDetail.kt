@@ -62,6 +62,8 @@ private open class AbstractProblemDetailShower(resp: GetProblemByIdOk) : Problem
 
     private val codeEditorShower = CodeEditorShower.from(resp)
 
+    private val testCasesShower = TestCasesShower.from(resp)
+
     override fun show(root: Container) {
         root.div {
             headerShower.show(div { })
@@ -69,6 +71,8 @@ private open class AbstractProblemDetailShower(resp: GetProblemByIdOk) : Problem
             div(className = "row") {
                 div(className = "col") {
                     contextShower.show(div { })
+
+                    testCasesShower.load(div { })
                 }
                 div(className = "col") {
                     codeEditorShower.show(div { })

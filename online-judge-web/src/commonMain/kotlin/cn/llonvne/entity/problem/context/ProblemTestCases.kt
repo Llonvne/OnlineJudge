@@ -17,4 +17,11 @@ data class ProblemTestCases(
         override val output: String,
         override val visibility: TestCaseType,
     ) : TestCase
+
+    fun canShow() = testCases.filter {
+        it.visibility in setOf(
+            TestCaseType.OnlyForView,
+            TestCaseType.ViewAndJudge
+        )
+    }
 }

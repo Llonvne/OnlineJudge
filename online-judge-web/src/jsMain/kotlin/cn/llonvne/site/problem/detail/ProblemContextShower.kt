@@ -26,7 +26,7 @@ private open class AbstractProblemContextShower(private val resp: GetProblemById
             h4 {
                 +"任务说明"
             }
-            p {
+            p(rich = true) {
                 +context.overall
             }
 
