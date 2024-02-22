@@ -3,6 +3,7 @@ package cn.llonvne.site.problem.detail
 import cn.llonvne.compoent.*
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.compoent.observable.observableProblemOf
+import cn.llonvne.entity.problem.context.TestCaseType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.ProblemNotFound
@@ -62,7 +63,9 @@ private open class AbstractProblemDetailShower(resp: GetProblemByIdOk) : Problem
 
     private val codeEditorShower = CodeEditorShower.from(resp)
 
-    private val testCasesShower = TestCasesShower.from(resp)
+    private val testCasesShower = TestCasesShower.from(resp, filter = {
+        it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)
+    })
 
     override fun show(root: Container) {
         root.div {

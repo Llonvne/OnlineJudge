@@ -2,28 +2,29 @@ package cn.llonvne.site.problem
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
-import cn.llonvne.compoent.navigateButton
-import cn.llonvne.constants.Frontend
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.context.ProblemTestCases
+import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
+import cn.llonvne.entity.problem.context.TestCaseType
 import cn.llonvne.entity.problem.context.passer.ProblemPasser
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.ProblemModel
+import cn.llonvne.site.problem.detail.TestCasesShower
 import io.kvision.core.Container
+import io.kvision.core.onClick
 import io.kvision.core.onClickLaunch
 import io.kvision.form.formPanel
 import io.kvision.form.number.Numeric
 import io.kvision.form.select.TomSelect
 import io.kvision.form.text.RichText
 import io.kvision.form.text.Text
-import io.kvision.form.text.TextArea
 import io.kvision.html.*
 import io.kvision.routing.Routing
 import io.kvision.state.bind
-import io.kvision.utils.px
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -42,6 +43,14 @@ data class CreateProblemForm(
     val problemSupportLanguages: String,
 )
 
+@Serializable
+data class ProblemTestCaseForm(
+    val name: String,
+    val input: String,
+    val output: String,
+    val visibilityStr: String,
+)
+
 fun Container.createProblem(routing: Routing) {
 
     alert(AlertType.Success) {
@@ -54,14 +63,14 @@ fun Container.createProblem(routing: Routing) {
         }
     }
 
-    val panel = formPanel<CreateProblemForm> { }
-
-    val testCases = ProblemTestCases(listOf(), ProblemPasser.PassAllCases)
+    val testCases = ProblemTestCases(
+        listOf(), ProblemPasser.PassAllCases
+    )
 
     div(className = "row") {
         div(className = "col") {
             alert(AlertType.Light) {
-                with(panel) {
+                val panel = formPanel {
                     add(CreateProblemForm::problemName, Text(label = "题目名字"))
                     add(CreateProblemForm::problemDescription, Text(label = "题目描述"))
                     add(CreateProblemForm::timeLimit, Numeric(min = 0, max = 1_0000_0000, label = "时间限制"))
@@ -120,15 +129,66 @@ fun Container.createProblem(routing: Routing) {
             }
         }
         div(className = "col") {
-            alert(AlertType.Info) {
+            alert(AlertType.Light) {
                 h4 {
                     +"测试样例"
                 }
+                observableOf(testCases) {
+                    sync(div { }) { cases ->
+                        console.log(cases)
+                        if (cases != null) {
+                            TestCasesShower.from(cases.testCases, withoutTitle = true) { case ->
+                                add {
+                                    +"删除"
 
-                
+                                    onClick {
+                                        setObv(cases.copy(testCases = cases.testCases - case, passer = cases.passer))
+                                    }
+                                }
+                            }
+                                .load(this)
+                        }
+
+                        val testCaseForm = formPanel<ProblemTestCaseForm> {
+                            add(ProblemTestCaseForm::name, Text(label = "测试样例名称"), required = true)
+                            add(ProblemTestCaseForm::input, Text(label = "输入"), required = true)
+                            add(ProblemTestCaseForm::output, Text(label = "输出"), required = true)
+                            add(ProblemTestCaseForm::visibilityStr, TomSelect(
+                                label = "类型",
+                                options = TestCaseType.entries.map {
+                                    it.ordinal.toString() to it.chinese
+                                }
+                            ), required = true)
+
+                            getChildren().forEach { it.addCssClass("small") }
+                        }
+
+
+
+                        button("增加一个样例") {
+                            onClickLaunch {
+                                setObv(
+                                    testCases.copy(
+                                        (cases?.testCases ?: listOf()) +
+                                                testCaseForm.getData().let { form ->
+                                                    ProblemTestCase(
+                                                        "",
+                                                        form.name,
+                                                        form.input,
+                                                        form.output,
+                                                        form.visibilityStr.let {
+                                                            TestCaseType.entries[it.toIntOrNull()
+                                                                ?: return@onClickLaunch Messager.toastInfo("测试样例类型无效")]
+                                                        })
+                                                }
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-
 
 }
