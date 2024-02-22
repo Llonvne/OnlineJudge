@@ -24,7 +24,7 @@ object ProblemModel {
 
     suspend fun listProblem() = problemService.list(AuthenticationModel.userToken.value)
 
-    suspend fun create(problemForm: CreateProblemForm): CreateProblemResp {
+    suspend fun create(problemForm: CreateProblemForm, testCases: ProblemTestCases): CreateProblemResp {
 
         if (AuthenticationModel.userToken.value == null) {
             Messager.send(ToastMessage(MessageLevel.Warning, "必须要登入才能发送消息哦"))
@@ -40,10 +40,7 @@ object ProblemModel {
                     inputDescription = problemForm.inputDescr,
                     outputDescription = problemForm.outputDescr,
                     hint = problemForm.hint,
-                    testCases = ProblemTestCases(
-                        testCases = listOf(),
-                        passer = PassAllCases
-                    ),
+                    testCases = testCases,
                     overall = problemForm.overall
                 ),
                 authorId = problemForm.authorId,
