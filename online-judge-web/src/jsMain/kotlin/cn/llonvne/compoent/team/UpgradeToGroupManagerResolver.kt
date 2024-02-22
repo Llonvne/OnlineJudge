@@ -4,7 +4,7 @@ import cn.llonvne.entity.group.GroupId
 import cn.llonvne.kvision.service.GroupIdNotFound
 import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GroupMemberDto
-import cn.llonvne.kvision.service.IGroupService.UpgradeGroupManagerResp.*
+import cn.llonvne.kvision.service.IGroupService.UpgradeGroupManagerResp.UpgradeManagerOk
 import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel

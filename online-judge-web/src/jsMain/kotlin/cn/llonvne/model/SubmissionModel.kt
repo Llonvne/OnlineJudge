@@ -40,4 +40,8 @@ object SubmissionModel {
         submissionService.getLastNPlaygroundSubmission(
             AuthenticationModel.userToken.value, lastN
         )
+
+    suspend fun submit(problemSubmissionReq: ProblemSubmissionReq) {
+        submissionService.submit(AuthenticationModel.userToken.value, problemSubmissionReq)
+    }
 }

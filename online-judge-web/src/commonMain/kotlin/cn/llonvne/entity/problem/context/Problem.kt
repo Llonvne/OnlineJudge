@@ -10,6 +10,7 @@ data class Problem(
     val problemId: Int? = null,
     // 作者 ID
     val authorId: Int,
+    val ownerId: Int,
 
     // 题目名字
     val problemName: String,

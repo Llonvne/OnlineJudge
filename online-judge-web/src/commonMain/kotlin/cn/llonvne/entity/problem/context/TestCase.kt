@@ -7,6 +7,6 @@ sealed interface TestCase {
     val id: String
     val name: String
     val input: String
-    val output: String
+    val expect: String
     val visibility: TestCaseType
 }

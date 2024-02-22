@@ -2,7 +2,6 @@ package cn.llonvne.site.team.show.member
 
 import cn.llonvne.entity.role.GroupManager
 import cn.llonvne.entity.role.GroupOwner
-import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GroupMemberDto
 import cn.llonvne.model.AuthenticationModel
 

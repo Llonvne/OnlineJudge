@@ -59,7 +59,7 @@ private open class AbstractTestCasesShower(
                 label { +"输出" }
                 customTag("pre") {
                     code {
-                        +testcase.output
+                        +testcase.expect
                     }
                 }
 

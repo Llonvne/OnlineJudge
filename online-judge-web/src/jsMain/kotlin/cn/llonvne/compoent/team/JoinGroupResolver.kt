@@ -2,9 +2,7 @@ package cn.llonvne.compoent.team
 
 import cn.llonvne.AppScope
 import cn.llonvne.entity.group.GroupId
-import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.kvision.service.GroupIdNotFound
-import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.JoinGroupResp.*
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager

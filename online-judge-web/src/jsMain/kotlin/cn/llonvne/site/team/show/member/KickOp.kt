@@ -2,15 +2,10 @@ package cn.llonvne.site.team.show.member
 
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.team.KickMemberResolver
-import cn.llonvne.entity.role.GroupManager
-import cn.llonvne.entity.role.GroupOwner
 import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.*
-import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.onClickLaunch
 import io.kvision.html.Span
-
 
 
 fun interface KickOp {

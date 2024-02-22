@@ -1,4 +1,4 @@
-package cn.llonvne.database.resolver
+package cn.llonvne.database.resolver.group
 
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.entity.AuthenticationUser

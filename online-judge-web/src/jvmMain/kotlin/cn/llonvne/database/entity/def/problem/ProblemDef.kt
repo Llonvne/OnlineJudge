@@ -13,6 +13,7 @@ private data class ProblemDef(
     val problemId: Nothing,
     // 作者 ID
     val authorId: Nothing,
+    val ownerId: Int,
 
     // 题目名字
     val problemName: Nothing,

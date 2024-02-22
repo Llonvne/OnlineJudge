@@ -1,19 +1,14 @@
-package cn.llonvne.database.resolver
+package cn.llonvne.database.resolver.group
 
 import cn.llonvne.database.repository.GroupRepository
-import cn.llonvne.database.resolver.JoinGroupVisibilityCheckResolver.JoinGroupVisibilityCheckResult.*
+import cn.llonvne.database.resolver.group.JoinGroupVisibilityCheckResolver.JoinGroupVisibilityCheckResult.*
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.GroupId
-import cn.llonvne.entity.role.GroupManager
 import cn.llonvne.entity.role.TeamIdRole
 import cn.llonvne.entity.role.TeamMember
 import cn.llonvne.kvision.service.GroupIdNotFound
-import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.JoinGroupResp
 import cn.llonvne.kvision.service.RoleService
-import cn.llonvne.security.UserRole
-import cn.llonvne.security.check
-import cn.llonvne.security.userRole
 import org.springframework.stereotype.Service
 
 @Service

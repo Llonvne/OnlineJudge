@@ -24,7 +24,7 @@ interface IProblemService {
         val memoryLimit: Long,
         val visibility: ProblemVisibility,
         val type: ProblemType,
-        val supportLanguages: List<Language>
+        val supportLanguages: List<Language>,
     )
 
     @Serializable

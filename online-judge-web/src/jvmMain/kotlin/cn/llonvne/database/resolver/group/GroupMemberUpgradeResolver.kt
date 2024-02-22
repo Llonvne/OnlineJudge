@@ -1,6 +1,6 @@
-package cn.llonvne.database.resolver
+package cn.llonvne.database.resolver.group
 
-import cn.llonvne.database.resolver.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.*
+import cn.llonvne.database.resolver.group.GroupMemberUpgradeResolver.GroupMemberUpgradeResult.*
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.TeamIdRole

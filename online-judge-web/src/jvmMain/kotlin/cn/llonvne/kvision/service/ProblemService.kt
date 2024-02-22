@@ -45,7 +45,12 @@ actual class ProblemService(
             return AuthorIdNotExist(createProblemReq.authorId)
         }
 
-        val problem = problemRepository.create(Problem.fromCreateReq(createProblemReq))
+        val problem = problemRepository.create(
+            Problem.fromCreateReq(
+                createProblemReq,
+                ownerId = authenticationToken.id
+            )
+        )
 
         if (problem.problemId == null) {
             throw ProblemIdDoNotExistAfterCreation()
@@ -70,8 +75,8 @@ actual class ProblemService(
 
     override suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto> {
         return problemRepository.search(text).mapNotNull {
-                it.listDto(token)
-            }
+            it.listDto(token)
+        }
     }
 
     private suspend fun Problem.listDto(token: AuthenticationToken?): ProblemListDto? {

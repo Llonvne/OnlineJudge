@@ -19,7 +19,6 @@ import io.kvision.html.button
 import io.kvision.html.div
 import io.kvision.html.h1
 import io.kvision.html.p
-import io.kvision.i18n.tr
 import io.kvision.routing.Routing
 import kotlinx.serialization.Serializable
 

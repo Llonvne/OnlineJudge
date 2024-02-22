@@ -7,7 +7,7 @@ import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
 import cn.llonvne.model.TeamModel.of
 import cn.llonvne.site.team.show.member.GroupMemberShower
 import io.kvision.core.Container
-import io.kvision.html.*
+import io.kvision.html.div
 import io.kvision.routing.Routing
 
 fun showGroup(root: Container, groupId: GroupId, routing: Routing) {

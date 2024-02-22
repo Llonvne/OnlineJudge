@@ -5,8 +5,9 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.defineColumn
 import cn.llonvne.compoent.team.*
-import cn.llonvne.entity.role.*
+import cn.llonvne.entity.role.DeleteTeam
 import cn.llonvne.entity.role.GroupManager.GroupMangerImpl
+import cn.llonvne.entity.role.GroupOwner
 import cn.llonvne.entity.role.InviteMember.InviteMemberImpl
 import cn.llonvne.entity.role.KickMember.KickMemberImpl
 import cn.llonvne.entity.role.TeamMember.TeamMemberImpl

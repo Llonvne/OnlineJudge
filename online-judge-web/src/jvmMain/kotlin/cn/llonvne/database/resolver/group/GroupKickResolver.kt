@@ -1,4 +1,4 @@
-package cn.llonvne.database.resolver
+package cn.llonvne.database.resolver.group
 
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.entity.AuthenticationUser
@@ -11,7 +11,6 @@ import cn.llonvne.kvision.service.IGroupService.KickGroupResp.*
 import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import cn.llonvne.kvision.service.RoleService
 import cn.llonvne.security.check
-import cn.llonvne.security.userRole
 import org.springframework.stereotype.Service
 
 @Service

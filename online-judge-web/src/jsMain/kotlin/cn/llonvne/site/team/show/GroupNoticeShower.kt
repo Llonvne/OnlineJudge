@@ -3,13 +3,11 @@ package cn.llonvne.site.team.show
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.kvision.service.GroupIdNotFound
-import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.*
 import cn.llonvne.kvision.service.PermissionDenied
 import io.kvision.core.Container
 import io.kvision.html.h4
-import io.kvision.panel.Root
 
 fun interface GroupNoticeShower {
     fun load(root: Container)

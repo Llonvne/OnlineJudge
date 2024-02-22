@@ -1,9 +1,8 @@
-package cn.llonvne.database.resolver
+package cn.llonvne.database.resolver.group
 
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.GroupManager
-import cn.llonvne.entity.role.TeamIdRole
 import cn.llonvne.kvision.service.RoleService
 import org.springframework.stereotype.Service
 

@@ -7,13 +7,15 @@ import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.SubmissionStatus
-import cn.llonvne.entity.problem.share.Code.CodeType
+import cn.llonvne.entity.problem.SubmissionVisibilityType
+import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
+
 
 @KVService
 interface ISubmissionService {
@@ -56,7 +58,8 @@ interface ISubmissionService {
     data object SubmissionNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetOutputByCodeIdResp
 
     @Serializable
-    data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp
+    data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp,
+        ProblemSubmissionResp
 
     @Serializable
     data object UserNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
@@ -65,14 +68,14 @@ interface ISubmissionService {
     sealed interface CreateSubmissionReq {
         val rawCode: String
         val languageId: Int
-        val codeType: CodeType
+        val codeType: Code.CodeType
 
         @Serializable
         data class PlaygroundCreateSubmissionReq(
             val stdin: String,
             override val rawCode: String,
             override val languageId: Int,
-            override val codeType: CodeType
+            override val codeType: Code.CodeType
         ) : CreateSubmissionReq
     }
 
@@ -153,4 +156,22 @@ interface ISubmissionService {
     suspend fun getLastNPlaygroundSubmission(
         authenticationToken: AuthenticationToken?, last: Int = 5
     ): GetLastNPlaygroundSubmissionResp
+
+    @Serializable
+    data class ProblemSubmissionReq(
+        val code: String,
+        val problemId: Int,
+        val languageId: Int,
+        val visibilityType: SubmissionVisibilityType
+    )
+
+    @Serializable
+    sealed interface ProblemSubmissionResp {
+
+    }
+
+    suspend fun submit(
+        value: AuthenticationToken?,
+        submissionSubmit: ProblemSubmissionReq
+    ): ProblemSubmissionResp
 }

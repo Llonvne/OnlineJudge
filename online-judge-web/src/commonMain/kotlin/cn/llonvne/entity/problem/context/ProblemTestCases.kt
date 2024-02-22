@@ -14,7 +14,7 @@ data class ProblemTestCases(
         override val id: String,
         override val name: String,
         override val input: String,
-        override val output: String,
+        override val expect: String,
         override val visibility: TestCaseType,
     ) : TestCase
 
@@ -22,6 +22,13 @@ data class ProblemTestCases(
         it.visibility in setOf(
             TestCaseType.OnlyForView,
             TestCaseType.ViewAndJudge
+        )
+    }
+
+    fun canJudge() = testCases.filter {
+        it.visibility in setOf(
+            TestCaseType.ViewAndJudge,
+            TestCaseType.OnlyForJudge
         )
     }
 }

@@ -4,12 +4,10 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.message.Messager
 import io.kvision.core.Container
-import io.kvision.core.onClick
 import io.kvision.form.select.tomSelect
 import io.kvision.form.text.text
 import io.kvision.html.*
 import io.kvision.routing.Routing
-import io.kvision.utils.px
 
 fun Container.index(routing: Routing) {
     alert(AlertType.Light) {

@@ -1,10 +1,10 @@
 package cn.llonvne.database.aware
 
-import cn.llonvne.database.resolver.GroupMembersResolver
-import cn.llonvne.database.resolver.GroupRoleResolver
+import cn.llonvne.database.aware.GroupInfoAwareProvider.GroupInfoAware
+import cn.llonvne.database.resolver.group.GroupMembersResolver
+import cn.llonvne.database.resolver.group.GroupRoleResolver
 import cn.llonvne.entity.group.Group
 import cn.llonvne.entity.group.GroupId
-import cn.llonvne.entity.role.GroupManager
 import cn.llonvne.entity.role.GroupOwner
 import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GroupMemberDtoImpl
 import org.springframework.stereotype.Service

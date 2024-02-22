@@ -1,19 +1,16 @@
 package cn.llonvne.site.problem.detail
 
-import cn.llonvne.compoent.*
+import cn.llonvne.compoent.NotFoundAble
+import cn.llonvne.compoent.loading
+import cn.llonvne.compoent.notFound
 import cn.llonvne.compoent.observable.observableOf
-import cn.llonvne.compoent.observable.observableProblemOf
 import cn.llonvne.entity.problem.context.TestCaseType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.ProblemNotFound
-import cn.llonvne.ll
 import cn.llonvne.model.ProblemModel
-import io.kvision.core.*
-import io.kvision.html.*
-import io.kvision.routing.Routing
-import io.kvision.state.bind
-import kotlinx.serialization.Serializable
+import io.kvision.core.Container
+import io.kvision.html.div
 
 fun detail(root: Container, problemId: Int) {
     observableOf<ProblemGetByIdResult>(null) {
@@ -48,20 +45,21 @@ private fun interface ProblemDetailShower {
 
         fun from(problemId: Int, resp: ProblemGetByIdResult): ProblemDetailShower {
             return when (resp) {
-                is GetProblemByIdOk -> AbstractProblemDetailShower(resp)
+                is GetProblemByIdOk -> AbstractProblemDetailShower(problemId, resp)
                 ProblemNotFound -> problemNotFoundDetailShower(problemId = problemId)
             }
         }
     }
 }
 
-private open class AbstractProblemDetailShower(resp: GetProblemByIdOk) : ProblemDetailShower {
+private open class AbstractProblemDetailShower(private val problemId: Int, resp: GetProblemByIdOk) :
+    ProblemDetailShower {
 
     private val headerShower = DetailHeaderShower.from(resp)
 
     private val contextShower = ProblemContextShower.from(resp)
 
-    private val codeEditorShower = CodeEditorShower.from(resp)
+    private val codeEditorShower = CodeEditorShower.from(problemId,resp)
 
     private val testCasesShower = TestCasesShower.from(resp, filter = {
         it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)

@@ -5,7 +5,6 @@ import cn.llonvne.entity.group.GroupLoader
 import cn.llonvne.kvision.service.ClientError
 import cn.llonvne.kvision.service.IGroupService
 import cn.llonvne.kvision.service.IGroupService.*
-import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.GroupMemberDto
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.kvision.service.Validatable.Companion.Failed
 import cn.llonvne.kvision.service.Validatable.Companion.Ok

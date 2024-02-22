@@ -1,6 +1,8 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.database.repository.*
+import cn.llonvne.database.resolver.submission.ProblemJudgeResolver
+import cn.llonvne.database.resolver.submission.ProblemSubmissionPassResolver
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
@@ -50,7 +52,9 @@ actual class SubmissionService(
     private val authenticationUserRepository: AuthenticationUserRepository,
     private val judgeService: JudgeService,
     private val codeRepository: CodeRepository,
-    private val authentication: RedisAuthenticationService
+    private val authentication: RedisAuthenticationService,
+    private val problemSubmissionPassResolver: ProblemSubmissionPassResolver,
+    private val problemJudgeResolver: ProblemJudgeResolver,
 ) : ISubmissionService {
 
     private val json = Json
@@ -306,5 +310,23 @@ actual class SubmissionService(
                 ?: return InternalError("插入 Submission 后 SubmissionId 仍不存在"),
             code.codeId
         )
+    }
+
+    override suspend fun submit(
+        value: AuthenticationToken?,
+        submissionSubmit: ProblemSubmissionReq
+    ): ProblemSubmissionResp {
+
+        val user = authentication.validate(value) {
+            requireLogin()
+        } ?: return PermissionDenied
+
+        val language = languageRepository.getByIdOrNull(submissionSubmit.problemId).let {
+            SupportLanguages.fromId(it?.languageId ?: return LanguageNotFound)
+        } ?: return LanguageNotFound
+
+        return problemSubmissionPassResolver.resolve(user, submissionSubmit) { problem ->
+            problemJudgeResolver.resolve(problem, submissionSubmit, language)
+        }
     }
 }

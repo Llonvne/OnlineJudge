@@ -1,16 +1,13 @@
 package cn.llonvne.database.entity.def.problem
 
 import cn.llonvne.entity.problem.context.Problem
-import cn.llonvne.entity.problem.context.ProblemContext
-import cn.llonvne.entity.problem.context.ProblemTestCases
-import cn.llonvne.kvision.service.IProblemService
 import cn.llonvne.kvision.service.IProblemService.CreateProblemReq
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 private val json = Json
 
-fun Problem.Companion.fromCreateReq(createProblemReq: CreateProblemReq) =
+fun Problem.Companion.fromCreateReq(createProblemReq: CreateProblemReq, ownerId: Int) =
     Problem(
         authorId = createProblemReq.authorId,
         problemName = createProblemReq.problemName,
@@ -20,4 +17,5 @@ fun Problem.Companion.fromCreateReq(createProblemReq: CreateProblemReq) =
         visibility = createProblemReq.visibility,
         type = createProblemReq.type,
         contextJson = json.encodeToString(createProblemReq.problemContext),
+        ownerId = ownerId
     )
