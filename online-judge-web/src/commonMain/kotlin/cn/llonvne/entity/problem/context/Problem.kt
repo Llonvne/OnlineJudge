@@ -2,6 +2,7 @@ package cn.llonvne.entity.problem.context
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class Problem(
@@ -20,6 +21,9 @@ data class Problem(
     val memoryLimit: Long,
     val visibility: ProblemVisibility,
     val type: ProblemType,
+    /**
+     * [ProblemContext] 序列化后的类型
+     */
     val contextJson: String,
 
     //--- 数据库信息区 ---//
@@ -36,6 +40,8 @@ data class Problem(
         }
         return onNull
     }
+
+    val context = Json.decodeFromString<ProblemContext>(contextJson)
 }
 
 

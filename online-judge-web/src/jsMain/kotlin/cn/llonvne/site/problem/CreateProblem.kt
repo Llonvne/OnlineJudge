@@ -1,10 +1,10 @@
-package cn.llonvne.site
+package cn.llonvne.site.problem
 
-import cn.llonvne.AppScope
 import cn.llonvne.compoent.navigateButton
 import cn.llonvne.constants.Frontend
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
+import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.ProblemModel
@@ -17,10 +17,10 @@ import io.kvision.form.text.Text
 import io.kvision.form.text.TextArea
 import io.kvision.html.button
 import io.kvision.html.h1
+import io.kvision.html.tr
 import io.kvision.routing.Routing
 import io.kvision.state.bind
 import io.kvision.utils.px
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,7 +35,8 @@ data class CreateProblemForm(
     val overall: String,
     val inputDescr: String,
     val outputDescr: String,
-    val hint: String
+    val hint: String,
+    val problemSupportLanguages: String
 )
 
 fun Container.createProblem(routing: Routing) {
@@ -64,13 +65,14 @@ fun Container.createProblem(routing: Routing) {
                 placeholder = "题目可见性设置"
             }
         )
-        add(CreateProblemForm::problemTypeInt, TomSelect(
-            options = ProblemType.entries.map {
-                it.ordinal.toString() to it.name
-            }
-        ) {
-            placeholder = "题目类型"
-        })
+        add(
+            CreateProblemForm::problemTypeInt, TomSelect(
+                options = ProblemType.entries.map {
+                    it.ordinal.toString() to it.name
+                }
+            ) {
+                placeholder = "题目类型"
+            })
         add(CreateProblemForm::overall, TextArea() {
             placeholder = "题目总体要做什么,解决什么问题"
         })
@@ -83,6 +85,14 @@ fun Container.createProblem(routing: Routing) {
         add(CreateProblemForm::hint, Text() {
             placeholder = "题目提示"
         })
+        add(
+            CreateProblemForm::problemSupportLanguages, TomSelect(
+                options = SupportLanguages.entries.map {
+                    it.languageId.toString() to it.toString()
+                },
+                multiple = true
+            )
+        )
     }
 
     button("提交").bind(AuthenticationModel.userToken) { token ->
@@ -93,7 +103,11 @@ fun Container.createProblem(routing: Routing) {
 
         onClickLaunch {
             Messager.toastInfo("已经提交请求，请稍等")
-            Messager.toastInfo(ProblemModel.create(createPanel.getData()).toString())
+            Messager.toastInfo(
+                ProblemModel.create(
+                    createPanel.getData()
+                ).toString()
+            )
         }
 
         marginBottom = 100.px

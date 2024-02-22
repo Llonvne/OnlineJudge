@@ -6,6 +6,9 @@ import cn.llonvne.constants.Frontend
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
+import cn.llonvne.site.problem.createProblem
+import cn.llonvne.site.problem.detail.detail
+import cn.llonvne.site.problem.problems
 import cn.llonvne.site.share.CodeLoader
 import cn.llonvne.site.share.share
 import cn.llonvne.site.team.show.showGroup
@@ -54,7 +57,7 @@ class App : Application() {
         }).on(RegExp("^problems/(.*)"), { match: Match ->
             failTo404(routing) {
                 layout(routing) {
-                    detail(routing, (match.data[0] as String).toInt())
+                    detail(div { }, (match.data[0] as String).toInt())
                 }
             }
         }).on(Frontend.Mine.uri, {
@@ -93,8 +96,7 @@ class App : Application() {
                     }
                 }
             }
-        }).injectTeam(routing)
-            .on("/404", {
+        }).injectTeam(routing).on("/404", {
                 layout(routing) {
                     alert(AlertType.Danger) {
                         +"解析失败了"
@@ -104,8 +106,7 @@ class App : Application() {
                 {
                     routing.navigate("/404")
                 },
-            )
-            .resolve()
+            ).resolve()
         Unit
     }
 

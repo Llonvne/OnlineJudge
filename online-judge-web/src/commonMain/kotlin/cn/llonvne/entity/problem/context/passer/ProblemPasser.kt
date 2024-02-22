@@ -9,6 +9,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface ProblemPasser<out R : PasserResult> {
+
+    val description: String
+
     /**
      * 通过测试结果集合判断题目是否通过测试，并获得测试结果
      */
@@ -23,6 +26,9 @@ sealed interface ProblemPasser<out R : PasserResult> {
         override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult {
             TODO("Not yet implemented")
         }
+
+        override val description: String
+            get() = "需通过所有测试才算题目通过"
     }
 
     /**
@@ -33,6 +39,9 @@ sealed interface ProblemPasser<out R : PasserResult> {
         override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult {
             TODO()
         }
+
+        override val description: String
+            get() = "通过 $rate 比例测试即可算题目通过"
     }
 
 }

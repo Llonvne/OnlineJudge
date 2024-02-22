@@ -19,5 +19,5 @@ fun Problem.Companion.fromCreateReq(createProblemReq: CreateProblemReq) =
         problemDescription = createProblemReq.problemDescription,
         visibility = createProblemReq.visibility,
         type = createProblemReq.type,
-        contextJson = json.encodeToString(createProblemReq.problemContext)
+        contextJson = json.encodeToString(createProblemReq.problemContext),
     )

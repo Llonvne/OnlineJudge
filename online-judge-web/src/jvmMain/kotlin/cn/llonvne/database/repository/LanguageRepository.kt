@@ -1,6 +1,8 @@
 package cn.llonvne.database.repository
 
+import cn.llonvne.database.entity.ProblemSupportLanguage
 import cn.llonvne.database.entity.def.problem.language
+import cn.llonvne.database.entity.problemSupportLanguage
 import cn.llonvne.entity.problem.Language
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
@@ -16,6 +18,7 @@ class LanguageRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
 ) {
     private val languageMeta = Meta.language
+    private val problemSupportLanguages = Meta.problemSupportLanguage
 
     suspend fun getByIdOrNull(id: Int?): Language? {
         if (id == null) {
@@ -41,6 +44,19 @@ class LanguageRepository(
             } else {
                 return@map it != 0L
             }
+        }
+    }
+
+    suspend fun setSupportLanguages(problemId: Int, languages: List<Int>) {
+        db.runQuery {
+            QueryDsl.insert(problemSupportLanguages).multiple(
+                languages.map {
+                    ProblemSupportLanguage(
+                        problemId = problemId,
+                        languageId = it
+                    )
+                }
+            )
         }
     }
 }

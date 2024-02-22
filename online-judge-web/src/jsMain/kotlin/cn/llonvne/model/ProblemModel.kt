@@ -1,12 +1,14 @@
 package cn.llonvne.model
 
 import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.entity.problem.context.ProblemTestCases
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
-import cn.llonvne.entity.problem.context.passer.ProblemPasser.Companion
 import cn.llonvne.entity.problem.context.passer.ProblemPasser.PassAllCases
+import cn.llonvne.gojudge.api.SupportLanguages
+import cn.llonvne.gojudge.api.fromId
 import cn.llonvne.kvision.service.IProblemService
 import cn.llonvne.kvision.service.IProblemService.CreateProblemReq
 import cn.llonvne.kvision.service.IProblemService.CreateProblemResp
@@ -14,7 +16,7 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Message.ToastMessage
 import cn.llonvne.message.MessageLevel
 import cn.llonvne.message.Messager
-import cn.llonvne.site.CreateProblemForm
+import cn.llonvne.site.problem.CreateProblemForm
 import io.kvision.remote.getService
 
 object ProblemModel {
@@ -52,7 +54,17 @@ object ProblemModel {
                 },
                 type = problemForm.problemTypeInt.let {
                     ProblemType.entries[it.toInt()]
-                }
+                },
+                supportLanguages = problemForm.problemSupportLanguages.split(",")
+                    .map { it.toInt() }.mapNotNull {
+                        SupportLanguages.fromId(it)
+                    }.map {
+                        Language(
+                            languageId = it.languageId,
+                            languageName = it.languageName,
+                            languageVersion = it.languageVersion
+                        )
+                    }
             )
         )
     }

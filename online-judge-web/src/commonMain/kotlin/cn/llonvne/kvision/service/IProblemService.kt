@@ -1,10 +1,13 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.ProblemTag
 import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
+import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
@@ -21,6 +24,7 @@ interface IProblemService {
         val memoryLimit: Long,
         val visibility: ProblemVisibility,
         val type: ProblemType,
+        val supportLanguages: List<Language>
     )
 
     @Serializable
@@ -40,7 +44,11 @@ interface IProblemService {
     @Serializable
     sealed interface ProblemGetByIdResult {
         @Serializable
-        data class Ok(val problem: Problem) : ProblemGetByIdResult
+        data class GetProblemByIdOk(
+            val problem: Problem,
+            val supportLanguages: List<Language>,
+            val tage: List<ProblemTag>
+        ) : ProblemGetByIdResult
 
         @Serializable
         data object ProblemNotFound : ProblemGetByIdResult
