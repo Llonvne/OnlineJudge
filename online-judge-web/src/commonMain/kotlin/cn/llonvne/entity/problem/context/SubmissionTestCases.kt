@@ -20,7 +20,6 @@ data class SubmissionTestCases(val testCases: List<SubmissionTestCase>) {
         companion object {
             fun from(
                 problemTestCase: ProblemTestCase,
-                problem: Problem,
                 output: Output
             ): SubmissionTestCase {
                 return SubmissionTestCase(

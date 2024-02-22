@@ -1,5 +1,6 @@
 package cn.llonvne.dtos
 
+import cn.llonvne.entity.problem.JudgeResult
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.gojudge.api.task.Output
@@ -13,5 +14,5 @@ data class ViewCodeDto(
     val problemId: Int,
     val status: SubmissionStatus,
     val submissionId: Int,
-    val output: Output?
+    val judgeResult: JudgeResult
 )

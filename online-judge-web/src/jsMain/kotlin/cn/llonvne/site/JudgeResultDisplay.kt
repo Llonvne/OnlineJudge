@@ -5,16 +5,12 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.CodeNotFound
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
-import cn.llonvne.kvision.service.ISubmissionService.SubmissionNotFound
-import cn.llonvne.kvision.service.JudgeResultParseError
-import cn.llonvne.kvision.service.LanguageNotFound
-import cn.llonvne.kvision.service.PermissionDenied
+import cn.llonvne.kvision.service.*
+import cn.llonvne.kvision.service.ISubmissionService.*
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureReason.*
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.SuccessOutput
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.SuccessPlaygroundOutput
 import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
@@ -58,8 +54,7 @@ private class PlaygroundJudgeResultDisplay(
 ) : JudgeResultDisplay {
 
     override fun load(root: Container) {
-
-        observableOf<GetOutputByCodeIdResp?>(null) {
+        observableOf<GetJudgeResultByCodeIdResp>(null) {
             setUpdater { SubmissionModel.getJudgeResultByCodeID(codeId) }
 
             root.syncNotNull { resp ->
@@ -69,8 +64,7 @@ private class PlaygroundJudgeResultDisplay(
                     JudgeResultParseError -> errorHandler.handleJudgeResultParseError(this, codeId)
                     PermissionDenied -> Messager.toastInfo("请登入来查看对应评测结果")
                     SubmissionNotFound -> errorHandler.handleSubmissionNotFound(this, codeId)
-                    is SuccessGetOutput -> display(this, resp.outputDto)
-                    null -> {}
+                    is SuccessPlaygroundOutput -> display(this, resp.outputDto)
                 }
             }
         }

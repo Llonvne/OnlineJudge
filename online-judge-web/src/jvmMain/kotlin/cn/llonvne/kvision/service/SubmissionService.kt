@@ -6,8 +6,9 @@ import cn.llonvne.database.resolver.submission.ProblemSubmissionPassResolver
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.Submission
-import cn.llonvne.entity.problem.SubmissionStatus
+import cn.llonvne.entity.problem.*
+import cn.llonvne.entity.problem.context.*
+import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeVisibilityType.*
 import cn.llonvne.exts.now
@@ -25,10 +26,10 @@ import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.PlaygroundSubmissionDto
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureOutput
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.FailureReason.*
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.OutputDto.SuccessOutput
-import cn.llonvne.kvision.service.ISubmissionService.GetOutputByCodeIdResp.SuccessGetOutput
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureOutput
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureReason.*
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.SuccessOutput
+import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.SuccessPlaygroundOutput
 import cn.llonvne.kvision.service.ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
@@ -79,8 +80,8 @@ actual class SubmissionService(
     override suspend fun getViewCode(id: Int): ViewCodeGetByIdResp {
         val submission = submissionRepository.getById(id) ?: return SubmissionNotFound
 
-        val result: Result<Output> = kotlin.runCatching {
-            Json.decodeFromString(submission.judgeResult)
+        val result = runCatching {
+            submission.result
         }
 
         val problem =
@@ -97,18 +98,14 @@ actual class SubmissionService(
                     ?: return LanguageNotFound,
                 problemName = problem.problemName,
                 problemId = problem.problemId ?: return ProblemNotFound,
-                output = result.getOrNull(),
                 status = submission.status,
-                submissionId = submission.submissionId ?: return SubmissionNotFound
+                submissionId = submission.submissionId ?: return SubmissionNotFound,
+                judgeResult = result.getOrNull() ?: return JudgeResultParseError
             )
         )
     }
 
     private suspend fun Submission.aslistDto(): SubmissionGetByIdResp {
-        val result: Result<Output> = kotlin.runCatching {
-            Json.decodeFromString(judgeResult)
-        }
-
         val problem = problemRepository.getById(problemId) ?: return ProblemNotFound
 
         return problem.onIdNotNull(ProblemNotFound) { problemId, problem ->
@@ -124,8 +121,9 @@ actual class SubmissionService(
                     problemName = problem.problemName,
                     submissionId = this.submissionId ?: return@onIdNotNull SubmissionNotFound,
                     status = this.status,
-                    runTime = result.getOrNull().runTimeRepr,
-                    runMemory = result.getOrNull().memoryRepr,
+                    // TODO 获得运行时间和内存
+                    runTime = "NULL",
+                    runMemory = "NULL",
                     codeLength = codeRepository.getCodeLength(codeId)?.toLong() ?: return@onIdNotNull CodeNotFound,
                     submitTime = this.createdAt ?: LocalDateTime.now()
                 )
@@ -175,7 +173,7 @@ actual class SubmissionService(
     override suspend fun getOutputByCodeId(
         authenticationToken: AuthenticationToken?,
         codeId: Int
-    ): GetOutputByCodeIdResp {
+    ): GetJudgeResultByCodeIdResp {
         val visibilityType = codeRepository.getCodeVisibilityType(codeId) ?: return CodeNotFound
         val codeOwnerId = codeRepository.getCodeOwnerId(codeId) ?: return CodeNotFound
 
@@ -200,7 +198,7 @@ actual class SubmissionService(
         val submission = submissionRepository.getByCodeId(codeId) ?: return SubmissionNotFound
 
         val output = kotlin.runCatching {
-            json.decodeFromString<Output>(submission.judgeResult)
+            submission.result
         }
 
         val languageId = codeRepository.getCodeLanguageId(codeId) ?: return LanguageNotFound
@@ -209,40 +207,46 @@ actual class SubmissionService(
         output.onFailure {
             return JudgeResultParseError
         }.onSuccess { output ->
-            return SuccessGetOutput(
-                when (output) {
-                    is Failure.CompileError -> {
-                        FailureOutput(
-                            CompileError(output.compileResult.files?.get("stderr").toString()),
-                            language
-                        )
-                    }
+            when (output) {
+                is PlaygroundJudgeResult -> {
+                    return SuccessPlaygroundOutput(
+                        when (val output = output.output) {
+                            is Failure.CompileError -> {
+                                FailureOutput(
+                                    CompileError(output.compileResult.files?.get("stderr").toString()),
+                                    language
+                                )
+                            }
 
-                    is CompileResultIsNull -> {
-                        FailureOutput(
-                            CompileResultNotFound,
-                            language
-                        )
-                    }
+                            is CompileResultIsNull -> {
+                                FailureOutput(
+                                    CompileResultNotFound,
+                                    language
+                                )
+                            }
 
-                    is Failure.RunResultIsNull -> FailureOutput(
-                        RunResultIsNull,
-                        language
-                    )
+                            is Failure.RunResultIsNull -> FailureOutput(
+                                RunResultIsNull,
+                                language
+                            )
 
-                    is TargetFileNotExist -> FailureOutput(
-                        TargetResultNotFound,
-                        language
-                    )
+                            is TargetFileNotExist -> FailureOutput(
+                                TargetResultNotFound,
+                                language
+                            )
 
-                    is Success -> SuccessOutput(
-                        stdin = output.runRequest.cmd.first().files?.filterIsInstance<GoJudgeFile.MemoryFile>()
-                            ?.first()?.content.toString(),
-                        stdout = output.runResult.files?.get("stdout").toString(),
-                        language
+                            is Success -> SuccessOutput(
+                                stdin = output.runRequest.cmd.first().files?.filterIsInstance<GoJudgeFile.MemoryFile>()
+                                    ?.first()?.content.toString(),
+                                stdout = output.runResult.files?.get("stdout").toString(),
+                                language
+                            )
+                        }
                     )
                 }
-            )
+
+                is ProblemJudgeResult -> TODO()
+            }
         }
         error("这不应该发生")
     }
@@ -293,7 +297,18 @@ actual class SubmissionService(
             return JudgeError(it.cause.toString())
         }
 
-        val judgeResult = json.encodeToString(output.getOrNull())
+        val playgroundJudgeResult = SubmissionTestCases(
+            listOf(
+                SubmissionTestCases.SubmissionTestCase.from(
+                    ProblemTestCase("Playgroud", "Playgroud", req.stdin, "", TestCaseType.OnlyForJudge),
+                    output = output.getOrNull()!!
+                )
+            )
+        ).let {
+            PlaygroundJudgeResult(it)
+        }
+
+        val judgeResult = playgroundJudgeResult.json()
 
         val submission = submissionRepository.save(
             Submission(

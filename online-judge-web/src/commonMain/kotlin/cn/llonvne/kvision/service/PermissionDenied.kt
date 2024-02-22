@@ -12,7 +12,7 @@ data object PermissionDenied : CreateProblemResp,
     SaveCodeResp, CommitOnCodeResp, SetCodeVisibilityResp,
     GetCodeResp, SetCodeCommentTypeResp,
     SetCodeCommentVisibilityTypeResp, CreateSubmissionResp,
-    GetOutputByCodeIdResp, GetLastNPlaygroundSubmissionResp,
+    PlaygroundOutput, GetLastNPlaygroundSubmissionResp,
     CreateGroupResp, LoadGroupResp, IGroupService.JoinGroupResp, IGroupService.QuitGroupResp,
     IGroupService.KickGroupResp, ProblemSubmissionResp
 

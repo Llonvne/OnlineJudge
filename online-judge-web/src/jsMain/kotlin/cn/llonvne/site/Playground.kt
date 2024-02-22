@@ -3,6 +3,7 @@ package cn.llonvne.site
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
+import cn.llonvne.entity.problem.JudgeResult
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
 import cn.llonvne.kvision.service.InternalError
@@ -99,15 +100,18 @@ fun Container.playground() {
 
                             Messager.toastInfo(resp.subs.toString())
 
-                            val sortByTime = resp.subs.sortedBy {
+                            val sortByTime = resp.subs.sortedByDescending {
                                 it.submitTime
                             }
 
                             val first = sortByTime.firstOrNull()
 
                             if (first != null) {
-                                lastRun.onClick {
-                                    RoutingModule.routing.navigate("/share/${first.codeId}")
+                                lastRun.apply {
+                                    JudgeResultDisplay.playground(first.codeId, lastRun)
+                                    onClick {
+                                        RoutingModule.routing.navigate("/share/${first.codeId}")
+                                    }
                                 }
                             }
 
@@ -123,9 +127,7 @@ fun Container.playground() {
                         }
                     }
                 }
-
             }
         }
     }
-
 }

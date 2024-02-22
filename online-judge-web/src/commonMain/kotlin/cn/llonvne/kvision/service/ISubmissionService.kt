@@ -55,7 +55,7 @@ interface ISubmissionService {
     ): GetSupportLanguageByProblemIdResp
 
     @Serializable
-    data object SubmissionNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetOutputByCodeIdResp
+    data object SubmissionNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, PlaygroundOutput
 
     @Serializable
     data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp,
@@ -91,11 +91,14 @@ interface ISubmissionService {
     ): CreateSubmissionResp
 
     @Serializable
-    sealed interface GetOutputByCodeIdResp {
+    sealed interface GetJudgeResultByCodeIdResp
+
+    @Serializable
+    sealed interface PlaygroundOutput : GetJudgeResultByCodeIdResp {
         @Serializable
-        data class SuccessGetOutput(
+        data class SuccessPlaygroundOutput(
             val outputDto: OutputDto
-        ) : GetOutputByCodeIdResp
+        ) : PlaygroundOutput
 
         @Serializable
         sealed interface OutputDto {
@@ -133,7 +136,7 @@ interface ISubmissionService {
 
     suspend fun getOutputByCodeId(
         authenticationToken: AuthenticationToken?, codeId: Int
-    ): GetOutputByCodeIdResp
+    ): GetJudgeResultByCodeIdResp
 
     @Serializable
     sealed interface GetLastNPlaygroundSubmissionResp {

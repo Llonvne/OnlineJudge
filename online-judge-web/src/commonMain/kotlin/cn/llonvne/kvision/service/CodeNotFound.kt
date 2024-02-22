@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object CodeNotFound : GetCodeResp, GetCommitsOnCodeResp,
     SetCodeVisibilityResp, SetCodeCommentTypeResp, ViewCodeGetByIdResp,
-    SubmissionGetByIdResp, GetOutputByCodeIdResp
+    SubmissionGetByIdResp, PlaygroundOutput

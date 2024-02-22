@@ -2,6 +2,9 @@ package cn.llonvne.entity.problem
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class Submission(
@@ -19,4 +22,11 @@ data class Submission(
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
-)
+) {
+
+    companion object {
+        private val json = Json
+    }
+
+    val result: JudgeResult get() = json.decodeFromString(judgeResult)
+}

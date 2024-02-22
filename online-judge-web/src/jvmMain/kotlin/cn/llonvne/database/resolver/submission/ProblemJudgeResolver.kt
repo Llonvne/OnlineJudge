@@ -27,7 +27,9 @@ class ProblemJudgeResolver(
                 testcase.expect,
             )
         }.map { (problemTestcase, output) ->
-            SubmissionTestCases.SubmissionTestCase.from(problemTestcase, problem, output)
+            SubmissionTestCases.SubmissionTestCase.from(problemTestcase, output)
         }
+
+        TODO()
     }
 }

@@ -10,6 +10,7 @@ import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById
+import cn.llonvne.kvision.service.JudgeResultParseError
 import cn.llonvne.kvision.service.LanguageNotFound
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
@@ -54,6 +55,10 @@ fun Container.submissionDetail(routing: Routing, submissionId: Int) {
                     }
 
                     CodeNotFound -> {
+                        codeNotfound(submission, submissionId)
+                    }
+
+                    JudgeResultParseError -> {
                         codeNotfound(submission, submissionId)
                     }
                 }
