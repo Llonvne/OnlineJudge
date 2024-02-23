@@ -3,7 +3,6 @@ package cn.llonvne.site
 import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
-import cn.llonvne.entity.problem.JudgeResult
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
 import cn.llonvne.kvision.service.InternalError

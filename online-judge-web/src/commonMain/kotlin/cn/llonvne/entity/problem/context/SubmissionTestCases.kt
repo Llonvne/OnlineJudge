@@ -1,6 +1,6 @@
 package cn.llonvne.entity.problem.context
 
-import cn.llonvne.entity.problem.context.ProblemTestCases.*
+import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.gojudge.api.task.Output
 import kotlinx.serialization.Serializable
 

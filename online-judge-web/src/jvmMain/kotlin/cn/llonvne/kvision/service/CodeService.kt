@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.LanguageRepository
+import cn.llonvne.database.resolver.code.GetCodeSafetyCheckResolver
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
 import cn.llonvne.entity.AuthenticationUser
@@ -36,30 +37,22 @@ actual class CodeService(
     private val codeRepository: CodeRepository,
     private val languageRepository: LanguageRepository,
     private val authenticationUserRepository: AuthenticationUserRepository,
-    private val authenticationService: RedisAuthenticationService
+    private val authentication: RedisAuthenticationService,
+    private val getCodeSafetyCheckResolver: GetCodeSafetyCheckResolver
 ) : ICodeService {
     override suspend fun saveCode(
-        token: AuthenticationToken?, saveCodeReq: SaveCodeReq
+        token: AuthenticationToken?,
+        saveCodeReq: SaveCodeReq
     ): SaveCodeResp {
-
-        val user = authenticationService.validate(token) {
+        val user = authentication.validate(token) {
             requireLogin()
-        }
-
-        return if (authenticationService.isLogin(token)) {
-            PermissionDenied
-        } else {
-
-            val user = authenticationService.getAuthenticationUser(token) ?: return PermissionDenied
-
-            if (saveCodeReq.languageId != null) {
-                if (!languageRepository.isIdExist(saveCodeReq.languageId)) {
-                    return LanguageNotFound
-                }
+        } ?: return PermissionDenied
+        if (saveCodeReq.languageId != null) {
+            if (!languageRepository.isIdExist(saveCodeReq.languageId)) {
+                return LanguageNotFound
             }
-
-            SuccessfulSaveCode(codeRepository.save(saveCodeReq.toCode(user)))
         }
+        return SuccessfulSaveCode(codeRepository.save(saveCodeReq.toCode(user)))
     }
 
     enum class GetCodeId {
@@ -67,9 +60,10 @@ actual class CodeService(
     }
 
     private suspend fun getCodeSafetyCheck(
-        getCodeId: GetCodeId, code: Code, value: AuthenticationToken?
+        getCodeId: GetCodeId,
+        code: Code,
+        value: AuthenticationToken?
     ): GetCodeResp {
-
         when (code.visibilityType) {
             Public -> {
 
@@ -77,7 +71,7 @@ actual class CodeService(
 
             Private -> {
 
-                val user = authenticationService.getAuthenticationUser(value)
+                val user = authentication.getAuthenticationUser(value)
 
                 if (user == null) {
                     return PermissionDenied
@@ -89,7 +83,7 @@ actual class CodeService(
             }
 
             Restrict -> {
-                val user = authenticationService.getAuthenticationUser(value)
+                val user = authentication.getAuthenticationUser(value)
 
                 when {
                     getCodeId == GetCodeId.HashLink -> {}
@@ -136,7 +130,7 @@ actual class CodeService(
         if (!codeRepository.isIdExist(shareId)) {
             return CodeNotFound
         }
-        val user = authenticationService.getAuthenticationUser(token)
+        val user = authentication.getAuthenticationUser(token)
         if (user?.id != codeRepository.getCodeOwnerId(shareId)) {
             return PermissionDenied
         }
@@ -149,7 +143,7 @@ actual class CodeService(
     override suspend fun setCodeCommentVisibilityType(
         token: AuthenticationToken?, shareId: Int, commentId: Int, type: ShareCodeCommentType
     ): SetCodeCommentVisibilityTypeResp {
-        val user = authenticationService.getAuthenticationUser(token)
+        val user = authentication.getAuthenticationUser(token)
         if (user == null) {
             return PermissionDenied
         } else if (user.id != codeRepository.getCodeOwnerId(shareId)) {
@@ -179,7 +173,7 @@ actual class CodeService(
             return PermissionDenied
         }
 
-        val user = authenticationService.getAuthenticationUser(commitOnCodeReq.token) ?: return PermissionDenied
+        val user = authentication.getAuthenticationUser(commitOnCodeReq.token) ?: return PermissionDenied
 
         val result = codeRepository.comment(
             ShareCodeComment(
@@ -224,7 +218,7 @@ actual class CodeService(
                 val sharCodeOwnerId = codeRepository.getCodeOwnerId(sharCodeId)
 
                 val user =
-                    authenticationService.getAuthenticationUser(authenticationToken) ?: return@mapNotNull null
+                    authentication.getAuthenticationUser(authenticationToken) ?: return@mapNotNull null
 
                 if (it.type == ShareCodeCommentType.Private) {
                     if (authenticationToken == null) {
@@ -255,7 +249,7 @@ actual class CodeService(
     override suspend fun setCodeVisibility(
         token: AuthenticationToken?, shareId: Int, result: CodeVisibilityType
     ): SetCodeVisibilityResp {
-        val user = authenticationService.getAuthenticationUser(token) ?: return PermissionDenied
+        val user = authentication.getAuthenticationUser(token) ?: return PermissionDenied
 
         val codeOwnerId = codeRepository.getCodeOwnerId(shareId) ?: return CodeNotFound
 

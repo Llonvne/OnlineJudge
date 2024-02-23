@@ -7,7 +7,6 @@ import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
-import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable

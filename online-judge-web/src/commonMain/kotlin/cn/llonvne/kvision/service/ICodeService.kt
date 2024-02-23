@@ -2,7 +2,6 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentDto
-import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeCommentType

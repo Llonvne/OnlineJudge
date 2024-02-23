@@ -59,8 +59,6 @@ actual class ProblemService(
         languageRepository.setSupportLanguages(problem.problemId,
             createProblemReq.supportLanguages.map { it.languageId })
 
-
-
         return IProblemService.CreateProblemResp.Ok(problem.problemId)
     }
 

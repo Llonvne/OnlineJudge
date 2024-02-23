@@ -1,6 +1,9 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver
+import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult
+import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult.*
 import cn.llonvne.kvision.service.IAuthenticationService.*
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*
 import cn.llonvne.kvision.service.IAuthenticationService.GetLogoutResp.Logout
@@ -21,18 +24,16 @@ import org.springframework.transaction.annotation.Transactional
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class AuthenticationService(
     private val userRepository: AuthenticationUserRepository,
-    private val authentication: RedisAuthenticationService
+    private val authentication: RedisAuthenticationService,
+    private val bannedUsernameCheckResolver: BannedUsernameCheckResolver
 ) : IAuthenticationService {
-
-
-    private val bannedUsernameKeyWords = listOf("admin")
-
     override suspend fun register(username: String, password: String): RegisterResult {
 
-        bannedUsernameKeyWords.forEach { bannedKeyWord ->
-            if (username.lowercase().contains(bannedKeyWord)) {
-                return Failed(Message.ToastMessage(MessageLevel.Warning, "用户名不得包含 $bannedKeyWord"))
-            }
+        when (bannedUsernameCheckResolver.resolve(username)) {
+            Pass -> {}
+            BannedUsernameCheckResult.Failed -> return IAuthenticationService.RegisterResult.Failed(
+                Message.ToastMessage(MessageLevel.Danger, "名称包含违禁词")
+            )
         }
 
         // 检查用户名是否可用
@@ -48,21 +49,20 @@ actual class AuthenticationService(
     }
 
     override suspend fun login(username: String, password: String): LoginResult {
-        val resp = userRepository.login(username, password)
-        return resp
+        return userRepository.login(username, password)
     }
 
     override suspend fun getLoginInfo(token: AuthenticationToken?): GetLoginInfoResp {
-        if (token == null){
+        if (token == null) {
             return NotLogin
         }
         val user = authentication.validate(token) { requireLogin() }
 
-        if (user == null){
+        if (user == null) {
             return LoginExpired
         }
 
-        return Login(user.username,user.id)
+        return Login(user.username, user.id)
     }
 
     override suspend fun logout(token: AuthenticationToken?): GetLogoutResp {

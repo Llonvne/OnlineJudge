@@ -1,7 +1,6 @@
 package cn.llonvne.database.resolver.submission
 
 import cn.llonvne.database.aware.ProblemAwareProvider
-import cn.llonvne.database.aware.ProblemAwareProvider.ProblemAwarer
 import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.problem.context.Problem

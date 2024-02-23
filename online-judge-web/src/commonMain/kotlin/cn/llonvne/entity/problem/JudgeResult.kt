@@ -2,7 +2,6 @@ package cn.llonvne.entity.problem
 
 import cn.llonvne.entity.problem.context.ProblemTestCases
 import cn.llonvne.entity.problem.context.SubmissionTestCases
-import cn.llonvne.entity.problem.context.SubmissionTestCases.SubmissionTestCase
 import cn.llonvne.entity.problem.context.passer.PasserResult
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString

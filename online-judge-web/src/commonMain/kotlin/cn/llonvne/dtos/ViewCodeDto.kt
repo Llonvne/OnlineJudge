@@ -3,7 +3,6 @@ package cn.llonvne.dtos
 import cn.llonvne.entity.problem.JudgeResult
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.SubmissionStatus
-import cn.llonvne.gojudge.api.task.Output
 import kotlinx.serialization.Serializable
 
 @Serializable
