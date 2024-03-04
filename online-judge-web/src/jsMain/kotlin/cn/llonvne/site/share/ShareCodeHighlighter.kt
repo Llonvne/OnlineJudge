@@ -5,8 +5,7 @@ import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.codeHighlighter
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.entity.problem.share.Code.CodeType.Playground
-import cn.llonvne.entity.problem.share.Code.CodeType.Share
+import cn.llonvne.entity.problem.share.Code.CodeType.*
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.message.Messager
 import cn.llonvne.model.RoutingModule
@@ -94,6 +93,7 @@ interface ShareCodeHighlighter {
             when (codeDto.codeType) {
                 Share -> highlighterJsImpl(shareId = shareId, alert = alert)
                 Playground -> playgroundHighlighterJsImpl(shareId, alert)
+                Problem -> ProblemHighlighterJs(shareId, alert)
             }
     }
 }
@@ -104,10 +104,14 @@ private class HighlighterJs(
 
 private class PlaygroundHighlighterJs(
     override val idPlaceHolder: ShareID, override val title: Div, override val shareName: String = "训练场"
-) : ShareCodeHighlighter{
+) : ShareCodeHighlighter {
     override fun Container.slotOnTitle() {
         p {
             +"训练场提交数据默认为私有，如果要与他人分享，请点击下方 <私有> 更改可见性"
         }
     }
 }
+
+private class ProblemHighlighterJs(
+    override val idPlaceHolder: ShareID, override val title: Div, override val shareName: String = "题解",
+) : ShareCodeHighlighter

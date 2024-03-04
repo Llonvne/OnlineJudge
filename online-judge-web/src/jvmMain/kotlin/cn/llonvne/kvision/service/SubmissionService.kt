@@ -3,19 +3,20 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.*
 import cn.llonvne.database.resolver.submission.ProblemJudgeResolver
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPassResolver
+import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver
+import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.Failed
+import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.NotNeedToPersist
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.PlaygroundJudgeResult
-import cn.llonvne.entity.problem.ProblemJudgeResult
-import cn.llonvne.entity.problem.Submission
-import cn.llonvne.entity.problem.SubmissionStatus
+import cn.llonvne.entity.problem.*
 import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.context.SubmissionTestCases
 import cn.llonvne.entity.problem.context.TestCaseType
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.problem.share.CodeVisibilityType.*
 import cn.llonvne.exts.now
+import cn.llonvne.getLogger
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.gojudge.api.fromId
 import cn.llonvne.gojudge.api.spec.runtime.GoJudgeFile
@@ -27,20 +28,26 @@ import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.PlaygroundSubmissionDto
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
+import cn.llonvne.kvision.service.ISubmissionService.GetLastNProblemSubmissionResp.GetLastNProblemSubmissionRespImpl
 import cn.llonvne.kvision.service.ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureOutput
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureReason.*
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.SuccessOutput
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.SuccessPlaygroundOutput
+import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.track
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Objects
+import kotlin.math.log
+import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.Success as PersisitSuccess
 
 @Service
 @Transactional
@@ -56,9 +63,12 @@ actual class SubmissionService(
     private val authentication: RedisAuthenticationService,
     private val problemSubmissionPassResolver: ProblemSubmissionPassResolver,
     private val problemJudgeResolver: ProblemJudgeResolver,
+    private val problemSubmissionPersistenceResolver: ProblemSubmissionPersistenceResolver
 ) : ISubmissionService {
 
     private val json = Json
+
+    private val logger = getLogger()
 
     override suspend fun list(req: ListSubmissionReq): List<SubmissionListDto> {
         return submissionRepository.list()
@@ -177,6 +187,7 @@ actual class SubmissionService(
         val visibilityType = codeRepository.getCodeVisibilityType(codeId) ?: return CodeNotFound
         val codeOwnerId = codeRepository.getCodeOwnerId(codeId) ?: return CodeNotFound
 
+
         when (visibilityType) {
             Public -> {
             }
@@ -245,7 +256,9 @@ actual class SubmissionService(
                     )
                 }
 
-                is ProblemJudgeResult -> TODO()
+                is ProblemJudgeResult -> {
+                    return ProblemOutput.SuccessProblemOutput(output)
+                }
             }
         }
         error("这不应该发生")
@@ -336,12 +349,75 @@ actual class SubmissionService(
             requireLogin()
         } ?: return PermissionDenied
 
-        val language = languageRepository.getByIdOrNull(submissionSubmit.problemId).let {
+        logger.info("判题请求已收到来自用户 ${user.id} 在题目 ${submissionSubmit.problemId} 语言是 ${submissionSubmit.languageId} 代码是 ${submissionSubmit.code}")
+
+        val language = languageRepository.getByIdOrNull(submissionSubmit.languageId).let {
             SupportLanguages.fromId(it?.languageId ?: return LanguageNotFound)
         } ?: return LanguageNotFound
 
+        logger.info("判题语言是 ${language.languageName}:${language.languageVersion}")
+
         return problemSubmissionPassResolver.resolve(user, submissionSubmit) { problem ->
-            problemJudgeResolver.resolve(problem, submissionSubmit, language)
+            val result = problemJudgeResolver.resolve(problem, submissionSubmit, language)
+
+            return@resolve when (val persistenceResult =
+                problemSubmissionPersistenceResolver.resolve(user, result, submissionSubmit, language)) {
+                is Failed -> {
+                    return@resolve InternalError("评测结果持久化失败")
+                }
+
+                NotNeedToPersist -> {
+                    return@resolve InternalError("评测结果无法持久化,TrackId-${Objects.hash(value, submissionSubmit)}")
+                }
+
+                is PersisitSuccess -> {
+                    logger.info("成功持久化判题结果,SubmissionId:${persistenceResult.submissionId},CodeId:${persistenceResult.codeId}")
+                    ProblemSubmissionRespImpl(
+                        persistenceResult.codeId,
+                        result.problemTestCases,
+                        result.submissionTestCases
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun getLastNProblemSubmission(
+        value: AuthenticationToken?,
+        problemId: Int,
+        lastN: Int
+    ): GetLastNProblemSubmissionResp {
+        val user = authentication.validate(value) {
+            requireLogin()
+        } ?: return PermissionDenied
+
+        logger.info("用户 ${user.id} 正在请求题目 $problemId 的前 $lastN 次提交记录")
+
+        val problem = problemRepository.getById(problemId) ?: return ProblemNotFound.also {
+            logger.info("题目 $problemId 不存在，请求失败")
+        }
+
+
+        val result = submissionRepository.getByAuthenticationUserID(user.id, codeType = Code.CodeType.Problem, lastN)
+            .filter {
+                it.problemId != null && it.problemId == problemId
+            }.filter {
+                it.result is ProblemJudgeResult
+            }
+            .map { sub ->
+
+                val languageId = codeRepository.getCodeLanguageId(sub.codeId) ?: return LanguageNotFound
+                val language = languageRepository.getByIdOrNull(languageId) ?: return LanguageNotFound
+
+                GetLastNProblemSubmissionResp.ProblemSubmissionListDto(
+                    language = language,
+                    codeId = sub.codeId,
+                    submitTime = sub.createdAt ?: LocalDateTime.now(),
+                    passerResult = (sub.result as ProblemJudgeResult).passerResult
+                )
+            }
+        return GetLastNProblemSubmissionRespImpl(result).also {
+            logger.info("共找到 ${result.size} 条记录")
         }
     }
 }

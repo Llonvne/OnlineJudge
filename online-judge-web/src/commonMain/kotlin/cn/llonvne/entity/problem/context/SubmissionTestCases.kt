@@ -6,6 +6,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SubmissionTestCases(val testCases: List<SubmissionTestCase>) {
+
+    val showOnJudgeResultDisplay
+        get() = testCases.filter {
+            it.visibility in setOf(
+                TestCaseType.ViewAndJudge
+            )
+        }
+
     @Serializable
     data class SubmissionTestCase(
         override val id: String,

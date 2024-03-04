@@ -61,16 +61,6 @@ fun Application.judging(judgeContext: JudgeContext) {
                         call.respondText(judgeClient.config(), ContentType.Application.Json)
                     }
                 }
-
-                globalAuth {
-                    rateLimit(RACE_LIMIT_JUDGE_NAME) {
-                        get {
-                            call.respondText {
-                                "HelloWorld"
-                            }
-                        }
-                    }
-                }
             }
         }
     }

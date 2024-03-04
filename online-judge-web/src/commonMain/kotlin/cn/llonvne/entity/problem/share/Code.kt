@@ -26,7 +26,7 @@ data class Code(
 ) {
     @Serializable
     enum class CodeType {
-        Share, Playground
+        Share, Playground, Problem
     }
 }
 

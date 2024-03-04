@@ -6,9 +6,12 @@ import cn.llonvne.compoent.problemStatus
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ProblemModel
+import cn.llonvne.model.RoutingModule
 import cn.llonvne.model.Storage
 import io.kvision.core.Container
+import io.kvision.core.onClickLaunch
 import io.kvision.core.onInput
+import io.kvision.core.style
 import io.kvision.form.formPanel
 import io.kvision.form.text.Text
 import io.kvision.html.*
@@ -85,6 +88,12 @@ private fun Container.problemsList(routing: Routing) {
                             }
                         }
                     }
+                }
+            }
+            button("创建您的题目", style = ButtonStyle.OUTLINESECONDARY) {
+                addCssClass("col-auto")
+                onClickLaunch {
+                    RoutingModule.routing.navigate("/problems/create")
                 }
             }
         }

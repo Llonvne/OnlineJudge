@@ -1,9 +1,13 @@
 package cn.llonvne.model
 
+import cn.llonvne.entity.problem.context.passer.PasserResult.BooleanResult
 import cn.llonvne.entity.problem.share.Code
-import cn.llonvne.kvision.service.ISubmissionService
+import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
+import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
+import cn.llonvne.message.Message
+import cn.llonvne.message.Messager
 import cn.llonvne.site.PlaygroundSubmission
 import io.kvision.remote.getService
 
@@ -41,7 +45,25 @@ object SubmissionModel {
             AuthenticationModel.userToken.value, lastN
         )
 
-    suspend fun submit(problemSubmissionReq: ProblemSubmissionReq) {
-        submissionService.submit(AuthenticationModel.userToken.value, problemSubmissionReq)
+    suspend fun getLastNProblemSubmission(
+        problemId: Int,
+        lastN: Int = 5
+    ) = submissionService.getLastNProblemSubmission(
+        AuthenticationModel.userToken.value, problemId, lastN
+    )
+
+
+    suspend fun submit(
+        problemSubmissionReq: ProblemSubmissionReq,
+        onSuccess: suspend (ProblemSubmissionRespImpl) -> Unit
+    ) {
+        when (val resp = submissionService.submit(AuthenticationModel.userToken.value, problemSubmissionReq)) {
+            LanguageNotFound -> Messager.toastInfo("提交的语言不受支持，请刷新网页重新提交")
+            PermissionDenied -> Messager.toastInfo("你还未登入，或者登入已经过期")
+            is PermissionDeniedWithMessage -> Messager.toastInfo(resp.message)
+            ProblemNotFound -> Messager.toastInfo("你提交的题目不存在或者设置了权限")
+            is ProblemSubmissionRespImpl -> onSuccess(resp)
+            is InternalError -> Messager.toastInfo(resp.reason)
+        }
     }
 }

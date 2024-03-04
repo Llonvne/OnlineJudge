@@ -6,8 +6,13 @@ import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
 import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.entity.problem.SubmissionVisibilityType
+import cn.llonvne.entity.problem.context.Problem
+import cn.llonvne.entity.problem.context.ProblemTestCases
+import cn.llonvne.entity.problem.context.SubmissionTestCases
+import cn.llonvne.entity.problem.context.passer.PasserResult
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.security.AuthenticationToken
@@ -59,7 +64,7 @@ interface ISubmissionService {
 
     @Serializable
     data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp,
-        ProblemSubmissionResp
+        ProblemSubmissionResp, GetLastNProblemSubmissionResp
 
     @Serializable
     data object UserNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
@@ -92,6 +97,14 @@ interface ISubmissionService {
 
     @Serializable
     sealed interface GetJudgeResultByCodeIdResp
+
+    @Serializable
+    sealed interface ProblemOutput : GetJudgeResultByCodeIdResp {
+        @Serializable
+        data class SuccessProblemOutput(
+            val problem: ProblemJudgeResult
+        ) : PlaygroundOutput
+    }
 
     @Serializable
     sealed interface PlaygroundOutput : GetJudgeResultByCodeIdResp {
@@ -169,12 +182,45 @@ interface ISubmissionService {
     )
 
     @Serializable
-    sealed interface ProblemSubmissionResp {
+    data class ProblemSubmissionRespNotPersist(
+        val problemTestCases: ProblemTestCases,
+        val submissionTestCases: SubmissionTestCases,
+    )
 
+    @Serializable
+    sealed interface ProblemSubmissionResp {
+        @Serializable
+        data class ProblemSubmissionRespImpl(
+            val codeId: Int,
+            val problemTestCases: ProblemTestCases,
+            val submissionTestCases: SubmissionTestCases,
+        ) : ProblemSubmissionResp
     }
 
     suspend fun submit(
         value: AuthenticationToken?,
         submissionSubmit: ProblemSubmissionReq
     ): ProblemSubmissionResp
+
+    @Serializable
+    sealed interface GetLastNProblemSubmissionResp {
+        @Serializable
+        data class GetLastNProblemSubmissionRespImpl(
+            val submissions: List<ProblemSubmissionListDto>
+        ) : GetLastNProblemSubmissionResp
+
+        @Serializable
+        data class ProblemSubmissionListDto(
+            val language: Language,
+            val submitTime: LocalDateTime,
+            val codeId: Int,
+            val passerResult: PasserResult,
+        )
+    }
+
+    suspend fun getLastNProblemSubmission(
+        value: AuthenticationToken?,
+        problemId: Int,
+        lastN: Int
+    ): GetLastNProblemSubmissionResp
 }

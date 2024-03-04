@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object LanguageNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp,
     SaveCodeResp, CreateSubmissionResp,
-    GetLastNPlaygroundSubmissionResp, PlaygroundOutput, ProblemSubmissionResp
+    GetLastNPlaygroundSubmissionResp, PlaygroundOutput, ProblemSubmissionResp, GetLastNProblemSubmissionResp

@@ -5,6 +5,7 @@ import cn.llonvne.gojudge.web.links.LinkTreeConfigurer
 import cn.llonvne.gojudge.web.links.get
 import cn.llonvne.gojudge.web.links.linkIn
 import cn.llonvne.gojudge.web.links.linkTr
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -66,6 +67,9 @@ private class LanguageRouterLoader(
     private val name: String, private val path: String,
     private val languageRouter: LanguageRouter, private val decr: String = name
 ) {
+
+    private val logger = KotlinLogging.logger("LanguageRouter")
+
     init {
         route(path) {
             linkTr(
@@ -82,6 +86,10 @@ private class LanguageRouterLoader(
                         ?: return@post call.respond(HttpStatusCode.BadRequest, "代码为空")
                     val stdin = call.receiveParameters()["stdin"]
                         ?: return@post call.respond(HttpStatusCode.BadRequest, "输入为空")
+
+                    logger.info {
+                        "$name 评测代码 $code,标准输入为 $stdin"
+                    }
                     languageRouter.judge(code, stdin)
                 }
 

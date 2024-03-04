@@ -22,13 +22,12 @@ sealed interface ProblemPasser<out R : PasserResult> {
      * 通过所有测试
      */
     @Serializable
-    data object PassAllCases : ProblemPasser<BooleanResult> {
+    data class PassAllCases(override val description: String = "必须要通过所有测试") : ProblemPasser<BooleanResult> {
         override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult {
-            TODO("Not yet implemented")
+            return submissionTestCases.testCases.map { testcase ->
+                testcase.outputStr?.trimIndent() == testcase.expect
+            }.all { it }.let { BooleanResult(it) }
         }
-
-        override val description: String
-            get() = "需通过所有测试才算题目通过"
     }
 
     /**
@@ -43,5 +42,4 @@ sealed interface ProblemPasser<out R : PasserResult> {
         override val description: String
             get() = "通过 $rate 比例测试即可算题目通过"
     }
-
 }

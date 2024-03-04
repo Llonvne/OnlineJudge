@@ -3,8 +3,7 @@ package cn.llonvne.site.share
 import cn.llonvne.compoent.NotFoundAble
 import cn.llonvne.compoent.notFound
 import cn.llonvne.compoent.observable.observableOf
-import cn.llonvne.entity.problem.share.Code.CodeType.Playground
-import cn.llonvne.entity.problem.share.Code.CodeType.Share
+import cn.llonvne.entity.problem.share.Code.CodeType.*
 import cn.llonvne.kvision.service.ICodeService.GetCodeResp
 import cn.llonvne.site.JudgeResultDisplay
 import io.kvision.core.Container
@@ -50,12 +49,11 @@ private fun Container.shareInternal(load: Deferred<GetCodeResp>, id: ShareID) {
                             highlighter.load(this, code)
                         })
 
-                        add(Div{
+                        add(Div {
                             when (code.codeType) {
                                 Share -> {}
-                                Playground -> {
-                                    JudgeResultDisplay.playground(code.codeId, this)
-                                }
+                                Playground -> JudgeResultDisplay.playground(code.codeId, this)
+                                Problem -> JudgeResultDisplay.problem(code.codeId, this)
                             }
                         })
                     }

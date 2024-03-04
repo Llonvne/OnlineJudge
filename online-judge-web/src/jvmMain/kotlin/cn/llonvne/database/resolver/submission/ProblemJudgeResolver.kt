@@ -2,10 +2,13 @@ package cn.llonvne.database.resolver.submission
 
 import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.SubmissionTestCases
+import cn.llonvne.getLogger
 import cn.llonvne.gojudge.api.SupportLanguages
-import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionReq
-import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp
+import cn.llonvne.kvision.service.ISubmissionService
+import cn.llonvne.kvision.service.ISubmissionService.*
+import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
 import cn.llonvne.kvision.service.JudgeService
+import org.komapper.core.dsl.operator.text
 import org.springframework.stereotype.Service
 
 /**
@@ -13,23 +16,27 @@ import org.springframework.stereotype.Service
  */
 @Service
 class ProblemJudgeResolver(
-    private val judgeService: JudgeService
+    private val judgeService: JudgeService,
 ) {
+
     suspend fun resolve(
         problem: Problem,
         submissionSubmit: ProblemSubmissionReq,
-        language: SupportLanguages
-    ): ProblemSubmissionResp {
+        language: SupportLanguages,
+    ): ProblemSubmissionRespNotPersist {
+
         val results = problem.context.testCases.canJudge().map { testcase ->
             testcase to judgeService.judge(
-                language,
-                testcase.input,
-                testcase.expect,
+                languages = language,
+                stdin = testcase.input,
+                code = submissionSubmit.code
             )
         }.map { (problemTestcase, output) ->
             SubmissionTestCases.SubmissionTestCase.from(problemTestcase, output)
         }
-
-        TODO()
+        return ProblemSubmissionRespNotPersist(
+            problem.context.testCases,
+            SubmissionTestCases(results)
+        )
     }
 }

@@ -65,10 +65,10 @@ fun Container.createProblem(routing: Routing) {
     }
 
     val testCases = ProblemTestCases(
-        listOf(), ProblemPasser.PassAllCases
+        listOf(), ProblemPasser.PassAllCases()
     )
 
-    observableOf(ProblemTestCases(listOf(), ProblemPasser.PassAllCases)) {
+    observableOf(ProblemTestCases(listOf(), ProblemPasser.PassAllCases())) {
         div(className = "row") {
             div(className = "col") {
                 alert(AlertType.Light) {

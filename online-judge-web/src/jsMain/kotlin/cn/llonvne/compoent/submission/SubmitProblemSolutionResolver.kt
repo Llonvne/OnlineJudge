@@ -20,6 +20,9 @@ class SubmitProblemSolutionResolver {
                 visibilityType = submissionVisibilityType,
                 languageId = data.languageId?.toIntOrNull() ?: return Messager.toastInfo("语言无效或为空")
             )
-        )
+        ) {
+            val passerResult = it.problemTestCases.passer.pass(it.submissionTestCases)
+            PasserResultShower.from(passerResult, codeId = it.codeId).show()
+        }
     }
 }

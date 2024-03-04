@@ -43,7 +43,9 @@ fun Container.badge(badgeColor: BadgeColor, display: Span.() -> Unit) = span {
 }
 
 interface BadgesDsl {
-    fun add(action: Span.() -> Unit)
+    fun add(
+        color: BadgeColor? = null, action: Span.() -> Unit
+    )
 
     fun <V> addBind(observableValue: ObservableValue<V>, action: Span.(V) -> Unit)
 }
@@ -52,8 +54,8 @@ private class BadgesImpl(private val target: Container) : BadgesDsl {
 
     private var index = 0
 
-    override fun add(action: Span.() -> Unit) {
-        target.badge(BadgeColor.entries[index++ % BadgeColor.entries.size]) {
+    override fun add(color: BadgeColor?, action: Span.() -> Unit) {
+        target.badge(color ?: BadgeColor.entries[index++ % BadgeColor.entries.size]) {
             action()
         }
     }

@@ -59,11 +59,13 @@ private open class AbstractProblemDetailShower(private val problemId: Int, resp:
 
     private val contextShower = ProblemContextShower.from(resp)
 
-    private val codeEditorShower = CodeEditorShower.from(problemId,resp)
+    private val codeEditorShower = CodeEditorShower.from(problemId, resp)
 
     private val testCasesShower = TestCasesShower.from(resp, filter = {
         it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)
     })
+
+    private val submissionsShower = ProblemSubmissionShower.from(resp)
 
     override fun show(root: Container) {
         root.div {
@@ -77,10 +79,11 @@ private open class AbstractProblemDetailShower(private val problemId: Int, resp:
                 }
                 div(className = "col") {
                     codeEditorShower.show(div { })
+
+                    submissionsShower.show(div { })
                 }
             }
         }
-
     }
 }
 
