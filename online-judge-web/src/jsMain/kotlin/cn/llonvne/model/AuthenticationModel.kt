@@ -93,4 +93,6 @@ object AuthenticationModel {
             NotLogin -> null
         }
     }
+
+    suspend fun mine() = authenticationService.mine(userToken.value)
 }

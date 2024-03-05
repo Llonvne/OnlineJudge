@@ -41,6 +41,7 @@ interface ShareCodeCommentComponent<Comment> {
                 ClosedByAdmin -> empty("评论区已被管理员关闭")
                 Protected -> protected(code.codeId, code)
                 Freezing -> freezing(code.codeId, code)
+                ContestCode -> empty("比赛提交评论区将自动关闭")
             }
         }
 

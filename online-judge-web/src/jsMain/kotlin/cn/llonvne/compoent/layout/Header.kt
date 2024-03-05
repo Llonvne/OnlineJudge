@@ -7,6 +7,7 @@ import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.site.loginPanel
 import io.kvision.core.Container
+import io.kvision.core.onClick
 import io.kvision.dropdown.dropDown
 import io.kvision.html.div
 import io.kvision.navbar.*
@@ -32,6 +33,15 @@ private fun Navbar.showNavigator(routing: Routing) {
                 routing.navigate(Frontend.Submission.uri)
             }
         }
+        dropDown(
+            "比赛",
+            listOf(
+                "比赛信息" to "#/contest",
+                "创建" to "#/contest/create"
+            ),
+            icon = "fas fa-star",
+            forNavbar = true
+        )
         navLink("训练场", icon = "fas fa-play") {
             onClick {
                 routing.navigate(Frontend.PlayGround.uri)
@@ -79,7 +89,10 @@ fun Container.header(routing: Routing) {
 
                     dropDown(
                         info?.username.toString(),
-                        listOf("我的主页" to "#/me", "Forms" to "#!/forms"),
+                        listOf(
+                            "我的主页" to "#/me",
+                            "Forms" to "#!/forms",
+                        ),
                         icon = "fas fa-star",
                         forNavbar = true
                     )

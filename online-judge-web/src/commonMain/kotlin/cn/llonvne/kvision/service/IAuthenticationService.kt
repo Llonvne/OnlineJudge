@@ -72,4 +72,22 @@ interface IAuthenticationService {
     }
 
     suspend fun logout(token: AuthenticationToken?): GetLogoutResp
+
+    @Serializable
+    sealed interface MineResp {
+        @Serializable
+        data class NormalUserMineResp(
+            val username: String,
+            val createAt: String,
+            val acceptedTotal: Int,
+            val accepted7Days: Int,
+            val accepted30Days: Int,
+            val acceptedToday: Int
+        ) : MineResp
+
+        @Serializable
+        data class AdministratorMineResp(val placeholder: Unit) : MineResp
+    }
+
+    suspend fun mine(value: AuthenticationToken?): MineResp
 }

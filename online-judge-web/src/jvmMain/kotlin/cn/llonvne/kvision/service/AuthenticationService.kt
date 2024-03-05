@@ -4,6 +4,7 @@ import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult.*
+import cn.llonvne.database.resolver.mine.MineRoleCheckResolver
 import cn.llonvne.kvision.service.IAuthenticationService.*
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*
 import cn.llonvne.kvision.service.IAuthenticationService.GetLogoutResp.Logout
@@ -25,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 actual class AuthenticationService(
     private val userRepository: AuthenticationUserRepository,
     private val authentication: RedisAuthenticationService,
-    private val bannedUsernameCheckResolver: BannedUsernameCheckResolver
+    private val bannedUsernameCheckResolver: BannedUsernameCheckResolver,
+    private val mineResolver: MineRoleCheckResolver
 ) : IAuthenticationService {
     override suspend fun register(username: String, password: String): RegisterResult {
 
@@ -68,5 +70,12 @@ actual class AuthenticationService(
     override suspend fun logout(token: AuthenticationToken?): GetLogoutResp {
         authentication.logout(token)
         return Logout
+    }
+
+    override suspend fun mine(value: AuthenticationToken?): MineResp {
+        val user = authentication.validate(value) {
+            requireLogin()
+        } ?: return PermissionDenied
+      return  mineResolver.resolve(user)
     }
 }

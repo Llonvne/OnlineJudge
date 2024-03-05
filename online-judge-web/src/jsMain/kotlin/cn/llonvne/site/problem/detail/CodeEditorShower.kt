@@ -2,7 +2,7 @@ package cn.llonvne.site.problem.detail
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
-import cn.llonvne.compoent.submission.SubmitProblemSolutionResolver
+import cn.llonvne.compoent.submission.SubmitProblemResolver
 import cn.llonvne.dtos.SubmissionSubmit
 import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
@@ -20,16 +20,18 @@ interface CodeEditorShower {
     companion object {
         fun from(
             problemId: Int,
-            getProblemByIdOk: GetProblemByIdOk
+            getProblemByIdOk: GetProblemByIdOk,
+            submissionResolver: SubmitProblemResolver
         ): CodeEditorShower {
-            return AbstractCodeEditorShower(problemId, getProblemByIdOk)
+            return AbstractCodeEditorShower(problemId, getProblemByIdOk, submissionResolver)
         }
     }
 }
 
 private class AbstractCodeEditorShower(
     private val problemId: Int,
-    getProblemByIdOk: GetProblemByIdOk
+    getProblemByIdOk: GetProblemByIdOk,
+    private val submissionResolver: SubmitProblemResolver
 ) : CodeEditorShower {
 
     val problem = getProblemByIdOk
@@ -53,12 +55,12 @@ private class AbstractCodeEditorShower(
                 })
                 add(SubmissionSubmit::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
                     it.ordinal.toString() to it.chinese
-                }))
+                }, label = "提交可见性"))
             }
 
             button("提交") {
                 onClickLaunch {
-                    SubmitProblemSolutionResolver().resolve(problemId, panel.getData())
+                    submissionResolver.resolve(problemId, panel.getData())
                 }
             }
         }

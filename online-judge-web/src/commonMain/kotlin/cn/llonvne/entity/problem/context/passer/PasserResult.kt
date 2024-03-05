@@ -9,6 +9,8 @@ sealed interface PasserResult {
 
     val readable: String
 
+    val pass: Boolean
+
     @Serializable
     class BooleanResult(
         val result: Boolean
@@ -23,6 +25,8 @@ sealed interface PasserResult {
                 true -> "Accepted"
                 false -> "Wrong Answer"
             }
+        override val pass: Boolean
+            get() = result
     }
 
 

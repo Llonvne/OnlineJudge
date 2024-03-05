@@ -6,6 +6,9 @@ import cn.llonvne.constants.Frontend
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.*
+import cn.llonvne.site.contest.ContestDetail
+import cn.llonvne.site.contest.contest
+import cn.llonvne.site.contest.createContest
 import cn.llonvne.site.problem.createProblem
 import cn.llonvne.site.problem.detail.detail
 import cn.llonvne.site.problem.problems
@@ -78,25 +81,46 @@ class App : Application() {
                     submissionDetail(routing, (match.data[0] as String).toInt())
                 }
             }
-        }).on(RegExp("^share/(.*)"), {
+        }).on("/contest/create", {
             failTo404(routing) {
                 layout(routing) {
-                    val id = it.data[0] as String
-
-                    val intId = id.toIntOrNull()
-
-                    if (intId != null) {
-                        share(
-                            intId, CodeLoader.id()
-                        )
-                    } else {
-                        share(
-                            id, CodeLoader.hash()
-                        )
-                    }
+                    createContest()
                 }
             }
-        }).injectTeam(routing).on("/404", {
+        })
+            .on("/contest", {
+                failTo404(routing) {
+                    layout(routing) {
+                        contest()
+                    }
+                }
+            })
+            .on(RegExp("^contest/(.*)"), {
+                failTo404(routing) {
+                    layout(routing) {
+                        ContestDetail.from(it.data[0] as String).show(div { })
+                    }
+                }
+            })
+            .on(RegExp("^share/(.*)"), {
+                failTo404(routing) {
+                    layout(routing) {
+                        val id = it.data[0] as String
+
+                        val intId = id.toIntOrNull()
+
+                        if (intId != null) {
+                            share(
+                                intId, CodeLoader.id()
+                            )
+                        } else {
+                            share(
+                                id, CodeLoader.hash()
+                            )
+                        }
+                    }
+                }
+            }).injectTeam(routing).on("/404", {
                 layout(routing) {
                     alert(AlertType.Danger) {
                         +"解析失败了"

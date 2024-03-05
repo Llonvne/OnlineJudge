@@ -9,6 +9,7 @@ data class Submission(
     val submissionId: Int? = null,
     val problemId: Int?,
     val codeId: Int,
+    val contestId: Int? = null,
     // 用户 ID
     val authenticationUserId: Int,
     // 可见性

@@ -1,10 +1,12 @@
 package cn.llonvne.site
 
+import cn.llonvne.compoent.defineColumn
 import cn.llonvne.compoent.observable.observableListOf
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.core.onClick
+import io.kvision.html.Span
 import io.kvision.html.div
 import io.kvision.html.link
 import io.kvision.html.span
@@ -22,12 +24,14 @@ fun Container.submission(routing: Routing) {
 
     observableListOf {
         setUpdater {
-            SubmissionModel.list()
+            SubmissionModel.list().sortedByDescending {
+                it.submitTime
+            }
         }
 
-        div(className = "p-1") { }.bind(this) {
+        div(className = "p-1") { }.bind(this) { listDtos ->
             tabulator<SubmissionListDto>(
-                it,
+                listDtos,
                 options = TabulatorOptions(
                     layout = Layout.FITDATASTRETCH,
                     columns = listOf(
@@ -47,22 +51,17 @@ fun Container.submission(routing: Routing) {
                         }),
                         ColumnDefinition("状态", formatterComponentFunction = { _, _, e ->
                             span {
-                                +e.status.name
+                                +e.status.readable
                             }
                         }),
+                        defineColumn("评测结果") {
+                            Span {
+                                +it.passerResult.readable
+                            }
+                        },
                         ColumnDefinition("语言", formatterComponentFunction = { _, _, e ->
                             span {
                                 +e.language.toString()
-                            }
-                        }),
-                        ColumnDefinition("运行时间", formatterComponentFunction = { _, _, e ->
-                            span {
-                                +e.runTime
-                            }
-                        }),
-                        ColumnDefinition("运行内存", formatterComponentFunction = { _, _, e ->
-                            span {
-                                +e.runMemory
                             }
                         }),
                         ColumnDefinition("代码长度", formatterComponentFunction = { _, _, e ->
@@ -83,10 +82,10 @@ fun Container.submission(routing: Routing) {
                         ColumnDefinition("", formatterComponentFunction = { _, _, e ->
                             link("详情", className = "p-1") {
                                 onClick {
-                                    routing.navigate("/code/${e.submissionId}")
+                                    routing.navigate("/share/${e.codeId}")
                                 }
                             }
-                        })
+                        }),
                     ),
                 ),
                 serializer = serializer()

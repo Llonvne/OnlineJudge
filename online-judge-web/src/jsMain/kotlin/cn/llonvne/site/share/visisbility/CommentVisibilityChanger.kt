@@ -13,9 +13,13 @@ class CommentVisibilityChanger(override val codeDto: CodeDto) : VisibilityChange
             return
         }
 
+        if (codeDto.commentType == CodeCommentType.ContestCode) {
+            return Messager.toastInfo("比赛代码不支持修改评论区权限")
+        }
+
         val types = CodeCommentType.entries.limited(AuthenticationModel.userToken.value ?: return)
 
-        change("更改评论可见性",types){
+        change("更改评论可见性", types) {
             Messager.toastInfo(
                 CodeModel.setCodeCommentType(
                     shareId = codeDto.codeId,

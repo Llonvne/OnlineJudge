@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InternalError(val reason: String) : CommitOnCodeResp, CreateSubmissionResp,
-    GetLastNPlaygroundSubmissionResp, IGroupService.CreateGroupResp, ISubmissionService.ProblemSubmissionResp
+    GetLastNPlaygroundSubmissionResp, IGroupService.CreateGroupResp, ISubmissionService.ProblemSubmissionResp,
+    IContestService.AddProblemResp, IContestService.CreateContestResp
 
 @Serializable
 data class JudgeError(@Contextual val reason: String) : CreateSubmissionResp

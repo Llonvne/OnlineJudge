@@ -14,7 +14,8 @@ data object PermissionDenied : CreateProblemResp,
     SetCodeCommentVisibilityTypeResp, CreateSubmissionResp,
     PlaygroundOutput, GetLastNPlaygroundSubmissionResp,
     CreateGroupResp, LoadGroupResp, IGroupService.JoinGroupResp, IGroupService.QuitGroupResp,
-    IGroupService.KickGroupResp, ProblemSubmissionResp, GetLastNProblemSubmissionResp
+    IGroupService.KickGroupResp, ProblemSubmissionResp, GetLastNProblemSubmissionResp, IAuthenticationService.MineResp,
+    IContestService.AddProblemResp, IContestService.CreateContestResp, IContestService.LoadContestResp
 
 @Serializable
 data class PermissionDeniedWithMessage(val message: String) : IGroupService.KickGroupResp,

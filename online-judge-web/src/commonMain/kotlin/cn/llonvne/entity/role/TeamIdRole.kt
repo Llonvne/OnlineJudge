@@ -32,7 +32,7 @@ sealed interface TeamIdRole : Role {
     }
 }
 
-private inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Boolean {
+inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Boolean {
 
     if (provide is TeamSuperManager) {
         return true

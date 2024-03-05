@@ -19,7 +19,7 @@ private class SubmissionDef(
 
     // 可见性
     val visibility: Nothing,
-
+    val contestId: Int?,
     val status: Nothing,
 
     // 以 Json 形式存在内部

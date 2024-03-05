@@ -1,7 +1,9 @@
 package cn.llonvne.dtos
 
 import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.SubmissionStatus
+import cn.llonvne.entity.problem.context.passer.PasserResult
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -13,8 +15,8 @@ data class SubmissionListDto(
     val problemName: String,
     val submissionId: Int,
     val status: SubmissionStatus,
-    val runTime: String,
-    val runMemory: String,
     val codeLength: Long,
-    val submitTime: LocalDateTime
+    val submitTime: LocalDateTime,
+    val passerResult: PasserResult,
+    val codeId: Int
 )

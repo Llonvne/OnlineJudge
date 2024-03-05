@@ -2,27 +2,25 @@ package cn.llonvne.database.resolver.submission
 
 import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.SubmissionRepository
-import cn.llonvne.dtos.SubmissionSubmit
+import cn.llonvne.database.resolver.contest.ContestIdGetResolver
 import cn.llonvne.entity.AuthenticationUser
-import cn.llonvne.entity.problem.JudgeResult
-import cn.llonvne.entity.problem.Language
-import cn.llonvne.entity.problem.ProblemJudgeResult
-import cn.llonvne.entity.problem.Submission
+import cn.llonvne.entity.contest.ContestId
+import cn.llonvne.entity.problem.*
+import cn.llonvne.entity.problem.SubmissionVisibilityType.*
 import cn.llonvne.entity.problem.share.Code
+import cn.llonvne.entity.problem.share.CodeCommentType
+import cn.llonvne.entity.problem.share.CodeVisibilityType
 import cn.llonvne.gojudge.api.SupportLanguages
+import cn.llonvne.kvision.service.ContestNotFound
 import cn.llonvne.kvision.service.ISubmissionService
 import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionReq
-import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp
-import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
-import cn.llonvne.kvision.service.LanguageNotFound
-import cn.llonvne.kvision.service.PermissionDenied
-import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import org.springframework.stereotype.Service
 
 @Service
 class ProblemSubmissionPersistenceResolver(
     private val codeRepository: CodeRepository,
-    private val submissionRepository: SubmissionRepository
+    private val submissionRepository: SubmissionRepository,
+    private val contestIdGetResolver: ContestIdGetResolver
 ) {
 
     sealed interface ProblemSubmissionPersistenceResult {
@@ -36,25 +34,39 @@ class ProblemSubmissionPersistenceResolver(
     suspend fun resolve(
         user: AuthenticationUser,
         result: ISubmissionService.ProblemSubmissionRespNotPersist,
-        submissionSubmit: ProblemSubmissionReq,
+        problemSubmissionReq: ProblemSubmissionReq,
         language: SupportLanguages
     ): ProblemSubmissionPersistenceResult {
-        return persist(user, result, submissionSubmit, language)
+
+        if (problemSubmissionReq.contestId != null) {
+            return persistAsContestSubmission(
+                user,
+                result,
+                problemSubmissionReq,
+                language,
+                contestId = problemSubmissionReq.contestId
+            )
+        }
+
+        return persist(user, result, problemSubmissionReq, language)
     }
 
-    private suspend fun persist(
+    private suspend fun persistAsContestSubmission(
         user: AuthenticationUser,
         result: ISubmissionService.ProblemSubmissionRespNotPersist,
-        submissionSubmit: ProblemSubmissionReq,
-        language: SupportLanguages
+        problemSubmissionReq: ProblemSubmissionReq,
+        language: SupportLanguages,
+        contestId: ContestId
     ): ProblemSubmissionPersistenceResult {
         val code = codeRepository.save(
             Code(
                 codeId = null,
                 authenticationUserId = user.id,
-                code = submissionSubmit.code,
+                code = problemSubmissionReq.code,
                 codeType = Code.CodeType.Problem,
-                languageId = submissionSubmit.languageId
+                languageId = problemSubmissionReq.languageId,
+                visibilityType = CodeVisibilityType.Restrict,
+                commentType = CodeCommentType.ContestCode,
             )
         )
 
@@ -74,7 +86,67 @@ class ProblemSubmissionPersistenceResolver(
                     result.submissionTestCases,
                     passerResult = passerResult
                 ).json(),
-                problemId = submissionSubmit.problemId
+                problemId = problemSubmissionReq.problemId,
+                status = SubmissionStatus.Finished,
+                contestId = contestIdGetResolver.resolve(contestId)?.contestId
+                    ?: return ProblemSubmissionPersistenceResult.Failed("无效的 ContestId")
+            )
+        )
+
+        if (submission.submissionId == null) {
+            return ProblemSubmissionPersistenceResult.Failed("Submission 在持久后 id 仍然为空")
+        }
+
+        return ProblemSubmissionPersistenceResult.Success(
+            submissionId = submission.submissionId,
+            codeId = code.codeId
+        )
+    }
+
+    private suspend fun persist(
+        user: AuthenticationUser,
+        result: ISubmissionService.ProblemSubmissionRespNotPersist,
+        problemSubmissionReq: ProblemSubmissionReq,
+        language: SupportLanguages
+    ): ProblemSubmissionPersistenceResult {
+
+        val code = codeRepository.save(
+            Code(
+                codeId = null,
+                authenticationUserId = user.id,
+                code = problemSubmissionReq.code,
+                codeType = Code.CodeType.Problem,
+                languageId = problemSubmissionReq.languageId,
+                visibilityType = when (problemSubmissionReq.visibilityType) {
+                    PUBLIC -> CodeVisibilityType.Public
+                    PRIVATE -> CodeVisibilityType.Private
+                }
+            )
+        )
+
+        if (code.codeId == null) {
+            return ProblemSubmissionPersistenceResult.Failed("Code 在持久化后 id 仍然为空·")
+        }
+
+        val passerResult = result.problemTestCases.passer.pass(result.submissionTestCases)
+
+        val submission = submissionRepository.save(
+            Submission(
+                submissionId = null,
+                authenticationUserId = user.id,
+                codeId = code.codeId,
+                judgeResult = ProblemJudgeResult(
+                    result.problemTestCases,
+                    result.submissionTestCases,
+                    passerResult = passerResult
+                ).json(),
+                problemId = problemSubmissionReq.problemId,
+                status = SubmissionStatus.Finished,
+                contestId = if (problemSubmissionReq.contestId == null) {
+                    null
+                } else {
+                    contestIdGetResolver.resolve(problemSubmissionReq.contestId)?.contestId
+                }
             )
         )
 

@@ -38,15 +38,12 @@ import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.Probl
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
-import cn.llonvne.track
 import kotlinx.datetime.LocalDateTime
-import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Objects
-import kotlin.math.log
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.Success as PersisitSuccess
 
 @Service
@@ -65,15 +62,12 @@ actual class SubmissionService(
     private val problemJudgeResolver: ProblemJudgeResolver,
     private val problemSubmissionPersistenceResolver: ProblemSubmissionPersistenceResolver
 ) : ISubmissionService {
-
-    private val json = Json
-
     private val logger = getLogger()
 
     override suspend fun list(req: ListSubmissionReq): List<SubmissionListDto> {
         return submissionRepository.list()
             .mapNotNull { submission ->
-                when (val result = submission.aslistDto()) {
+                when (val result = submission.listDto()) {
                     is SuccessfulGetById -> result.submissionListDto
                     else -> null
                 }
@@ -84,7 +78,7 @@ actual class SubmissionService(
         val submission =
             submissionRepository.getById(id) ?: return SubmissionNotFound
 
-        return submission.aslistDto()
+        return submission.listDto()
     }
 
     override suspend fun getViewCode(id: Int): ViewCodeGetByIdResp {
@@ -115,7 +109,7 @@ actual class SubmissionService(
         )
     }
 
-    private suspend fun Submission.aslistDto(): SubmissionGetByIdResp {
+    private suspend fun Submission.listDto(): SubmissionGetByIdResp {
         val problem = problemRepository.getById(problemId) ?: return ProblemNotFound
 
         return problem.onIdNotNull(ProblemNotFound) { problemId, problem ->
@@ -131,11 +125,10 @@ actual class SubmissionService(
                     problemName = problem.problemName,
                     submissionId = this.submissionId ?: return@onIdNotNull SubmissionNotFound,
                     status = this.status,
-                    // TODO 获得运行时间和内存
-                    runTime = "NULL",
-                    runMemory = "NULL",
                     codeLength = codeRepository.getCodeLength(codeId)?.toLong() ?: return@onIdNotNull CodeNotFound,
-                    submitTime = this.createdAt ?: LocalDateTime.now()
+                    submitTime = this.createdAt ?: LocalDateTime.now(),
+                    passerResult = (this.result as ProblemJudgeResult).passerResult,
+                    codeId = codeId
                 )
             )
         }
@@ -398,24 +391,25 @@ actual class SubmissionService(
         }
 
 
-        val result = submissionRepository.getByAuthenticationUserID(user.id, codeType = Code.CodeType.Problem, lastN)
-            .filter {
-                it.problemId != null && it.problemId == problemId
-            }.filter {
-                it.result is ProblemJudgeResult
-            }
-            .map { sub ->
+        val result =
+            submissionRepository.getByAuthenticationUserID(user.id, codeType = Code.CodeType.Problem, lastN)
+                .filter {
+                    it.problemId != null && it.problemId == problemId
+                }.filter {
+                    it.result is ProblemJudgeResult
+                }
+                .map { sub ->
 
-                val languageId = codeRepository.getCodeLanguageId(sub.codeId) ?: return LanguageNotFound
-                val language = languageRepository.getByIdOrNull(languageId) ?: return LanguageNotFound
+                    val languageId = codeRepository.getCodeLanguageId(sub.codeId) ?: return LanguageNotFound
+                    val language = languageRepository.getByIdOrNull(languageId) ?: return LanguageNotFound
 
-                GetLastNProblemSubmissionResp.ProblemSubmissionListDto(
-                    language = language,
-                    codeId = sub.codeId,
-                    submitTime = sub.createdAt ?: LocalDateTime.now(),
-                    passerResult = (sub.result as ProblemJudgeResult).passerResult
-                )
-            }
+                    GetLastNProblemSubmissionResp.ProblemSubmissionListDto(
+                        language = language,
+                        codeId = sub.codeId,
+                        submitTime = sub.createdAt ?: LocalDateTime.now(),
+                        passerResult = (sub.result as ProblemJudgeResult).passerResult
+                    )
+                }
         return GetLastNProblemSubmissionRespImpl(result).also {
             logger.info("共找到 ${result.size} 条记录")
         }

@@ -8,7 +8,7 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.CodeModel
 
-class CodeCommentVisibilityTypeChanger(override val codeDto: CodeDto) : VisibilityChanger {
+class  CodeCommentVisibilityTypeChanger(override val codeDto: CodeDto) : VisibilityChanger {
     fun change(commentId: Int) {
         if (!isCodeOwner()) {
             return

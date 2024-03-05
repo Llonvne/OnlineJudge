@@ -12,7 +12,11 @@ import cn.llonvne.model.ProblemModel
 import io.kvision.core.Container
 import io.kvision.html.div
 
-fun detail(root: Container, problemId: Int) {
+fun detail(root: Container, problemId: Int, configurer: ProblemDetailConfigurer.() -> Unit = {}) {
+
+    val configure = ProblemDetailConfigurer()
+    configure.configurer()
+
     observableOf<ProblemGetByIdResult>(null) {
         setUpdater {
             ProblemModel.getById(problemId)
@@ -22,7 +26,7 @@ fun detail(root: Container, problemId: Int) {
             if (resp == null) {
                 loading()
             } else {
-                ProblemDetailShower.from(problemId, resp).show(this)
+                ProblemDetailShower.from(problemId, resp, configure).show(this)
             }
         }
     }
@@ -43,23 +47,27 @@ private fun interface ProblemDetailShower {
             })
         }
 
-        fun from(problemId: Int, resp: ProblemGetByIdResult): ProblemDetailShower {
+        fun from(problemId: Int, resp: ProblemGetByIdResult, configure: ProblemDetailConfigurer): ProblemDetailShower {
             return when (resp) {
-                is GetProblemByIdOk -> AbstractProblemDetailShower(problemId, resp)
+                is GetProblemByIdOk -> AbstractProblemDetailShower(problemId, resp, configure)
                 ProblemNotFound -> problemNotFoundDetailShower(problemId = problemId)
             }
         }
     }
 }
 
-private open class AbstractProblemDetailShower(private val problemId: Int, resp: GetProblemByIdOk) :
+private open class AbstractProblemDetailShower(
+    private val problemId: Int,
+    resp: GetProblemByIdOk,
+    private val configure: ProblemDetailConfigurer
+) :
     ProblemDetailShower {
 
     private val headerShower = DetailHeaderShower.from(resp)
 
     private val contextShower = ProblemContextShower.from(resp)
 
-    private val codeEditorShower = CodeEditorShower.from(problemId, resp)
+    private val codeEditorShower = CodeEditorShower.from(problemId, resp, configure.submitProblemResolver)
 
     private val testCasesShower = TestCasesShower.from(resp, filter = {
         it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)
@@ -80,7 +88,9 @@ private open class AbstractProblemDetailShower(private val problemId: Int, resp:
                 div(className = "col") {
                     codeEditorShower.show(div { })
 
-                    submissionsShower.show(div { })
+                    if (!configure.disableHistory) {
+                        submissionsShower.show(div { })
+                    }
                 }
             }
         }

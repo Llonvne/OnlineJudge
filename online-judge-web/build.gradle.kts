@@ -142,6 +142,7 @@ kotlin {
                 implementation("io.kvision:kvision-tabulator:$kvisionVersion")
                 implementation("io.kvision:kvision-tom-select:$kvisionVersion")
                 implementation("io.kvision:kvision-jquery:$kvisionVersion")
+                implementation("io.kvision:kvision-datetime:$kvisionVersion")
             }
         }
         val jsTest by getting {

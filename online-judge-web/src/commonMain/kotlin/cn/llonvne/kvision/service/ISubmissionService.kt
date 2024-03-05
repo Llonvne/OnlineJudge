@@ -5,6 +5,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
+import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.SubmissionStatus
@@ -64,7 +65,7 @@ interface ISubmissionService {
 
     @Serializable
     data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp,
-        ProblemSubmissionResp, GetLastNProblemSubmissionResp
+        ProblemSubmissionResp, GetLastNProblemSubmissionResp, IContestService.AddProblemResp
 
     @Serializable
     data object UserNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
@@ -178,7 +179,8 @@ interface ISubmissionService {
         val code: String,
         val problemId: Int,
         val languageId: Int,
-        val visibilityType: SubmissionVisibilityType
+        val visibilityType: SubmissionVisibilityType,
+        val contestId: ContestId? = null
     )
 
     @Serializable

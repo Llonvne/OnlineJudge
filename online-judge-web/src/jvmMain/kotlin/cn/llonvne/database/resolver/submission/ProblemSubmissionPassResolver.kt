@@ -23,6 +23,12 @@ class ProblemSubmissionPassResolver(
     ): ProblemSubmissionResp {
         val problem = problemRepository.getById(problemSubmissionReq.problemId) ?: return ProblemNotFound
 
+        // 如果是以 Contest 形式提交,则无需检查群组/个人权限
+        if (problemSubmissionReq.contestId != null) {
+            return onPass(problem)
+        }
+
+        // 否则检查权限
         return problemAwareProvider.awareOf(problem) {
             when (problem.type) {
                 Individual -> individualProblemPassResolver.resolve(
