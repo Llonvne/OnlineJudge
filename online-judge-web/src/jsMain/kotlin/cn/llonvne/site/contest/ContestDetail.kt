@@ -16,10 +16,16 @@ import cn.llonvne.kvision.service.IContestService.LoadContestResp.LoadOk
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.ll
 import cn.llonvne.model.ContestModel
+import cn.llonvne.site.contest.Display.*
+import cn.llonvne.site.contest.detail.ContestDetailHeader
+import cn.llonvne.site.contest.detail.ContestProblemDisplay
+import cn.llonvne.site.contest.detail.ContestStatusResolver
+import cn.llonvne.site.contest.detail.ProblemChooser
 import cn.llonvne.site.problem.detail.CodeEditorShower
 import cn.llonvne.site.problem.detail.CodeEditorShower.Companion.CodeEditorConfigurer
 import cn.llonvne.site.problem.detail.detail
 import io.kvision.core.Container
+import io.kvision.core.Display
 import io.kvision.core.onClickLaunch
 import io.kvision.html.*
 import kotlinx.datetime.Instant
@@ -27,6 +33,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.js.Date
+import cn.llonvne.site.contest.Display as ContestDisplay
 
 
 sealed interface ContestDetail {
@@ -60,6 +67,14 @@ sealed interface ContestDetail {
             return BaseContestDetail(contestId)
         }
     }
+}
+
+sealed interface Display {
+    data class ProblemIndex(val id: Int) : ContestDisplay
+
+    data object Status : ContestDisplay
+
+    data object None : ContestDisplay
 }
 
 private class BaseContestDetail(private val contestId: ContestId) : ContestDetail {
@@ -99,88 +114,39 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
     }
 
     fun onOk(container: Container, loadOk: LoadOk) {
+
+        val contestDetailHeader = ContestDetailHeader.form(loadOk = loadOk)
+
+        val problemChooser = ProblemChooser.from(loadOk)
+
+        val problemDisplay = ContestProblemDisplay.from(contestId)
+
         container.div {
 
-            val instant = Instant.fromEpochMilliseconds(Date.now().toLong())
-            val status: Contest.ContestStatus =
-                if (instant < loadOk.contest.startAt.toInstant(TimeZone.currentSystemDefault())) {
-                    NotBegin
-                } else if (instant < loadOk.contest.endAt.toInstant(TimeZone.currentSystemDefault())) {
-                    Running
-                } else {
-                    Ended
-                }
+            contestDetailHeader.show(div { })
 
-            alert(
-                when (status) {
-                    NotBegin -> AlertType.Info
-                    Running -> AlertType.Success
-                    Ended -> AlertType.Danger
-                }
-            ) {
-                h1 {
-                    +loadOk.contest.title
-                }
-
-                h4(rich = true) {
-                    +loadOk.contest.description
-                }
-
-                badges {
-                    add {
-                        +status.name
-                    }
-                    add {
-                        +"所有者:${loadOk.ownerName}"
-                    }
-                    add {
-                        +loadOk.contest.contestScoreType.name
-                    }
-                    add {
-                        +loadOk.contest.rankType.chinese
-                    }
-                    add {
-                        +"开始于${loadOk.contest.startAt.ll()}"
-                    }
-                    add {
-                        +"结束于${loadOk.contest.endAt.ll()}"
-                    }
-                }
-            }
-
-            observableOf<IContestService.ContextSubmissionResp>(null) {
-                setUpdater { ContestModel.contextSubmissions(contestId) }
-
-                sync(div { }) { resp ->
-                    if (resp != null) {
-                        console.log(resp)
-                    }
-                }
-            }
-
-            observableOf(loadOk.contest.context.problems.first().problemId) {
-                setUpdater { loadOk.contest.context.problems.first().problemId }
+            observableOf<ContestDisplay>(None) {
+                setUpdater { ProblemIndex(loadOk.contest.context.problems.first().problemId) }
                 sync(div { }) { index ->
                     div(className = "row") {
                         div(className = "col-3") {
+
+                            problemChooser.show(div { }, this@observableOf)
+
                             alert(AlertType.Light) {
-                                loadOk.contest.context.problems.forEachIndexed { index, problem ->
-                                    button('A'.plus(index).toString()) {
-                                        onClickLaunch {
-                                            setObv(problem.problemId)
-                                        }
+                                button("状态") {
+                                    onClickLaunch {
+                                        setObv(Status)
                                     }
                                 }
                             }
                         }
                         div(className = "col") {
-                            if (index != null && index > 0) {
-                                detail(div { }, index) {
-                                    disableHistory = true
-                                    submitProblemResolver = SubmitProblemResolver(contestId = contestId)
-                                    codeEditorConfigurer = CodeEditorConfigurer {
-                                        forceVisibility = SubmissionVisibilityType.Contest
-                                    }
+                            if (index != null) {
+                                when (index) {
+                                    None -> loading()
+                                    is ProblemIndex -> problemDisplay.show(div { }, index)
+                                    Status -> TODO()
                                 }
                             }
                         }
