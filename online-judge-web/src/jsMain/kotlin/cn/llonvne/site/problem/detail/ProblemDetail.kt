@@ -67,7 +67,10 @@ private open class AbstractProblemDetailShower(
 
     private val contextShower = ProblemContextShower.from(resp)
 
-    private val codeEditorShower = CodeEditorShower.from(problemId, resp, configure.submitProblemResolver)
+    private val codeEditorShower = CodeEditorShower.from(
+        problemId, resp,
+        configure.codeEditorConfigurer
+    )
 
     private val testCasesShower = TestCasesShower.from(resp, filter = {
         it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)

@@ -6,6 +6,7 @@ import cn.llonvne.compoent.submission.SubmitProblemResolver
 import cn.llonvne.dtos.SubmissionSubmit
 import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
+import cn.llonvne.site.problem.detail.CodeEditorShower.Companion.CodeEditorConfigurer
 import io.kvision.core.Container
 import io.kvision.core.onClickLaunch
 import io.kvision.form.formPanel
@@ -21,9 +22,24 @@ interface CodeEditorShower {
         fun from(
             problemId: Int,
             getProblemByIdOk: GetProblemByIdOk,
-            submissionResolver: SubmitProblemResolver
+            codeEditorConfigurer: CodeEditorConfigurer
         ): CodeEditorShower {
-            return AbstractCodeEditorShower(problemId, getProblemByIdOk, submissionResolver)
+            return AbstractCodeEditorShower(problemId, getProblemByIdOk, codeEditorConfigurer)
+        }
+
+        class CodeEditorConfigurer {
+            /**
+             * 设置为 null 允许用户进行选择，否则将使用这里设定的可见性设置
+             */
+            var forceVisibility: SubmissionVisibilityType? = null
+
+            var submitProblemResolver = SubmitProblemResolver()
+        }
+
+        fun CodeEditorConfigurer(action: CodeEditorConfigurer.() -> Unit): CodeEditorConfigurer {
+            val codeEditorConfigurer = CodeEditorConfigurer()
+            codeEditorConfigurer.action()
+            return codeEditorConfigurer
         }
     }
 }
@@ -31,7 +47,7 @@ interface CodeEditorShower {
 private class AbstractCodeEditorShower(
     private val problemId: Int,
     getProblemByIdOk: GetProblemByIdOk,
-    private val submissionResolver: SubmitProblemResolver
+    private val codeEditorConfigurer: CodeEditorConfigurer
 ) : CodeEditorShower {
 
     val problem = getProblemByIdOk
@@ -53,14 +69,25 @@ private class AbstractCodeEditorShower(
                     label = "解决方案"
                     rows = 10
                 })
-                add(SubmissionSubmit::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
-                    it.ordinal.toString() to it.chinese
-                }, label = "提交可见性"))
+
+                if (
+                    codeEditorConfigurer.forceVisibility == null
+                ) {
+                    add(SubmissionSubmit::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
+                        it.ordinal.toString() to it.chinese
+                    }, label = "提交可见性"))
+                }
             }
 
             button("提交") {
                 onClickLaunch {
-                    submissionResolver.resolve(problemId, panel.getData())
+                    codeEditorConfigurer.submitProblemResolver.resolve(problemId, panel.getData().let {
+                        if (codeEditorConfigurer.forceVisibility != null) {
+                            it.copy(visibilityTypeStr = codeEditorConfigurer.forceVisibility?.ordinal.toString())
+                        } else {
+                            it
+                        }
+                    })
                 }
             }
         }

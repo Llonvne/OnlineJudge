@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class SubmissionSubmit(
     val languageId: String?,
     val code: String?,
-    val visibilityTypeStr: String
+    val visibilityTypeStr: String? = null
 )

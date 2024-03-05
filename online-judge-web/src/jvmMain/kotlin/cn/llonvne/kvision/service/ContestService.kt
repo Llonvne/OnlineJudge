@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.repository.ContestRepository
 import cn.llonvne.database.repository.ProblemRepository
+import cn.llonvne.database.repository.SubmissionRepository
 import cn.llonvne.database.resolver.contest.ContestIdGetResolver
 import cn.llonvne.database.resolver.contest.ContestProblemVisibilityCheckResolver
 import cn.llonvne.database.resolver.contest.ContestProblemVisibilityCheckResolver.ContestProblemVisibilityCheckResult.Pass
@@ -31,7 +32,8 @@ actual class ContestService(
     private val contestProblemVisibilityCheckResolver: ContestProblemVisibilityCheckResolver,
     private val contestRepository: ContestRepository,
     private val contestIdGetResolver: ContestIdGetResolver,
-    private val authenticationUserRepository: AuthenticationUserRepository
+    private val authenticationUserRepository: AuthenticationUserRepository,
+    private val submissionRepository: SubmissionRepository
 ) : IContestService {
     override suspend fun addProblem(value: AuthenticationToken?, problemId: String): IContestService.AddProblemResp {
         val user = authentication.validate(value) { requireLogin() } ?: return PermissionDenied
@@ -112,5 +114,20 @@ actual class ContestService(
         )?.username ?: return ContestOwnerNotFound
 
         return IContestService.LoadContestResp.LoadOk(contest, username)
+    }
+
+    override suspend fun contextSubmission(
+        value: AuthenticationToken?,
+        contestId: ContestId
+    ): IContestService.ContextSubmissionResp {
+        val user = authentication.validate(value) {
+            requireLogin()
+        } ?: return PermissionDenied
+
+        val contestId = contestIdGetResolver.resolve(contestId)?.contestId ?: return ContestNotFound
+
+        val submissions = submissionRepository.getByContestId(contestId)
+
+        return IContestService.ContextSubmissionResp.ContextSubmissionOk(submissions)
     }
 }

@@ -40,4 +40,8 @@ object ContestModel {
     suspend fun load(contestId: ContestId) = contestService.load(
         AuthenticationModel.userToken.value, contestId
     )
+
+    suspend fun contextSubmissions(contestId: ContestId) = contestService.contextSubmission(
+        AuthenticationModel.userToken.value, contestId
+    )
 }

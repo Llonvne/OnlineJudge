@@ -3,6 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestContext
 import cn.llonvne.entity.contest.ContestId
+import cn.llonvne.entity.problem.Submission
 import cn.llonvne.security.AuthenticationToken
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
@@ -46,4 +47,13 @@ interface IContestService {
     }
 
     suspend fun load(value: AuthenticationToken?, contestId: ContestId): LoadContestResp
+
+
+    @Serializable
+    sealed interface ContextSubmissionResp {
+        @Serializable
+        data class ContextSubmissionOk(val submissions: List<Submission>) : ContextSubmissionResp
+    }
+
+    suspend fun contextSubmission(value: AuthenticationToken?, contestId: ContestId): ContextSubmissionResp
 }

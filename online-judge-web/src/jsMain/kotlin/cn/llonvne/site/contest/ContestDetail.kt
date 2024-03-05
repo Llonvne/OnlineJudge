@@ -8,6 +8,7 @@ import cn.llonvne.entity.contest.Contest.ContestStatus.*
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.contest.HashId
 import cn.llonvne.entity.contest.IntId
+import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.ContestNotFound
 import cn.llonvne.kvision.service.ContestOwnerNotFound
 import cn.llonvne.kvision.service.IContestService
@@ -15,6 +16,8 @@ import cn.llonvne.kvision.service.IContestService.LoadContestResp.LoadOk
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.ll
 import cn.llonvne.model.ContestModel
+import cn.llonvne.site.problem.detail.CodeEditorShower
+import cn.llonvne.site.problem.detail.CodeEditorShower.Companion.CodeEditorConfigurer
 import cn.llonvne.site.problem.detail.detail
 import io.kvision.core.Container
 import io.kvision.core.onClickLaunch
@@ -145,14 +148,24 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
                 }
             }
 
+            observableOf<IContestService.ContextSubmissionResp>(null) {
+                setUpdater { ContestModel.contextSubmissions(contestId) }
+
+                sync(div { }) { resp ->
+                    if (resp != null) {
+                        console.log(resp)
+                    }
+                }
+            }
+
             observableOf(loadOk.contest.context.problems.first().problemId) {
                 setUpdater { loadOk.contest.context.problems.first().problemId }
                 sync(div { }) { index ->
                     div(className = "row") {
                         div(className = "col-3") {
                             alert(AlertType.Light) {
-                                loadOk.contest.context.problems.forEach { problem ->
-                                    button(problem.alias) {
+                                loadOk.contest.context.problems.forEachIndexed { index, problem ->
+                                    button('A'.plus(index).toString()) {
                                         onClickLaunch {
                                             setObv(problem.problemId)
                                         }
@@ -165,6 +178,9 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
                                 detail(div { }, index) {
                                     disableHistory = true
                                     submitProblemResolver = SubmitProblemResolver(contestId = contestId)
+                                    codeEditorConfigurer = CodeEditorConfigurer {
+                                        forceVisibility = SubmissionVisibilityType.Contest
+                                    }
                                 }
                             }
                         }

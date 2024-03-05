@@ -68,4 +68,12 @@ class SubmissionRepository(
         // TODO
         return ProblemStatus.NotBegin
     }
+
+    suspend fun getByContestId(contestId: Int, limit: Int = 1000): List<Submission> {
+        return db.runQuery {
+            QueryDsl.from(submissionMeta).where {
+                submissionMeta.contestId eq contestId
+            }.limit(1000)
+        }
+    }
 }

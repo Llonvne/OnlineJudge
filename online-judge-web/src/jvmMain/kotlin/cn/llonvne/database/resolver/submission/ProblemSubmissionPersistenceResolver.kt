@@ -120,6 +120,7 @@ class ProblemSubmissionPersistenceResolver(
                 visibilityType = when (problemSubmissionReq.visibilityType) {
                     PUBLIC -> CodeVisibilityType.Public
                     PRIVATE -> CodeVisibilityType.Private
+                    Contest -> CodeVisibilityType.Restrict
                 }
             )
         )

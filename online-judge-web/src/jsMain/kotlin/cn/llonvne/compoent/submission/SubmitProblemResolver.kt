@@ -14,7 +14,7 @@ class SubmitProblemResolver(
 
     suspend fun resolve(problemId: Int, data: SubmissionSubmit) {
         val submissionVisibilityType = data.visibilityTypeStr.let {
-            SubmissionVisibilityType.entries[it.toIntOrNull() ?: return Messager.toastInfo("提交可见性ID无效")]
+            SubmissionVisibilityType.entries[it?.toIntOrNull() ?: return Messager.toastInfo("提交可见性ID无效")]
         }
         SubmissionModel.submit(
             ISubmissionService.ProblemSubmissionReq(
