@@ -5,12 +5,12 @@ package cn.llonvne.kvision.service
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
+import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.entity.problem.SubmissionVisibilityType
-import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemTestCases
 import cn.llonvne.entity.problem.context.SubmissionTestCases
 import cn.llonvne.entity.problem.context.passer.PasserResult
@@ -225,4 +225,13 @@ interface ISubmissionService {
         problemId: Int,
         lastN: Int
     ): GetLastNProblemSubmissionResp
+
+    @Serializable
+    sealed interface GetParticipantContestResp {
+        @Serializable
+        data class GetParticipantContestOk(val contests: List<Contest>) :
+            GetParticipantContestResp
+    }
+
+    suspend fun getParticipantContest(value: AuthenticationToken?): GetParticipantContestResp
 }

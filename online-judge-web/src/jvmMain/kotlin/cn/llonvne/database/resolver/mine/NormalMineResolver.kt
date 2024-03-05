@@ -1,17 +1,14 @@
 package cn.llonvne.database.resolver.mine
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.exts.now
-import cn.llonvne.getLogger
 import cn.llonvne.kvision.service.IAuthenticationService
 import cn.llonvne.kvision.service.IAuthenticationService.MineResp.NormalUserMineResp
 import cn.llonvne.ll
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.springframework.stereotype.Service
 

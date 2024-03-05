@@ -14,6 +14,8 @@ import io.kvision.form.select.TomSelect
 import io.kvision.form.text.TextArea
 import io.kvision.html.button
 import io.kvision.html.h4
+import io.kvision.html.p
+import io.kvision.i18n.tr
 
 interface CodeEditorShower {
     fun show(root: Container)
@@ -34,6 +36,10 @@ interface CodeEditorShower {
             var forceVisibility: SubmissionVisibilityType? = null
 
             var submitProblemResolver = SubmitProblemResolver()
+
+            var showSubmitPanel: Boolean = true
+
+            var notShowSubmitPanelMessage: String = ""
         }
 
         fun CodeEditorConfigurer(action: CodeEditorConfigurer.() -> Unit): CodeEditorConfigurer {
@@ -53,6 +59,22 @@ private class AbstractCodeEditorShower(
     val problem = getProblemByIdOk
 
     override fun show(root: Container) {
+        if (codeEditorConfigurer.showSubmitPanel) {
+            doShow(root)
+        } else {
+            root.alert(AlertType.Secondary) {
+                h4 {
+                    +"提交面板已经被关闭"
+                }
+
+                p {
+                    +codeEditorConfigurer.notShowSubmitPanelMessage
+                }
+            }
+        }
+    }
+
+    private fun doShow(root: Container) {
         root.alert(AlertType.Secondary) {
 
             h4 {

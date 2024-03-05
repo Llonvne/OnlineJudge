@@ -2,19 +2,18 @@ package cn.llonvne.site.contest.detail
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.entity.contest.Contest
-import cn.llonvne.entity.contest.ContestId
-import cn.llonvne.kvision.service.IContestService
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.js.Date
 
-class ContestStatusResolver(private val loadOk: IContestService.LoadContestResp.LoadOk) {
+class ContestStatusResolver(private val startAt: LocalDateTime,private val endAt: LocalDateTime) {
     fun status(): Contest.ContestStatus {
         val instant = Instant.fromEpochMilliseconds(Date.now().toLong())
-        return if (instant < loadOk.contest.startAt.toInstant(TimeZone.currentSystemDefault())) {
+        return if (instant < startAt.toInstant(TimeZone.currentSystemDefault())) {
             Contest.ContestStatus.NotBegin
-        } else if (instant < loadOk.contest.endAt.toInstant(TimeZone.currentSystemDefault())) {
+        } else if (instant < endAt.toInstant(TimeZone.currentSystemDefault())) {
             Contest.ContestStatus.Running
         } else {
             Contest.ContestStatus.Ended

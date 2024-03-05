@@ -4,7 +4,7 @@ import cn.llonvne.compoent.badges
 import cn.llonvne.entity.problem.context.passer.PasserResult
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.site.BooleanPasserResultDisplay
-import io.kvision.core.*
+import io.kvision.core.onClickLaunch
 import io.kvision.modal.Dialog
 
 interface PasserResultShower {

@@ -1,12 +1,10 @@
 package cn.llonvne.model
 
-import cn.llonvne.entity.problem.context.passer.PasserResult.BooleanResult
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.PlaygroundCreateSubmissionReq
 import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
-import cn.llonvne.message.Message
 import cn.llonvne.message.Messager
 import cn.llonvne.site.PlaygroundSubmission
 import io.kvision.remote.getService
@@ -65,5 +63,9 @@ object SubmissionModel {
             is ProblemSubmissionRespImpl -> onSuccess(resp)
             is InternalError -> Messager.toastInfo(resp.reason)
         }
+    }
+
+    suspend fun getParticipantContest(): GetParticipantContestResp {
+        return submissionService.getParticipantContest(AuthenticationModel.userToken.value)
     }
 }

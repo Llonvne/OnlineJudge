@@ -2,13 +2,10 @@ package cn.llonvne.database.resolver.submission
 
 import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.SubmissionTestCases
-import cn.llonvne.getLogger
 import cn.llonvne.gojudge.api.SupportLanguages
-import cn.llonvne.kvision.service.ISubmissionService
-import cn.llonvne.kvision.service.ISubmissionService.*
-import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
+import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionReq
+import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionRespNotPersist
 import cn.llonvne.kvision.service.JudgeService
-import org.komapper.core.dsl.operator.text
 import org.springframework.stereotype.Service
 
 /**

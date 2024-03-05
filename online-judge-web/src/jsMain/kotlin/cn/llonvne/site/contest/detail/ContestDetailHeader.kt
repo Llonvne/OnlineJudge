@@ -20,7 +20,7 @@ interface ContestDetailHeader {
 
 private class BaseContestDetailHeader(private val loadOk: IContestService.LoadContestResp.LoadOk) :
     ContestDetailHeader {
-    private val contestStatusResolver = ContestStatusResolver(loadOk)
+    private val contestStatusResolver = ContestStatusResolver(loadOk.contest.startAt, loadOk.contest.endAt)
     override fun show(container: Container) {
         container.div {
             alert(contestStatusResolver.statusColor()) {

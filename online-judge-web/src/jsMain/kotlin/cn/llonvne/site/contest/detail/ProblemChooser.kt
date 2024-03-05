@@ -3,7 +3,6 @@ package cn.llonvne.site.contest.detail
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.observable.ObservableDsl
-import cn.llonvne.kvision.service.IContestService
 import cn.llonvne.kvision.service.IContestService.LoadContestResp.LoadOk
 import cn.llonvne.site.contest.Display
 import io.kvision.core.Container

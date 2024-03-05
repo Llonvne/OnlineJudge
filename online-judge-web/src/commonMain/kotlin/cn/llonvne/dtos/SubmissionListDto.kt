@@ -1,7 +1,6 @@
 package cn.llonvne.dtos
 
 import cn.llonvne.entity.problem.Language
-import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.entity.problem.context.passer.PasserResult
 import kotlinx.datetime.LocalDateTime

@@ -1,5 +1,7 @@
 package cn.llonvne.site.problem
 
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badgeGroup
 import cn.llonvne.compoent.observable.observableListOf
 import cn.llonvne.compoent.problemStatus
@@ -11,7 +13,6 @@ import cn.llonvne.model.Storage
 import io.kvision.core.Container
 import io.kvision.core.onClickLaunch
 import io.kvision.core.onInput
-import io.kvision.core.style
 import io.kvision.form.formPanel
 import io.kvision.form.text.Text
 import io.kvision.html.*
@@ -31,12 +32,27 @@ data class ProblemSearch(
 )
 
 internal fun Container.problems(routing: Routing) {
+
+    alert(AlertType.Light){
+        h1 {
+            +"题目集合"
+        }
+
+        p {
+            +"选择或者搜索您喜欢的题目来练练手吧！"
+        }
+    }
+
     div(className = "row") {
         div(className = "col-8") {
-            problemsList(routing)
+            alert(AlertType.Light){
+                problemsList(routing)
+            }
         }
         div(className = "col") {
-            h1 { +"HelloWorld" }
+            alert(AlertType.Light){
+                h1 { +"HelloWorld" }
+            }
         }
     }
 }

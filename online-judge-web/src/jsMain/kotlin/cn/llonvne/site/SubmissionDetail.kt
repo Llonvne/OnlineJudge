@@ -12,7 +12,6 @@ import cn.llonvne.kvision.service.ISubmissionService.*
 import cn.llonvne.kvision.service.ISubmissionService.ViewCodeGetByIdResp.SuccessfulGetById
 import cn.llonvne.kvision.service.JudgeResultParseError
 import cn.llonvne.kvision.service.LanguageNotFound
-import cn.llonvne.model.RoutingModule
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container
 import io.kvision.html.code

@@ -2,7 +2,6 @@ package cn.llonvne.database.resolver.mine
 
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.kvision.service.IAuthenticationService
-import kotlinx.serialization.Serializable
 import org.springframework.stereotype.Service
 
 @Service

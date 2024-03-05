@@ -1,9 +1,11 @@
 package cn.llonvne.site.problem.detail
 
-import cn.llonvne.compoent.*
+import cn.llonvne.compoent.AlertType
+import cn.llonvne.compoent.alert
+import cn.llonvne.compoent.defineColumn
+import cn.llonvne.compoent.loading
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.context.passer.PasserResult
-import cn.llonvne.kvision.service.IProblemService
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
 import cn.llonvne.kvision.service.ISubmissionService
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNProblemSubmissionResp.GetLastNProblemSubmissionRespImpl
@@ -15,7 +17,8 @@ import cn.llonvne.model.SubmissionModel
 import cn.llonvne.site.BooleanPasserResultDisplay
 import cn.llonvne.site.JudgeResultDisplayErrorHandler
 import io.kvision.core.Container
-import io.kvision.html.*
+import io.kvision.html.Span
+import io.kvision.html.h4
 import io.kvision.tabulator.Layout
 import io.kvision.tabulator.TabulatorOptions
 import io.kvision.tabulator.tabulator
@@ -83,7 +86,7 @@ private class BaseProblemSubmissionShower(
 
             tabulator(
                 resp.submissions, options = TabulatorOptions(
-                    layout = Layout.FITDATATABLE,
+                    layout = Layout.FITCOLUMNS,
                     columns = listOf(
                         defineColumn("提交时间") {
                             Span {

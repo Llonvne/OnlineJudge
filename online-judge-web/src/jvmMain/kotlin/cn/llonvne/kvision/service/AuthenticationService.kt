@@ -3,7 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.AuthenticationUserRepository
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult
-import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult.*
+import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult.Pass
 import cn.llonvne.database.resolver.mine.MineRoleCheckResolver
 import cn.llonvne.kvision.service.IAuthenticationService.*
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*

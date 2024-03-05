@@ -1,8 +1,6 @@
 package cn.llonvne.site.problem.detail
 
-import cn.llonvne.compoent.NotFoundAble
-import cn.llonvne.compoent.loading
-import cn.llonvne.compoent.notFound
+import cn.llonvne.compoent.*
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.context.TestCaseType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult
@@ -11,11 +9,26 @@ import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.ProblemNo
 import cn.llonvne.model.ProblemModel
 import io.kvision.core.Container
 import io.kvision.html.div
+import io.kvision.html.h4
+import io.kvision.html.p
 
 fun detail(root: Container, problemId: Int, configurer: ProblemDetailConfigurer.() -> Unit = {}) {
 
     val configure = ProblemDetailConfigurer()
     configure.configurer()
+
+    if (configure.notShowProblem) {
+        root.alert(AlertType.Secondary) {
+            h4 {
+                +"题目显示已经被关闭"
+            }
+
+            p {
+                +configure.notShowProblemMessage
+            }
+        }
+        return
+    }
 
     observableOf<ProblemGetByIdResult>(null) {
         setUpdater {

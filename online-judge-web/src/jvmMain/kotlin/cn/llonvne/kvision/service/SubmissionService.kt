@@ -1,6 +1,7 @@
 package cn.llonvne.kvision.service
 
 import cn.llonvne.database.repository.*
+import cn.llonvne.database.resolver.contest.ContestIdGetResolver
 import cn.llonvne.database.resolver.submission.ProblemJudgeResolver
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPassResolver
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver
@@ -9,7 +10,10 @@ import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResol
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.*
+import cn.llonvne.entity.problem.PlaygroundJudgeResult
+import cn.llonvne.entity.problem.ProblemJudgeResult
+import cn.llonvne.entity.problem.Submission
+import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.context.SubmissionTestCases
 import cn.llonvne.entity.problem.context.TestCaseType
@@ -29,6 +33,7 @@ import cn.llonvne.kvision.service.ISubmissionService.CreateSubmissionReq.Playgro
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.PlaygroundSubmissionDto
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNPlaygroundSubmissionResp.SuccessGetLastNPlaygroundSubmission
 import cn.llonvne.kvision.service.ISubmissionService.GetLastNProblemSubmissionResp.GetLastNProblemSubmissionRespImpl
+import cn.llonvne.kvision.service.ISubmissionService.GetParticipantContestResp.GetParticipantContestOk
 import cn.llonvne.kvision.service.ISubmissionService.GetSupportLanguageByProblemIdResp.SuccessfulGetSupportLanguage
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureOutput
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureReason.*
@@ -43,7 +48,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Objects
+import java.util.*
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.Success as PersisitSuccess
 
 @Service
@@ -60,7 +65,10 @@ actual class SubmissionService(
     private val authentication: RedisAuthenticationService,
     private val problemSubmissionPassResolver: ProblemSubmissionPassResolver,
     private val problemJudgeResolver: ProblemJudgeResolver,
-    private val problemSubmissionPersistenceResolver: ProblemSubmissionPersistenceResolver
+    private val problemSubmissionPersistenceResolver: ProblemSubmissionPersistenceResolver,
+    private val contestIdGetResolver: ContestIdGetResolver,
+    private val contestRepository: ContestRepository,
+    private val contestService: ContestService
 ) : ISubmissionService {
     private val logger = getLogger()
 
@@ -413,5 +421,23 @@ actual class SubmissionService(
         return GetLastNProblemSubmissionRespImpl(result).also {
             logger.info("共找到 ${result.size} 条记录")
         }
+    }
+
+    override suspend fun getParticipantContest(
+        value: AuthenticationToken?,
+    ): GetParticipantContestResp {
+        val user = authentication.validate(value) {
+            requireLogin()
+        } ?: return PermissionDenied
+
+        val contests = submissionRepository.getByAuthenticationUserID(
+            user.id, codeType = Code.CodeType.Problem
+        ).mapNotNull {
+            it.contestId
+        }.toSet().mapNotNull {
+            contestRepository.getById(it)
+        }
+
+        return GetParticipantContestOk(contests.sortedByDescending { it.endAt }.take(5))
     }
 }

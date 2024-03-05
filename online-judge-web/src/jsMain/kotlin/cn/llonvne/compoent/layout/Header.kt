@@ -7,7 +7,6 @@ import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.site.loginPanel
 import io.kvision.core.Container
-import io.kvision.core.onClick
 import io.kvision.dropdown.dropDown
 import io.kvision.html.div
 import io.kvision.navbar.*

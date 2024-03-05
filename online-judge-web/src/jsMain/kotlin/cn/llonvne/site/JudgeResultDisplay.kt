@@ -6,9 +6,8 @@ import cn.llonvne.compoent.badge
 import cn.llonvne.compoent.badges
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.entity.problem.ProblemJudgeResult
-import cn.llonvne.entity.problem.context.passer.PasserResult.BooleanResult
 import cn.llonvne.entity.types.badge.BadgeColor
-import cn.llonvne.kvision.service.*
+import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ISubmissionService.GetJudgeResultByCodeIdResp
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.FailureReason.*
@@ -16,6 +15,9 @@ import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.SuccessPlaygroundOutput
 import cn.llonvne.kvision.service.ISubmissionService.ProblemOutput.SuccessProblemOutput
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionNotFound
+import cn.llonvne.kvision.service.JudgeResultParseError
+import cn.llonvne.kvision.service.LanguageNotFound
+import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.SubmissionModel
 import io.kvision.core.Container

@@ -11,7 +11,6 @@ import io.kvision.core.Container
 import io.kvision.html.div
 import io.kvision.html.h4
 import io.kvision.html.p
-import kotlin.math.min
 
 fun Container.mine() {
     observableOf<MineResp>(null) {

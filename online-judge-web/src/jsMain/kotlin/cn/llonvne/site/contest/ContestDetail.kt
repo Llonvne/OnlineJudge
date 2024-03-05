@@ -2,37 +2,24 @@ package cn.llonvne.site.contest
 
 import cn.llonvne.compoent.*
 import cn.llonvne.compoent.observable.observableOf
-import cn.llonvne.compoent.submission.SubmitProblemResolver
-import cn.llonvne.entity.contest.Contest
-import cn.llonvne.entity.contest.Contest.ContestStatus.*
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.contest.HashId
 import cn.llonvne.entity.contest.IntId
-import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.ContestNotFound
 import cn.llonvne.kvision.service.ContestOwnerNotFound
 import cn.llonvne.kvision.service.IContestService
 import cn.llonvne.kvision.service.IContestService.LoadContestResp.LoadOk
 import cn.llonvne.kvision.service.PermissionDenied
-import cn.llonvne.ll
 import cn.llonvne.model.ContestModel
 import cn.llonvne.site.contest.Display.*
 import cn.llonvne.site.contest.detail.ContestDetailHeader
 import cn.llonvne.site.contest.detail.ContestProblemDisplay
 import cn.llonvne.site.contest.detail.ContestStatusResolver
 import cn.llonvne.site.contest.detail.ProblemChooser
-import cn.llonvne.site.problem.detail.CodeEditorShower
-import cn.llonvne.site.problem.detail.CodeEditorShower.Companion.CodeEditorConfigurer
-import cn.llonvne.site.problem.detail.detail
 import io.kvision.core.Container
-import io.kvision.core.Display
 import io.kvision.core.onClickLaunch
-import io.kvision.html.*
-import kotlinx.datetime.Instant
-
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlin.js.Date
+import io.kvision.html.button
+import io.kvision.html.div
 import cn.llonvne.site.contest.Display as ContestDisplay
 
 
@@ -119,7 +106,9 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
 
         val problemChooser = ProblemChooser.from(loadOk)
 
-        val problemDisplay = ContestProblemDisplay.from(contestId)
+        val statusResolver = ContestStatusResolver(loadOk.contest.startAt, loadOk.contest.endAt)
+
+        val problemDisplay = ContestProblemDisplay.from(contestId, statusResolver)
 
         container.div {
 
