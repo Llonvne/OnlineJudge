@@ -2,6 +2,7 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.entity.problem.ProblemTag
 import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemContext
@@ -38,7 +39,7 @@ interface IProblemService {
 
     suspend fun create(authenticationToken: AuthenticationToken?, createProblemReq: CreateProblemReq): CreateProblemResp
 
-    suspend fun list(authenticationToken: AuthenticationToken?): List<ProblemListDto>
+    suspend fun list(authenticationToken: AuthenticationToken?, showType: ProblemListShowType): List<ProblemListDto>
 
     @Serializable
     sealed interface ProblemGetByIdResult {

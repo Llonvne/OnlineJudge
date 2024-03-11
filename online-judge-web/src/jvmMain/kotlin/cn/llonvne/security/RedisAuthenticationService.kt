@@ -1,6 +1,7 @@
 package cn.llonvne.security
 
 import cn.llonvne.entity.AuthenticationUser
+import cn.llonvne.entity.role.Banned
 import cn.llonvne.entity.role.Role
 import cn.llonvne.getLogger
 import cn.llonvne.redis.Redis
@@ -39,7 +40,8 @@ class RedisAuthenticationService(
     }
 
     suspend fun isLogin(token: AuthenticationToken?): Boolean {
-        return getAuthenticationUser(token) != null
+        val user = getAuthenticationUser(token) ?: return false
+        return !user.check(Banned.BannedImpl)
     }
 
     suspend fun getAuthenticationUser(id: Int): AuthenticationUser? {

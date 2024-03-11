@@ -4,13 +4,16 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badgeGroup
 import cn.llonvne.compoent.observable.observableListOf
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.compoent.problemStatus
 import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ProblemModel
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.model.Storage
 import io.kvision.core.Container
+import io.kvision.core.onClick
 import io.kvision.core.onClickLaunch
 import io.kvision.core.onInput
 import io.kvision.form.formPanel
@@ -22,6 +25,7 @@ import io.kvision.tabulator.ColumnDefinition
 import io.kvision.tabulator.Layout
 import io.kvision.tabulator.TabulatorOptions
 import io.kvision.tabulator.tabulator
+import io.kvision.toolbar.buttonGroup
 import io.kvision.utils.px
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
@@ -33,7 +37,7 @@ data class ProblemSearch(
 
 internal fun Container.problems(routing: Routing) {
 
-    alert(AlertType.Light){
+    alert(AlertType.Light) {
         h1 {
             +"题目集合"
         }
@@ -43,21 +47,76 @@ internal fun Container.problems(routing: Routing) {
         }
     }
 
-    div(className = "row") {
-        div(className = "col-8") {
-            alert(AlertType.Light){
-                problemsList(routing)
-            }
-        }
-        div(className = "col") {
-            alert(AlertType.Light){
-                h1 { +"HelloWorld" }
+    observableOf(ProblemListConfigure()) {
+
+        setUpdater { ProblemListConfigure() }
+
+        syncNotNull(div { }) { config ->
+            div(className = "row") {
+                div(className = "col-8") {
+                    alert(AlertType.Light) {
+                        problemsList(routing, config)
+                    }
+                }
+                div(className = "col") {
+                    alert(AlertType.Light) {
+                        buttonGroup {
+                            button("所有") {
+                                onClick {
+                                    setObv(ProblemListConfigure {
+                                        showType = ProblemListShowType.All
+                                    })
+                                }
+                            }
+                            button("已通过", style = ButtonStyle.SUCCESS) {
+                                onClick {
+                                    setObv(ProblemListConfigure {
+                                        showType = ProblemListShowType.Accepted
+                                    })
+                                }
+                            }
+                            button("已尝试", style = ButtonStyle.WARNING) {
+                                onClick {
+                                    setObv(ProblemListConfigure {
+                                        showType = ProblemListShowType.Attempted
+                                    })
+                                }
+                            }
+                            button("星标", style = ButtonStyle.INFO) {
+                                onClick {
+                                    setObv(ProblemListConfigure {
+                                        showType = ProblemListShowType.Favorite
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-private fun Container.problemsList(routing: Routing) {
+
+
+private class ProblemListConfigure {
+    var showType: ProblemListShowType = ProblemListShowType.All
+}
+
+private fun ProblemListConfigure(configure: ProblemListConfigure.() -> Unit): ProblemListConfigure {
+    val config = ProblemListConfigure()
+    config.configure()
+    return config
+}
+
+private fun Container.problemsList(
+    routing: Routing,
+    configure: ProblemListConfigure = ProblemListConfigure()
+) {
+
+    val loader: suspend () -> List<ProblemListDto> = {
+        ProblemModel.listProblem(configure.showType)
+    }
 
     val alert = div { }
 

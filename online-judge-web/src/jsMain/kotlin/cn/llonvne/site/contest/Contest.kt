@@ -5,6 +5,7 @@ import cn.llonvne.compoent.alert
 import io.kvision.core.Container
 import io.kvision.html.div
 import io.kvision.html.h1
+import io.kvision.html.h4
 import io.kvision.html.p
 
 fun Container.contest() {
@@ -25,7 +26,7 @@ fun Container.contest() {
         }
 
         div(className = "col") {
-
+            ContestNavigator.get().show(div { })
         }
     }
 }

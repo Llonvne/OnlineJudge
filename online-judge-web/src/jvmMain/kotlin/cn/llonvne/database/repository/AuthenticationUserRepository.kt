@@ -3,10 +3,12 @@ package cn.llonvne.database.repository
 import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
+import cn.llonvne.entity.role.Banned
 import cn.llonvne.kvision.service.IAuthenticationService
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.*
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
 import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.check
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.operator.count
@@ -41,17 +43,15 @@ class AuthenticationUserRepository(
         return@passwordEncoder if (user == null) {
             UserDoNotExist
         } else if (matches(rawPassword, user.encryptedPassword)) {
-            SuccessfulLogin(redisAuthenticationService.login(user), user.username)
+
+            if (user.check(Banned.BannedImpl)) {
+                BannedUser
+            } else {
+                SuccessfulLogin(redisAuthenticationService.login(user), user.username)
+            }
+
         } else {
             IncorrectUsernameOrPassword
-        }
-    }
-
-    internal suspend fun usernameAvailableQuery(username: String): Query<Boolean> {
-        return QueryDsl.from(userMeta).where {
-            userMeta.username eq username
-        }.selectNotNull(count()).map {
-            it == 0L
         }
     }
 
@@ -59,7 +59,7 @@ class AuthenticationUserRepository(
         val count = db.runQuery {
             QueryDsl.from(userMeta).where {
                 userMeta.username eq username
-            }.selectNotNull(count())
+            }.selectNotNull(org.komapper.core.dsl.operator.count())
         }
         return count == 0.toLong()
     }
@@ -84,6 +84,28 @@ class AuthenticationUserRepository(
         return db.runQuery {
             QueryDsl.from(userMeta).where {
                 userMeta.role contains str
+            }
+        }
+    }
+
+    internal suspend fun count(): Int {
+        return db.runQuery {
+            QueryDsl.from(userMeta).select(org.komapper.core.dsl.operator.count())
+        }?.toInt() ?: 0
+    }
+
+    internal suspend fun all(): List<AuthenticationUser> {
+        return db.runQuery {
+            QueryDsl.from(userMeta)
+        }
+    }
+
+    suspend fun deleteById(id: Int): Boolean {
+        return db.runQuery {
+            QueryDsl.delete(userMeta).where {
+                userMeta.id eq id
+            }.map {
+                it == 1.toLong()
             }
         }
     }

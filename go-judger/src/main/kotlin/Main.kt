@@ -23,8 +23,10 @@ private fun main() = SuspendApp {
             throw RuntimeException("Failed to init judge")
         }.toJudgeContext()
 
-        server(Netty, port = 8081) {
-            judging(judgeContext)
+        val port = 8081
+
+        server(Netty, port = port) {
+            judging(judgeContext, port)
         }
 
         awaitCancellation()

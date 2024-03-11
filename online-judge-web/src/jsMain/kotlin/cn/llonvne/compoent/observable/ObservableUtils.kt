@@ -1,6 +1,7 @@
 package cn.llonvne.compoent.observable
 
 import cn.llonvne.AppScope
+import cn.llonvne.compoent.loading
 import io.kvision.core.Container
 import io.kvision.state.*
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,20 @@ data class ObservableDsl<V>(
         }
     }
 
+    fun <T : Container> syncNotNull(
+        container: T,
+        onNull: T.() -> Unit = { loading() },
+        action: T.(V) -> Unit
+    ) {
+        container.sync { value ->
+            if (value != null) {
+                action(value)
+            } else {
+                onNull()
+            }
+        }
+    }
+
 
     override fun getState(): V? {
         return obv.getState()
@@ -50,6 +65,7 @@ data class ObservableDsl<V>(
         return obv.subscribe(observer)
     }
 }
+
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 fun <V> observableOf(

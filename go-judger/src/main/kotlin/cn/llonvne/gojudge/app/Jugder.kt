@@ -1,5 +1,6 @@
 package cn.llonvne.gojudge.app
 
+import cn.llonvne.gojudge.api.JudgeServerInfo
 import cn.llonvne.gojudge.api.SupportLanguages
 import cn.llonvne.gojudge.api.router.gpp.gpp
 import cn.llonvne.gojudge.api.router.install
@@ -21,6 +22,8 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.lang.management.ManagementFactory
+import java.net.InetAddress
 
 context(JudgeContext, LinkTreeConfigurer, Routing)
 fun installAllGpp() {
@@ -38,13 +41,30 @@ fun installAllGpp() {
         }
 }
 
+private val runtime = Runtime.getRuntime()
+
 /**
  * @param judgeContext 评测机运行时
  */
-fun Application.judging(judgeContext: JudgeContext) {
+fun Application.judging(judgeContext: JudgeContext, port: Int) {
     installKtorOfficialPlugins()
 
     routing {
+
+        get("/info") {
+            call.respond(
+                JudgeServerInfo(
+                    name = "judge", // TODO JudgeName
+                    cpuCoresCount = runtime.availableProcessors(),
+                    cpuUsage = ManagementFactory.getOperatingSystemMXBean().systemLoadAverage,
+                    host = InetAddress.getLocalHost().hostAddress,
+                    port = port.toString(),
+                    isOnline = true,
+                    memoryUsage = runtime.totalMemory().toInt() - runtime.freeMemory().toInt()
+                )
+            )
+        }
+
         linkTrUri("/link") {
             get { call.respondRedirect(linkTreeUri) }
 

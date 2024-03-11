@@ -42,6 +42,8 @@ object AuthenticationModel {
             LoginResult.UserDoNotExist -> {
                 Messager.toastInfo("用户不存在")
             }
+
+            LoginResult.BannedUser -> Messager.send(result.message)
         }
 
         return result

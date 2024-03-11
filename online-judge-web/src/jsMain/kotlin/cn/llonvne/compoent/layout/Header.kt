@@ -1,6 +1,7 @@
 package cn.llonvne.compoent.layout
 
 import cn.llonvne.AppScope
+import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.constants.Frontend
 import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
 import cn.llonvne.message.Messager
@@ -49,8 +50,8 @@ private fun Navbar.showNavigator(routing: Routing) {
         dropDown(
             "队伍",
             listOf(
+                "队伍" to "#/team",
                 "创建" to "#/team/create",
-                "Forms" to "#!/forms"
             ),
             icon = "fas fa-star",
             forNavbar = true
@@ -78,26 +79,25 @@ fun Container.header(routing: Routing) {
                 }
             } else {
 
-                val loginInfo = ObservableValue<Login?>(null)
+                observableOf<Login>(null) {
+                    setUpdater {
+                        AuthenticationModel.info()
+                    }
 
-                AppScope.launch {
-                    loginInfo.value = AuthenticationModel.info()
-                }
-
-                nav(rightAlign = true).bind(loginInfo) { info ->
-
-                    dropDown(
-                        info?.username.toString(),
-                        listOf(
-                            "我的主页" to "#/me",
-                            "Forms" to "#!/forms",
-                        ),
-                        icon = "fas fa-star",
-                        forNavbar = true
-                    )
-                    navLink("登出") {
-                        onClick {
-                            Messager.toastInfo(AuthenticationModel.logout().toString())
+                    sync(nav(rightAlign = true) { }) { info ->
+                        dropDown(
+                            info?.username.toString(),
+                            listOf(
+                                "我的主页" to "#/me",
+                                "Forms" to "#!/forms",
+                            ),
+                            icon = "fas fa-star",
+                            forNavbar = true
+                        )
+                        navLink("登出") {
+                            onClick {
+                                Messager.toastInfo(AuthenticationModel.logout().toString())
+                            }
                         }
                     }
                 }

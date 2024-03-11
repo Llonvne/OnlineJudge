@@ -10,10 +10,7 @@ import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResol
 import cn.llonvne.dtos.AuthenticationUserDto
 import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.ViewCodeDto
-import cn.llonvne.entity.problem.PlaygroundJudgeResult
-import cn.llonvne.entity.problem.ProblemJudgeResult
-import cn.llonvne.entity.problem.Submission
-import cn.llonvne.entity.problem.SubmissionStatus
+import cn.llonvne.entity.problem.*
 import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.context.SubmissionTestCases
 import cn.llonvne.entity.problem.context.TestCaseType
@@ -43,9 +40,14 @@ import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.Probl
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
 import cn.llonvne.security.AuthenticationToken
 import cn.llonvne.security.RedisAuthenticationService
+import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.toSet
 import kotlinx.datetime.LocalDateTime
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*

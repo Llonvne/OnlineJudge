@@ -2,6 +2,7 @@ package cn.llonvne.model
 
 import cn.llonvne.dtos.ProblemListDto
 import cn.llonvne.entity.problem.Language
+import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.entity.problem.context.ProblemTestCases
 import cn.llonvne.entity.problem.context.ProblemType
@@ -21,7 +22,9 @@ import io.kvision.remote.getService
 object ProblemModel {
     private val problemService = getService<IProblemService>()
 
-    suspend fun listProblem() = problemService.list(AuthenticationModel.userToken.value)
+    suspend fun listProblem(
+        showType: ProblemListShowType = ProblemListShowType.All
+    ) = problemService.list(AuthenticationModel.userToken.value,showType)
 
     suspend fun create(problemForm: CreateProblemForm, testCases: ProblemTestCases): CreateProblemResp {
 

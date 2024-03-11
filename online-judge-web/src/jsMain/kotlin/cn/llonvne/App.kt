@@ -9,11 +9,13 @@ import cn.llonvne.site.*
 import cn.llonvne.site.contest.ContestDetail
 import cn.llonvne.site.contest.contest
 import cn.llonvne.site.contest.createContest
+import cn.llonvne.site.mine.mine
 import cn.llonvne.site.problem.createProblem
 import cn.llonvne.site.problem.detail.detail
 import cn.llonvne.site.problem.problems
 import cn.llonvne.site.share.CodeLoader
 import cn.llonvne.site.share.share
+import cn.llonvne.site.team.TeamIndex
 import cn.llonvne.site.team.show.showGroup
 import cn.llonvne.site.team.teamCreate
 import io.kvision.*
@@ -135,7 +137,13 @@ class App : Application() {
     }
 
     private fun Navigo.injectTeam(routing: Routing): Navigo {
-        return on("/team/create", {
+        return on("/team", {
+            failTo404(routing) {
+                layout(routing) {
+                    TeamIndex.from().show(div { })
+                }
+            }
+        }).on("/team/create", {
             failTo404(routing) {
                 layout(routing) {
                     teamCreate(this, routing)

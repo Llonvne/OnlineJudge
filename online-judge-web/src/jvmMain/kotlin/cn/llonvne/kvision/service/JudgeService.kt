@@ -1,5 +1,6 @@
 package cn.llonvne.kvision.service
 
+import cn.llonvne.gojudge.api.JudgeServerApi
 import cn.llonvne.gojudge.api.LanguageDispatcher
 import cn.llonvne.gojudge.api.LanguageFactory
 import cn.llonvne.gojudge.api.SupportLanguages
@@ -18,13 +19,12 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Suppress("ACTUAL_WITHOUT_EXPECT")
+@Suppress("ACTUAL_WITHOUT_EXPECT", "SpringJavaInjectionPointsAutowiringInspection")
 actual class JudgeService(
     env: Environment,
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     private val judgeUrl: String = env.getProperty("oj.url") ?: throw RuntimeException("无法获得 oj.url "),
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    private val languageDispatcher: LanguageDispatcher = default(judgeUrl)
+    private val languageDispatcher: LanguageDispatcher = default(judgeUrl),
+    private val judgeServerApi: JudgeServerApi = JudgeServerApi.get(judgeUrl, httpClient)
 ) : IJudgeService {
 
     override suspend fun judge(languages: SupportLanguages, stdin: String, code: String): Output {
@@ -33,16 +33,21 @@ actual class JudgeService(
         }
     }
 
+    suspend fun info() = judgeServerApi.info()
+
     companion object {
+        private val httpClient: HttpClient = HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(Json)
+            }
+        }
+
         private fun default(judgeUrl: String): LanguageDispatcher {
             return LanguageDispatcher.get(
                 LanguageFactory.get(
                     judgeUrl,
-                    httpClient = HttpClient(OkHttp) {
-                        install(ContentNegotiation) {
-                            json(Json)
-                        }
-                    })
+                    httpClient = httpClient
+                )
             )
         }
     }

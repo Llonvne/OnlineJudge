@@ -1,4 +1,4 @@
-package cn.llonvne.site
+package cn.llonvne.site.mine
 
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
@@ -8,9 +8,8 @@ import cn.llonvne.kvision.service.IAuthenticationService.MineResp
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.model.AuthenticationModel
 import io.kvision.core.Container
-import io.kvision.html.div
-import io.kvision.html.h4
-import io.kvision.html.p
+import io.kvision.html.*
+import io.kvision.toolbar.buttonGroup
 
 fun Container.mine() {
     observableOf<MineResp>(null) {
@@ -58,14 +57,32 @@ private interface Mine {
     }
 }
 
-private class AdministratorMine : Mine {
+
+class AdministratorMine : Mine {
     override fun load(root: Container) {
         root.div {
-            alert(AlertType.Light) {
-                h4 {
-                    +"Load as Admin"
+            observableOf<AdminMineChoice>(null) {
+                setUpdater { AdminMineChoice.defaultChoice() }
+                alert(AlertType.Light) {
+                    h1 {
+                        +"Online Judge 管理面板"
+                    }
+                    buttonGroup {
+                        AdminMineChoice.getAdminMineChoices().forEach { choice ->
+                            button(choice.name) {
+                                onClick {
+                                    setObv(choice)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                syncNotNull(div { }) { choice ->
+                    choice.show(this)
                 }
             }
+
         }
     }
 }

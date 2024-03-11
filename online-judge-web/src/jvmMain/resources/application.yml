@@ -10,3 +10,4 @@ spring:
     password: admin
 oj:
   url: http://localhost:8081/
+  name: DefaultBackend

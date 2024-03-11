@@ -3,9 +3,7 @@
 package cn.llonvne.security
 
 import cn.llonvne.entity.AuthenticationUser
-import cn.llonvne.entity.role.Role
-import cn.llonvne.entity.role.TeamIdRole
-import cn.llonvne.entity.role.TeamRole
+import cn.llonvne.entity.role.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
 import kotlinx.serialization.encodeToString

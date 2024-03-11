@@ -33,6 +33,12 @@ interface IAuthenticationService {
         val message: Message
 
         @Serializable
+        data object BannedUser : LoginResult {
+            override val message: Message
+                get() = ToastMessage(MessageLevel.Danger, "您的账号已经被管理员封禁")
+        }
+
+        @Serializable
         data class SuccessfulLogin(val token: AuthenticationToken, val username: String) : LoginResult {
             override val message: Message =
                 ToastMessage(MessageLevel.Success, "登入成功，欢迎:${username}")

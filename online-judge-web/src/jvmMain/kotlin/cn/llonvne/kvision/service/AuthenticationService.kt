@@ -76,6 +76,6 @@ actual class AuthenticationService(
         val user = authentication.validate(value) {
             requireLogin()
         } ?: return PermissionDenied
-      return  mineResolver.resolve(user)
+        return mineResolver.resolve(user)
     }
 }

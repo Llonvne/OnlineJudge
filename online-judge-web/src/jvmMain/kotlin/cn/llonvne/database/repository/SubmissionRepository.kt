@@ -6,6 +6,8 @@ import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.types.ProblemStatus
 import cn.llonvne.security.AuthenticationToken
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDateTime
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
 import org.komapper.core.dsl.query.singleOrNull
@@ -74,6 +76,17 @@ class SubmissionRepository(
             QueryDsl.from(submissionMeta).where {
                 submissionMeta.contestId eq contestId
             }.limit(1000)
+        }
+    }
+
+    suspend fun getByTimeRange(start: LocalDateTime, end: LocalDateTime): List<Submission> {
+        return db.runQuery {
+            QueryDsl.from(submissionMeta).where {
+                submissionMeta.createdAt greaterEq start
+                and {
+                    submissionMeta.createdAt lessEq end
+                }
+            }
         }
     }
 }
