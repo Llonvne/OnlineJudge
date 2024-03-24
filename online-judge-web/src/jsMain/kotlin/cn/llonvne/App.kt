@@ -41,7 +41,7 @@ class App : Application() {
         throw it
     }
 
-    override fun start() {
+    override fun start(state: Map<String, Any>) {
         val routing = RoutingModule.routing
         routing.on(Frontend.Index.uri, {
             layout(routing) {

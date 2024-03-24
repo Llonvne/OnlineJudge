@@ -33,7 +33,7 @@ actual class AuthenticationService(
 
         when (bannedUsernameCheckResolver.resolve(username)) {
             Pass -> {}
-            BannedUsernameCheckResult.Failed -> return IAuthenticationService.RegisterResult.Failed(
+            BannedUsernameCheckResult.Failed -> return Failed(
                 Message.ToastMessage(MessageLevel.Danger, "名称包含违禁词")
             )
         }
