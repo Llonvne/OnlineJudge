@@ -1,35 +1,39 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult
 import cn.llonvne.database.resolver.authentication.BannedUsernameCheckResolver.BannedUsernameCheckResult.Pass
-import cn.llonvne.database.resolver.mine.MineRoleCheckResolver
+import cn.llonvne.database.resolver.mine.MineLoadAsNormalUserOrBackendDeterminer
 import cn.llonvne.kvision.service.IAuthenticationService.*
-import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*
-import cn.llonvne.kvision.service.IAuthenticationService.GetLogoutResp.Logout
-import cn.llonvne.kvision.service.IAuthenticationService.RegisterResult.Failed
-import cn.llonvne.kvision.service.IAuthenticationService.RegisterResult.SuccessfulRegistration
+import cn.llonvne.kvision.service.IAuthenticationService.LoginInfoResp.*
+import cn.llonvne.kvision.service.IAuthenticationService.LogoutResp.Logout
+import cn.llonvne.kvision.service.IAuthenticationService.RegisterResp.Failed
+import cn.llonvne.kvision.service.IAuthenticationService.RegisterResp.Successful
 import cn.llonvne.message.Message
 import cn.llonvne.message.MessageLevel
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.LoginLogoutResolver
+import cn.llonvne.security.TokenValidator
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @Service
 @Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class AuthenticationService(
-    private val userRepository: AuthenticationUserRepository,
-    private val authentication: RedisAuthenticationService,
+    private val userRepository: UserRepository,
     private val bannedUsernameCheckResolver: BannedUsernameCheckResolver,
-    private val mineResolver: MineRoleCheckResolver
+    private val mineLoadAsNormalUserOrBackendDeterminer: MineLoadAsNormalUserOrBackendDeterminer,
+    private val tokenValidator: TokenValidator,
+    private val loginLogoutResolver: LoginLogoutResolver
 ) : IAuthenticationService {
-    override suspend fun register(username: String, password: String): RegisterResult {
+    override suspend fun register(username: String, password: String): RegisterResp {
 
         when (bannedUsernameCheckResolver.resolve(username)) {
             Pass -> {}
@@ -42,7 +46,7 @@ actual class AuthenticationService(
         return if (userRepository.usernameAvailable(username)) {
             val user = userRepository.new(username, password)
             // 返回成功注册
-            SuccessfulRegistration(authentication.login(user), username)
+            Successful(loginLogoutResolver.login(user), username)
 
         } else {
             // 提示用户名已经存在
@@ -50,32 +54,32 @@ actual class AuthenticationService(
         }
     }
 
-    override suspend fun login(username: String, password: String): LoginResult {
+    override suspend fun login(username: String, password: String): LoginResp {
         return userRepository.login(username, password)
     }
 
-    override suspend fun getLoginInfo(token: AuthenticationToken?): GetLoginInfoResp {
+    override suspend fun loginInfo(token: Token?): LoginInfoResp {
         if (token == null) {
             return NotLogin
         }
-        val user = authentication.validate(token) { requireLogin() }
+        val user = tokenValidator.validate(token) { requireLogin() }
 
         if (user == null) {
             return LoginExpired
         }
 
-        return Login(user.username, user.id)
+        return Logined(user.username, user.id)
     }
 
-    override suspend fun logout(token: AuthenticationToken?): GetLogoutResp {
-        authentication.logout(token)
+    override suspend fun logout(token: Token?): LogoutResp {
+        loginLogoutResolver.logout(token)
         return Logout
     }
 
-    override suspend fun mine(value: AuthenticationToken?): MineResp {
-        val user = authentication.validate(value) {
+    override suspend fun mine(token: Token?): MineResp {
+        val user = tokenValidator.validate(token) {
             requireLogin()
         } ?: return PermissionDenied
-        return mineResolver.resolve(user)
+        return mineLoadAsNormalUserOrBackendDeterminer.resolve(user)
     }
 }

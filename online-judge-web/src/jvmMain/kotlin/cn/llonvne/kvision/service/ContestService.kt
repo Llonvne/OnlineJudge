@@ -1,6 +1,6 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.repository.ContestRepository
 import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.database.repository.SubmissionRepository
@@ -12,8 +12,8 @@ import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestContext
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.kvision.service.IContestService.AddProblemResp.AddOkResp
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -27,15 +27,15 @@ import java.util.*
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class ContestService(
-    private val authentication: RedisAuthenticationService,
+    private val authentication: UserLoginLogoutTokenValidator,
     private val problemRepository: ProblemRepository,
     private val contestProblemVisibilityCheckResolver: ContestProblemVisibilityCheckResolver,
     private val contestRepository: ContestRepository,
     private val contestIdGetResolver: ContestIdGetResolver,
-    private val authenticationUserRepository: AuthenticationUserRepository,
+    private val userRepository: UserRepository,
     private val submissionRepository: SubmissionRepository
 ) : IContestService {
-    override suspend fun addProblem(value: AuthenticationToken?, problemId: String): IContestService.AddProblemResp {
+    override suspend fun addProblem(value: Token?, problemId: String): IContestService.AddProblemResp {
         val user = authentication.validate(value) { requireLogin() } ?: return PermissionDenied
 
         val problem = problemRepository.getById(problemId.toIntOrNull() ?: return ProblemIdInvalid)
@@ -51,11 +51,11 @@ actual class ContestService(
     }
 
     override suspend fun create(
-        authenticationToken: AuthenticationToken?, createContestReq: IContestService.CreateContestReq
+        token: Token?, createContestReq: IContestService.CreateContestReq
     ): IContestService.CreateContestResp = coroutineScope {
 
         val userDeferred = async(Dispatchers.IO) {
-            authentication.validate(authenticationToken) {
+            authentication.validate(token) {
                 requireLogin()
             }
         }
@@ -102,14 +102,14 @@ actual class ContestService(
         return@coroutineScope IContestService.CreateContestResp.CreateOk(contest)
     }
 
-    override suspend fun load(value: AuthenticationToken?, contestId: ContestId): IContestService.LoadContestResp {
+    override suspend fun load(value: Token?, contestId: ContestId): IContestService.LoadContestResp {
         val user = authentication.validate(value) {
             requireLogin()
         } ?: return PermissionDenied
 
         val contest = contestIdGetResolver.resolve(contestId) ?: return ContestNotFound
 
-        val username = authenticationUserRepository.getByIdOrNull(
+        val username = userRepository.getByIdOrNull(
             contest.ownerId
         )?.username ?: return ContestOwnerNotFound
 
@@ -117,7 +117,7 @@ actual class ContestService(
     }
 
     override suspend fun contextSubmission(
-        value: AuthenticationToken?,
+        value: Token?,
         contestId: ContestId
     ): IContestService.ContextSubmissionResp {
         val user = authentication.validate(value) {

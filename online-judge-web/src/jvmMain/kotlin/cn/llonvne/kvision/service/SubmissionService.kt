@@ -7,9 +7,9 @@ import cn.llonvne.database.resolver.submission.ProblemSubmissionPassResolver
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.Failed
 import cn.llonvne.database.resolver.submission.ProblemSubmissionPersistenceResolver.ProblemSubmissionPersistenceResult.NotNeedToPersist
-import cn.llonvne.dtos.AuthenticationUserDto
+import cn.llonvne.dtos.Username
 import cn.llonvne.dtos.SubmissionListDto
-import cn.llonvne.dtos.ViewCodeDto
+import cn.llonvne.dtos.CodeForView
 import cn.llonvne.entity.problem.*
 import cn.llonvne.entity.problem.context.ProblemTestCases.ProblemTestCase
 import cn.llonvne.entity.problem.context.SubmissionTestCases
@@ -38,16 +38,11 @@ import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.OutputDto.
 import cn.llonvne.kvision.service.ISubmissionService.PlaygroundOutput.SuccessPlaygroundOutput
 import cn.llonvne.kvision.service.ISubmissionService.ProblemSubmissionResp.ProblemSubmissionRespImpl
 import cn.llonvne.kvision.service.ISubmissionService.SubmissionGetByIdResp.SuccessfulGetById
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
-import com.fasterxml.jackson.databind.ObjectMapper
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.toSet
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import kotlinx.datetime.LocalDateTime
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -61,10 +56,10 @@ actual class SubmissionService(
     private val submissionRepository: SubmissionRepository,
     private val languageRepository: LanguageRepository,
     private val problemRepository: ProblemRepository,
-    private val authenticationUserRepository: AuthenticationUserRepository,
+    private val userRepository: UserRepository,
     private val judgeService: JudgeService,
     private val codeRepository: CodeRepository,
-    private val authentication: RedisAuthenticationService,
+    private val authentication: UserLoginLogoutTokenValidator,
     private val problemSubmissionPassResolver: ProblemSubmissionPassResolver,
     private val problemJudgeResolver: ProblemJudgeResolver,
     private val problemSubmissionPersistenceResolver: ProblemSubmissionPersistenceResolver,
@@ -106,7 +101,7 @@ actual class SubmissionService(
         ) ?: return CodeNotFound
 
         return ViewCodeGetByIdResp.SuccessfulGetById(
-            ViewCodeDto(
+            CodeForView(
                 rawCode = code.code,
                 language = languageRepository.getByIdOrNull(code.languageId)
                     ?: return LanguageNotFound,
@@ -127,8 +122,8 @@ actual class SubmissionService(
             SuccessfulGetById(
                 SubmissionListDto(
                     language = languageRepository.getByIdOrNull(languageId) ?: return@onIdNotNull LanguageNotFound,
-                    user = AuthenticationUserDto(
-                        authenticationUserRepository.getByIdOrNull(authenticationUserId)?.username
+                    user = Username(
+                        userRepository.getByIdOrNull(authenticationUserId)?.username
                             ?: return@onIdNotNull UserNotFound,
                     ),
                     problemId = problemId,
@@ -145,7 +140,7 @@ actual class SubmissionService(
     }
 
     override suspend fun getSupportLanguageId(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         problemId: Int
     ): GetSupportLanguageByProblemIdResp {
 
@@ -159,12 +154,12 @@ actual class SubmissionService(
     }
 
     override suspend fun create(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         createSubmissionReq: CreateSubmissionReq
     ): CreateSubmissionResp {
 
         val language = SupportLanguages.fromId(createSubmissionReq.languageId) ?: return LanguageNotFound
-        val user = authentication.validate(authenticationToken) { requireLogin() } ?: return PermissionDenied
+        val user = authentication.validate(token) { requireLogin() } ?: return PermissionDenied
 
         val code = codeRepository.save(
             Code(
@@ -184,7 +179,7 @@ actual class SubmissionService(
     }
 
     override suspend fun getOutputByCodeId(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         codeId: Int
     ): GetJudgeResultByCodeIdResp {
         val visibilityType = codeRepository.getCodeVisibilityType(codeId) ?: return CodeNotFound
@@ -196,7 +191,7 @@ actual class SubmissionService(
             }
 
             Private -> {
-                val user = authentication.validate(authenticationToken) {
+                val user = authentication.validate(token) {
                     requireLogin()
                 } ?: return PermissionDenied
                 if (user.id != codeOwnerId) {
@@ -268,10 +263,10 @@ actual class SubmissionService(
     }
 
     override suspend fun getLastNPlaygroundSubmission(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         last: Int
     ): GetLastNPlaygroundSubmissionResp {
-        val user = authentication.getAuthenticationUser(authenticationToken) ?: return PermissionDenied
+        val user = authentication.getAuthenticationUser(token) ?: return PermissionDenied
         return submissionRepository.getByAuthenticationUserID(
             user.id,
             Code.CodeType.Playground,
@@ -287,8 +282,8 @@ actual class SubmissionService(
                 status = sub.status,
                 submissionId = sub.submissionId ?: return InternalError("Submission 被查询出来，但不存在 Id"),
                 submitTime = sub.createdAt ?: return InternalError("Submission 被查询出来，但不存在创建时间"),
-                user = AuthenticationUserDto(
-                    username = authenticationUserRepository.getByIdOrNull(sub.authenticationUserId)?.username
+                user = Username(
+                    username = userRepository.getByIdOrNull(sub.authenticationUserId)?.username
                         ?: return InternalError("Submission 被查询出来，但不存在 User")
                 )
             )
@@ -344,7 +339,7 @@ actual class SubmissionService(
     }
 
     override suspend fun submit(
-        value: AuthenticationToken?,
+        value: Token?,
         submissionSubmit: ProblemSubmissionReq
     ): ProblemSubmissionResp {
 
@@ -386,7 +381,7 @@ actual class SubmissionService(
     }
 
     override suspend fun getLastNProblemSubmission(
-        value: AuthenticationToken?,
+        value: Token?,
         problemId: Int,
         lastN: Int
     ): GetLastNProblemSubmissionResp {
@@ -426,7 +421,7 @@ actual class SubmissionService(
     }
 
     override suspend fun getParticipantContest(
-        value: AuthenticationToken?,
+        value: Token?,
     ): GetParticipantContestResp {
         val user = authentication.validate(value) {
             requireLogin()

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AuthorRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
-    private val authenticationService: AuthenticationUserRepository
+    private val authenticationService: UserRepository
 ) {
     private val authorMeta = Meta.author
     suspend fun create(author: Author): Author {

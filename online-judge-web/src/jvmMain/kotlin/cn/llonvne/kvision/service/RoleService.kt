@@ -3,7 +3,7 @@ package cn.llonvne.kvision.service
 import cn.llonvne.database.repository.RoleRepository
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.Role
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import cn.llonvne.security.UserRole
 import cn.llonvne.security.fromUserRoleString
 import cn.llonvne.security.userRole
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class RoleService(
     private val roleRepository: RoleRepository,
-    private val redisAuthentication: RedisAuthenticationService
+    private val redisAuthentication: UserLoginLogoutTokenValidator
 ) {
     suspend fun addRole(userId: Int, vararg role: Role): Boolean {
         val userRoleStr = roleRepository.getRoleStrByUserId(userId) ?: return false

@@ -2,7 +2,7 @@ package cn.llonvne.database.resolver.code
 
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.kvision.service.CodeService
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import kotlinx.serialization.Serializable
 import org.springframework.stereotype.Service
 
@@ -19,7 +19,7 @@ class GetCodeSafetyCheckResolver(
     suspend fun <R> resolve(
         getCodeId: CodeService.GetCodeId,
         code: Code,
-        value: AuthenticationToken?,
+        value: Token?,
         onPass: () -> R
     ): GetCodeSafetyCheckResult<R> {
         TODO()

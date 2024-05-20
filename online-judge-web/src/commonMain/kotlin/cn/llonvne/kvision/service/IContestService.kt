@@ -4,7 +4,7 @@ import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestContext
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.Submission
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
 
@@ -19,7 +19,7 @@ interface IContestService {
         data class AddOkResp(val problemId: Int, val problemName: String) : AddProblemResp
     }
 
-    suspend fun addProblem(value: AuthenticationToken?, problemId: String): AddProblemResp
+    suspend fun addProblem(value: Token?, problemId: String): AddProblemResp
 
     @Serializable
     data class CreateContestReq(
@@ -38,7 +38,7 @@ interface IContestService {
         data class CreateOk(val contest: Contest) : CreateContestResp
     }
 
-    suspend fun create(authenticationToken: AuthenticationToken?, createContestReq: CreateContestReq): CreateContestResp
+    suspend fun create(token: Token?, createContestReq: CreateContestReq): CreateContestResp
 
     @Serializable
     sealed interface LoadContestResp {
@@ -46,7 +46,7 @@ interface IContestService {
         data class LoadOk(val contest: Contest, val ownerName: String) : LoadContestResp
     }
 
-    suspend fun load(value: AuthenticationToken?, contestId: ContestId): LoadContestResp
+    suspend fun load(value: Token?, contestId: ContestId): LoadContestResp
 
 
     @Serializable
@@ -55,5 +55,5 @@ interface IContestService {
         data class ContextSubmissionOk(val submissions: List<Submission>) : ContextSubmissionResp
     }
 
-    suspend fun contextSubmission(value: AuthenticationToken?, contestId: ContestId): ContextSubmissionResp
+    suspend fun contextSubmission(value: Token?, contestId: ContestId): ContextSubmissionResp
 }

@@ -1,6 +1,6 @@
 package cn.llonvne.model
 
-import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.dtos.ProblemForList
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.entity.problem.context.ProblemContext
@@ -70,7 +70,7 @@ object ProblemModel {
 
     suspend fun getById(id: Int) = problemService.getById(id)
 
-    suspend fun search(text: String): List<ProblemListDto> {
+    suspend fun search(text: String): List<ProblemForList> {
         return problemService.search(AuthenticationModel.userToken.value, text)
     }
 }

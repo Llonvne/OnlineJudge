@@ -8,7 +8,7 @@ import cn.llonvne.security.check
 import org.springframework.stereotype.Service
 
 @Service
-class MineRoleCheckResolver(
+class MineLoadAsNormalUserOrBackendDeterminer(
     private val backendMineResolver: BackendMineResolver,
     private val normalMineResolver: NormalMineResolver
 ) {

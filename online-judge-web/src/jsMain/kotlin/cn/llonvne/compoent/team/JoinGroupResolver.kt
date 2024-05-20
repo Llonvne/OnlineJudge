@@ -7,12 +7,12 @@ import cn.llonvne.kvision.service.IGroupService.JoinGroupResp.*
 import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.routing.Routing
 import kotlinx.coroutines.launch
 
 class JoinGroupResolver(private val routing: Routing) {
-    fun resolve(groupId: GroupId, groupName: String, token: AuthenticationToken) {
+    fun resolve(groupId: GroupId, groupName: String, token: Token) {
         AppScope.launch {
             when (TeamModel.join(token, groupId)) {
                 is GroupIdNotFound -> Messager.toastError("小组不存在，可能是小组已经被删除")

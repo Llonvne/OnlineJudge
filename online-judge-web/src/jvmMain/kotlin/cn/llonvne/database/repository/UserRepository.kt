@@ -5,14 +5,12 @@ import cn.llonvne.database.entity.def.createAtNow
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.Banned
 import cn.llonvne.kvision.service.IAuthenticationService
-import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.*
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResp.*
 import cn.llonvne.security.BPasswordEncoder.Companion.invoke
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import cn.llonvne.security.check
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
-import org.komapper.core.dsl.operator.count
-import org.komapper.core.dsl.query.Query
 import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
@@ -20,10 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class AuthenticationUserRepository(
+class UserRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
     private val passwordEncoder: PasswordEncoder,
-    private val redisAuthenticationService: RedisAuthenticationService
+    private val loginLogoutRoleCheckResolver: UserLoginLogoutTokenValidator
 ) {
 
     private val userMeta = Meta.authenticationUser
@@ -34,20 +32,20 @@ class AuthenticationUserRepository(
         }
     }
 
-    suspend fun login(username: String, rawPassword: String): IAuthenticationService.LoginResult = passwordEncoder {
+    suspend fun login(username: String, rawPassword: String): IAuthenticationService.LoginResp = passwordEncoder {
         val user = db.runQuery {
             QueryDsl.from(userMeta).where {
                 userMeta.username eq username
             }.singleOrNull()
         }
         return@passwordEncoder if (user == null) {
-            UserDoNotExist
+            UserNotExist
         } else if (matches(rawPassword, user.encryptedPassword)) {
 
             if (user.check(Banned.BannedImpl)) {
-                BannedUser
+                IAuthenticationService.LoginResp.Banned
             } else {
-                SuccessfulLogin(redisAuthenticationService.login(user), user.username)
+                Successful(loginLogoutRoleCheckResolver.login(user), user.username)
             }
 
         } else {

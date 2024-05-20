@@ -3,7 +3,7 @@ package cn.llonvne.site.problem.detail
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.submission.SubmitProblemResolver
-import cn.llonvne.dtos.SubmissionSubmit
+import cn.llonvne.dtos.PlaygroudSubmission
 import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
 import cn.llonvne.site.problem.detail.CodeEditorShower.Companion.CodeEditorConfigurer
@@ -15,7 +15,6 @@ import io.kvision.form.text.TextArea
 import io.kvision.html.button
 import io.kvision.html.h4
 import io.kvision.html.p
-import io.kvision.i18n.tr
 
 interface CodeEditorShower {
     fun show(root: Container)
@@ -81,13 +80,13 @@ private class AbstractCodeEditorShower(
                 +"你的代码"
             }
 
-            val panel = formPanel<SubmissionSubmit> {
-                add(SubmissionSubmit::languageId, TomSelect(options = problem.supportLanguages.map {
+            val panel = formPanel<PlaygroudSubmission> {
+                add(PlaygroudSubmission::languageId, TomSelect(options = problem.supportLanguages.map {
                     it.languageId.toString() to it.toString()
                 }) {
                     label = "提交语言"
                 })
-                add(SubmissionSubmit::code, TextArea {
+                add(PlaygroudSubmission::code, TextArea {
                     label = "解决方案"
                     rows = 10
                 })
@@ -95,7 +94,7 @@ private class AbstractCodeEditorShower(
                 if (
                     codeEditorConfigurer.forceVisibility == null
                 ) {
-                    add(SubmissionSubmit::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
+                    add(PlaygroudSubmission::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
                         it.ordinal.toString() to it.chinese
                     }, label = "提交可见性"))
                 }

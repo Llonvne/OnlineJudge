@@ -4,7 +4,7 @@ import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.dtos.CreateCommentDto
+import cn.llonvne.dtos.CreateCommentReq
 import cn.llonvne.entity.problem.share.CodeCommentType
 import cn.llonvne.entity.problem.share.CodeCommentType.*
 import cn.llonvne.kvision.service.CodeNotFound
@@ -65,7 +65,7 @@ interface ShareCodeCommentComponent<Comment> {
             }
         }
 
-        private fun public(shareId: Int, code: CodeDto): ShareCodeCommentComponent<CreateCommentDto> =
+        private fun public(shareId: Int, code: CodeDto): ShareCodeCommentComponent<CreateCommentReq> =
             PublicShareCommentComponent(shareId, code)
 
         private fun protected(shareId: Int, code: CodeDto): ShareCodeCommentComponent<*> {
@@ -81,7 +81,7 @@ interface ShareCodeCommentComponent<Comment> {
 private class FreezingShareCommentCompoent(
     shareId: Int,
     private val code: CodeDto,
-    comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
+    comments: ObservableListWrapper<CreateCommentReq> = ObservableListWrapper()
 ) : PublicShareCommentComponent(shareId, code, comments) {
     override fun loadComments(root: Container) {
         AppScope.launch {
@@ -96,7 +96,7 @@ private class FreezingShareCommentCompoent(
 private class ProtectedShareCommentComponent(
     shareId: Int,
     private val code: CodeDto,
-    comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
+    comments: ObservableListWrapper<CreateCommentReq> = ObservableListWrapper()
 ) : PublicShareCommentComponent(shareId, code, comments) {
     override fun loadComments(root: Container) {
         AppScope.launch {
@@ -111,8 +111,8 @@ private class ProtectedShareCommentComponent(
 private open class PublicShareCommentComponent(
     override val shareId: Int,
     private val code: CodeDto,
-    override val comments: ObservableListWrapper<CreateCommentDto> = ObservableListWrapper()
-) : ShareCodeCommentComponent<CreateCommentDto> {
+    override val comments: ObservableListWrapper<CreateCommentReq> = ObservableListWrapper()
+) : ShareCodeCommentComponent<CreateCommentReq> {
 
     override fun refreshComments(): Deferred<Boolean> {
         return AppScope.async {
@@ -148,7 +148,7 @@ private open class PublicShareCommentComponent(
         )
     }
 
-    override fun getComments(): ObservableListWrapper<CreateCommentDto> {
+    override fun getComments(): ObservableListWrapper<CreateCommentReq> {
         return comments
     }
 }

@@ -5,7 +5,7 @@ import cn.llonvne.compoent.circleCheck
 import cn.llonvne.compoent.loading
 import cn.llonvne.compoent.notFound
 import cn.llonvne.compoent.observable.observableOf
-import cn.llonvne.dtos.ViewCodeDto
+import cn.llonvne.dtos.CodeForView
 import cn.llonvne.entity.problem.SubmissionStatus
 import cn.llonvne.kvision.service.CodeNotFound
 import cn.llonvne.kvision.service.ISubmissionService.*
@@ -52,7 +52,7 @@ fun Container.submissionDetail(routing: Routing, submissionId: Int) {
                     }
 
                     is SuccessfulGetById -> {
-                        showStatus(submission.viewCodeDto)
+                        showStatus(submission.codeForView)
                     }
 
                     CodeNotFound -> {
@@ -68,7 +68,7 @@ fun Container.submissionDetail(routing: Routing, submissionId: Int) {
     }
 }
 
-fun Container.showStatus(submission: ViewCodeDto) {
+fun Container.showStatus(submission: CodeForView) {
     when (submission.status) {
         SubmissionStatus.Received -> circleCheck()
         SubmissionStatus.Finished -> circleCheck()

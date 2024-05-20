@@ -1,6 +1,6 @@
 package cn.llonvne.compoent.submission
 
-import cn.llonvne.dtos.SubmissionSubmit
+import cn.llonvne.dtos.PlaygroudSubmission
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.SubmissionVisibilityType
 import cn.llonvne.kvision.service.ISubmissionService
@@ -12,7 +12,7 @@ class SubmitProblemResolver(
     private val contestId: ContestId? = null
 ) {
 
-    suspend fun resolve(problemId: Int, data: SubmissionSubmit) {
+    suspend fun resolve(problemId: Int, data: PlaygroudSubmission) {
         val submissionVisibilityType = data.visibilityTypeStr.let {
             SubmissionVisibilityType.entries[it?.toIntOrNull() ?: return Messager.toastInfo("提交可见性ID无效")]
         }

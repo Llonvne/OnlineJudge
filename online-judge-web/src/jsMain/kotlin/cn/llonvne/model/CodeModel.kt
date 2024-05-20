@@ -15,7 +15,7 @@ object CodeModel {
     suspend fun saveCode(
         rawCode: String,
         languageId: Int?
-    ): SaveCodeResp = codeService.saveCode(
+    ): SaveCodeResp = codeService.save(
         AuthenticationModel.userToken.value,
         SaveCodeReq(rawCode, languageId = languageId, CodeVisibilityType.Public)
     )

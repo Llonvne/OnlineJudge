@@ -4,7 +4,7 @@ import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.exts.now
 import cn.llonvne.kvision.service.IAuthenticationService
-import cn.llonvne.kvision.service.IAuthenticationService.MineResp.NormalUserMineResp
+import cn.llonvne.kvision.service.IAuthenticationService.MineResp.NormalUser
 import cn.llonvne.ll
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -32,7 +32,7 @@ class NormalMineResolver(
             val atToday = async { userSubmissionRangeResolver.acceptedIn(user, 1) }
             val at30Day = async { userSubmissionRangeResolver.acceptedIn(user, 30) }
 
-            return@coroutineScope NormalUserMineResp(
+            return@coroutineScope NormalUser(
                 user.username, user.createdAt?.ll() ?: LocalDateTime.now().ll(),
                 acceptedTotal = total.await(),
                 accepted7Days = at7Days.await(),

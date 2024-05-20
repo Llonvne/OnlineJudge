@@ -1,6 +1,6 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.resolver.mine.BackendInfoResolver
 import cn.llonvne.database.resolver.mine.JudgeServerInfoResolver
 import cn.llonvne.database.resolver.mine.OnlineJudgeStatisticsResolver
@@ -8,11 +8,10 @@ import cn.llonvne.entity.ModifyUserForm
 import cn.llonvne.entity.role.Backend
 import cn.llonvne.entity.role.Banned
 import cn.llonvne.entity.role.IUserRole
-import cn.llonvne.entity.role.check
 import cn.llonvne.exts.*
 import cn.llonvne.kvision.service.IMineService.DashboardResp.DashboardRespImpl
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import cn.llonvne.security.check
 import cn.llonvne.security.userRole
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -25,15 +24,15 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class MineService(
-    private val authentication: RedisAuthenticationService,
+    private val authentication: UserLoginLogoutTokenValidator,
     private val onlineJudgeStatisticsResolver: OnlineJudgeStatisticsResolver,
     private val backendInfoResolver: BackendInfoResolver,
     private val judgeServerInfoResolver: JudgeServerInfoResolver,
-    private val authenticationUserRepository: AuthenticationUserRepository,
+    private val userRepository: UserRepository,
     private val roleService: RoleService
 ) : IMineService {
-    override suspend fun dashboard(authenticationToken: AuthenticationToken?): IMineService.DashboardResp {
-        val user = authentication.validate(authenticationToken) {
+    override suspend fun dashboard(token: Token?): IMineService.DashboardResp {
+        authentication.validate(token) {
             requireLogin()
             check(Backend.BackendImpl)
         } ?: return PermissionDenied
@@ -46,7 +45,7 @@ actual class MineService(
 
     override suspend fun users(): IMineService.UsersResp {
 
-        val user = authenticationUserRepository.all()
+        val user = userRepository.all()
             .map {
                 IMineService.UsersResp.UserManageListUserDto(
                     userId = it.id,
@@ -60,11 +59,11 @@ actual class MineService(
         )
     }
 
-    override suspend fun deleteUser(value: AuthenticationToken?, id: Int): Boolean {
-        return authenticationUserRepository.deleteById(id)
+    override suspend fun deleteUser(value: Token?, id: Int): Boolean {
+        return userRepository.deleteById(id)
     }
 
-    override suspend fun modifyUser(value: AuthenticationToken?, result: ModifyUserForm): Boolean {
+    override suspend fun modifyUser(value: Token?, result: ModifyUserForm): Boolean {
         val id = result.userId.toIntOrNull() ?: return false
         val user = authentication.getAuthenticationUser(id) ?: return false
         if (result.isBanned) {

@@ -16,8 +16,8 @@ import cn.llonvne.getLogger
 import cn.llonvne.kvision.service.IGroupService.*
 import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
 import cn.llonvne.kvision.service.IGroupService.UpgradeGroupManagerResp.UpgradeManagerOk
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import cn.llonvne.security.userRole
 import cn.llonvne.track
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class GroupService(
-    private val authentication: RedisAuthenticationService,
+    private val authentication: UserLoginLogoutTokenValidator,
     private val groupRepository: GroupRepository,
     private val roleService: RoleService,
     private val groupIdResolver: GroupIdResolver,
@@ -44,9 +44,9 @@ actual class GroupService(
     private val logger = getLogger()
 
     override suspend fun createTeam(
-        authenticationToken: AuthenticationToken, createGroupReq: CreateGroupReq
+        token: Token, createGroupReq: CreateGroupReq
     ): CreateGroupResp {
-        val user = authentication.validate(authenticationToken) {
+        val user = authentication.validate(token) {
             check(CreateGroup.require(createGroupReq.groupType))
         } ?: return PermissionDenied
 
@@ -54,10 +54,10 @@ actual class GroupService(
             return GroupShortNameUnavailable(createGroupReq.groupShortName)
         }
 
-        return logger.track(authenticationToken, createGroupReq.groupName, createGroupReq.groupShortName) {
-            info("$authenticationToken try to create $createGroupReq")
+        return logger.track(token, createGroupReq.groupName, createGroupReq.groupShortName) {
+            info("$token try to create $createGroupReq")
             val group = groupRepository.create(createGroupReq)
-            info("$authenticationToken created ${createGroupReq.groupName},id is ${group.groupId}")
+            info("$token created ${createGroupReq.groupName},id is ${group.groupId}")
 
             roleService.addRole(
                 user.id, GroupOwner.GroupOwnerImpl(
@@ -70,19 +70,19 @@ actual class GroupService(
     }
 
     override suspend fun load(
-        authenticationToken: AuthenticationToken?, groupId: GroupId
-    ): LoadGroupResp = logger.track(authenticationToken, groupId) {
+        token: Token?, groupId: GroupId
+    ): LoadGroupResp = logger.track(token, groupId) {
         val id = groupIdResolver.resolve(groupId) ?: return@track GroupIdNotFound(groupId)
 
-        val user = authentication.getAuthenticationUser(authenticationToken)
+        val user = authentication.getAuthenticationUser(token)
 
         return@track groupLoadResolver.resolve(groupId, id, user)
     }
 
-    override suspend fun join(groupId: GroupId, authenticationToken: AuthenticationToken): JoinGroupResp {
+    override suspend fun join(groupId: GroupId, token: Token): JoinGroupResp {
         val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
 
-        val user = authentication.validate(authenticationToken) { requireLogin() }
+        val user = authentication.validate(token) { requireLogin() }
 
         if (user == null) {
             return PermissionDenied
@@ -91,7 +91,7 @@ actual class GroupService(
         return joinGroupResolver.resolve(groupId, id, user)
     }
 
-    override suspend fun quit(groupId: GroupId, value: AuthenticationToken?): QuitGroupResp {
+    override suspend fun quit(groupId: GroupId, value: Token?): QuitGroupResp {
         val user = authentication.validate(value) { requireLogin() } ?: return PermissionDenied
 
         val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
@@ -101,7 +101,7 @@ actual class GroupService(
         return QuitOk
     }
 
-    override suspend fun kick(token: AuthenticationToken?, groupId: GroupId, kickMemberId: Int): KickGroupResp {
+    override suspend fun kick(token: Token?, groupId: GroupId, kickMemberId: Int): KickGroupResp {
         val groupIntId = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
 
         val kicker = authentication.validate(token) {
@@ -112,7 +112,7 @@ actual class GroupService(
     }
 
     override suspend fun upgradeGroupManager(
-        token: AuthenticationToken?,
+        token: Token?,
         groupId: GroupId,
         updatee: Int
     ): UpgradeGroupManagerResp {
@@ -131,12 +131,12 @@ actual class GroupService(
     }
 
     override suspend fun downgradeToMember(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         groupId: GroupId,
         userId: Int
     ): DowngradeToMemberResp {
         val groupIntid = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
-        val owner = authentication.validate(authenticationToken) {
+        val owner = authentication.validate(token) {
             check(GroupOwner.GroupOwnerImpl(groupIntid))
         } ?: return PermissionDeniedWithMessage("你没有权限降级管理员哦")
 

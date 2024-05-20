@@ -7,6 +7,7 @@ import cn.llonvne.entity.group.GroupType
 import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.IGroupService.CreateGroupResp.CreateGroupOk
+import cn.llonvne.kvision.service.ClientError
 import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
 import io.kvision.core.Container

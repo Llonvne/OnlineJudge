@@ -2,7 +2,7 @@ package cn.llonvne.entity.problem.share
 
 import cn.llonvne.entity.DescriptionGetter
 import cn.llonvne.entity.problem.share.CodeCommentType.*
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import kotlinx.serialization.Serializable
 import kotlin.enums.EnumEntries
 
@@ -31,6 +31,6 @@ private fun CodeCommentType.decr() = when (this) {
     ContestCode -> "比赛代码不支持评论"
 }
 
-fun EnumEntries<CodeCommentType>.limited(token: AuthenticationToken): List<CodeCommentType> {
+fun EnumEntries<CodeCommentType>.limited(token: Token): List<CodeCommentType> {
     return this.filter { it != ContestCode }
 }

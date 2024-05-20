@@ -6,14 +6,13 @@ import cn.llonvne.compoent.badgeGroup
 import cn.llonvne.compoent.observable.observableListOf
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.compoent.problemStatus
-import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.dtos.ProblemForList
 import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ProblemModel
 import cn.llonvne.model.RoutingModule
 import cn.llonvne.model.Storage
 import io.kvision.core.Container
-import io.kvision.core.onClick
 import io.kvision.core.onClickLaunch
 import io.kvision.core.onInput
 import io.kvision.form.formPanel
@@ -114,7 +113,7 @@ private fun Container.problemsList(
     configure: ProblemListConfigure = ProblemListConfigure()
 ) {
 
-    val loader: suspend () -> List<ProblemListDto> = {
+    val loader: suspend () -> List<ProblemForList> = {
         ProblemModel.listProblem(configure.showType)
     }
 
@@ -182,24 +181,24 @@ private fun Container.problemsList(
                             val id = cell.getData.invoke().asDynamic().problem.problemId as Int?
                             routing.navigate("/problems/${id}")
                         }),
-                        ColumnDefinition("状态", "status", formatterComponentFunction = { _, _, e: ProblemListDto ->
+                        ColumnDefinition("状态", "status", formatterComponentFunction = { _, _, e: ProblemForList ->
                             span {
                                 problemStatus(e.status)
                             }
                         }),
-                        ColumnDefinition("题目标签", formatterComponentFunction = { _, _, e: ProblemListDto ->
+                        ColumnDefinition("题目标签", formatterComponentFunction = { _, _, e: ProblemForList ->
                             span {
                                 badgeGroup(e.tags) { tag ->
                                     +tag.tag
                                 }
                             }
                         }),
-                        ColumnDefinition("作者", formatterComponentFunction = { _, _, e: ProblemListDto ->
+                        ColumnDefinition("作者", formatterComponentFunction = { _, _, e: ProblemForList ->
                             span {
                                 +e.author.authorName
                             }
                         }),
-                        ColumnDefinition("更新时间", formatterComponentFunction = { _, _, e: ProblemListDto ->
+                        ColumnDefinition("更新时间", formatterComponentFunction = { _, _, e: ProblemForList ->
                             span {
                                 val updateAt = e.problem.updatedAt
                                 if (updateAt != null) {

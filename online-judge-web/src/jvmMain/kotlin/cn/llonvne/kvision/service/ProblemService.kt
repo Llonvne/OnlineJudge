@@ -5,7 +5,7 @@ import cn.llonvne.database.repository.AuthorRepository
 import cn.llonvne.database.repository.LanguageRepository
 import cn.llonvne.database.repository.ProblemRepository
 import cn.llonvne.database.repository.SubmissionRepository
-import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.dtos.ProblemForList
 import cn.llonvne.entity.problem.PlaygroundJudgeResult
 import cn.llonvne.entity.problem.ProblemJudgeResult
 import cn.llonvne.entity.problem.ProblemListShowType
@@ -17,9 +17,8 @@ import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.GetProblemByIdOk
 import cn.llonvne.kvision.service.IProblemService.ProblemGetByIdResult.ProblemNotFound
 import cn.llonvne.kvision.service.exception.ProblemIdDoNotExistAfterCreation
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
-import org.komapper.core.dsl.operator.trim
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
@@ -34,19 +33,19 @@ actual class ProblemService(
     private val problemRepository: ProblemRepository,
     private val submissionRepository: SubmissionRepository,
     private val languageRepository: LanguageRepository,
-    private val authentication: RedisAuthenticationService
+    private val authentication: UserLoginLogoutTokenValidator
 ) : IProblemService {
 
     override suspend fun list(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         showType: ProblemListShowType
-    ): List<ProblemListDto> {
+    ): List<ProblemForList> {
         return problemRepository.list()
             .filter { problem ->
                 when (showType) {
                     All -> true
                     Accepted -> {
-                        val user = authentication.validate(authenticationToken) {
+                        val user = authentication.validate(token) {
                             requireLogin()
                         } ?: return listOf()
                         val submission = submissionRepository.getByAuthenticationUserID(
@@ -64,7 +63,7 @@ actual class ProblemService(
                     }
 
                     Attempted -> {
-                        val user = authentication.validate(authenticationToken) {
+                        val user = authentication.validate(token) {
                             requireLogin()
                         } ?: return listOf()
                         val submission = submissionRepository.getByAuthenticationUserID(
@@ -86,14 +85,14 @@ actual class ProblemService(
                     }
                 }
             }
-            .mapNotNull { it.listDto(authenticationToken) }
+            .mapNotNull { it.listDto(token) }
     }
 
     override suspend fun create(
-        authenticationToken: AuthenticationToken?, createProblemReq: IProblemService.CreateProblemReq
+        token: Token?, createProblemReq: IProblemService.CreateProblemReq
     ): IProblemService.CreateProblemResp {
 
-        if (authenticationToken == null) {
+        if (token == null) {
             return PermissionDenied
         }
 
@@ -104,7 +103,7 @@ actual class ProblemService(
         val problem = problemRepository.create(
             Problem.fromCreateReq(
                 createProblemReq,
-                ownerId = authenticationToken.id
+                ownerId = token.id
             )
         )
 
@@ -127,15 +126,15 @@ actual class ProblemService(
         }
     }
 
-    override suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto> {
+    override suspend fun search(token: Token?, text: String): List<ProblemForList> {
         return problemRepository.search(text).mapNotNull {
             it.listDto(token)
         }
     }
 
-    private suspend fun Problem.listDto(token: AuthenticationToken?): ProblemListDto? {
+    private suspend fun Problem.listDto(token: Token?): ProblemForList? {
         return onIdNotNull(null) { id, problem ->
-            ProblemListDto(
+            ProblemForList(
                 problem,
                 id,
                 authorRepository.getByIdOrThrow(authorId),

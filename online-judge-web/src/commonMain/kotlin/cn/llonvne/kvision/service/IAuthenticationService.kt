@@ -3,86 +3,86 @@ package cn.llonvne.kvision.service
 import cn.llonvne.message.Message
 import cn.llonvne.message.Message.ToastMessage
 import cn.llonvne.message.MessageLevel
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
 
 @KVService
 interface IAuthenticationService {
     @Serializable
-    sealed interface RegisterResult {
+    sealed interface RegisterResp {
         val message: ToastMessage
 
-        fun isOk() = this is SuccessfulRegistration
+        fun isOk() = this is Successful
 
         @Serializable
-        data class SuccessfulRegistration(val token: AuthenticationToken, val username: String) : RegisterResult {
+        data class Successful(val token: Token, val username: String) : RegisterResp {
             override val message: ToastMessage = ToastMessage(
                 MessageLevel.Success, "成功注册，欢迎新用户:${username}"
             )
         }
 
         @Serializable
-        data class Failed(override val message: ToastMessage) : RegisterResult
+        data class Failed(override val message: ToastMessage) : RegisterResp
     }
 
-    suspend fun register(username: String, password: String): RegisterResult
+    suspend fun register(username: String, password: String): RegisterResp
 
     @Serializable
-    sealed interface LoginResult {
+    sealed interface LoginResp {
         val message: Message
 
         @Serializable
-        data object BannedUser : LoginResult {
+        data object Banned : LoginResp {
             override val message: Message
                 get() = ToastMessage(MessageLevel.Danger, "您的账号已经被管理员封禁")
         }
 
         @Serializable
-        data class SuccessfulLogin(val token: AuthenticationToken, val username: String) : LoginResult {
+        data class Successful(val token: Token, val username: String) : LoginResp {
             override val message: Message =
                 ToastMessage(MessageLevel.Success, "登入成功，欢迎:${username}")
         }
 
         @Serializable
-        data object IncorrectUsernameOrPassword : LoginResult {
+        data object IncorrectUsernameOrPassword : LoginResp {
             override val message: Message = ToastMessage(MessageLevel.Warning, "用户名或者密码错误")
         }
 
         @Serializable
-        data object UserDoNotExist : LoginResult {
+        data object UserNotExist : LoginResp {
             override val message: Message = ToastMessage(MessageLevel.Warning, "用户不存在")
         }
     }
 
-    suspend fun login(username: String, password: String): LoginResult
+    suspend fun login(username: String, password: String): LoginResp
 
     @Serializable
-    sealed interface GetLoginInfoResp {
+    sealed interface LoginInfoResp {
         @Serializable
-        data object NotLogin : GetLoginInfoResp
+        data object NotLogin : LoginInfoResp
 
         @Serializable
-        data object LoginExpired : GetLoginInfoResp
+        data object LoginExpired : LoginInfoResp
 
         @Serializable
-        data class Login(val username: String, val id: Int) : GetLoginInfoResp
+        data class Logined(val username: String, val id: Int) : LoginInfoResp
     }
 
-    suspend fun getLoginInfo(token: AuthenticationToken?): GetLoginInfoResp
+    suspend fun loginInfo(token: Token?): LoginInfoResp
 
     @Serializable
-    sealed interface GetLogoutResp {
+    sealed interface LogoutResp {
         @Serializable
-        data object Logout : GetLogoutResp
+        data object Logout : LogoutResp
     }
 
-    suspend fun logout(token: AuthenticationToken?): GetLogoutResp
+    suspend fun logout(token: Token?): LogoutResp
 
     @Serializable
     sealed interface MineResp {
         @Serializable
-        data class NormalUserMineResp(
+        data class NormalUser(
             val username: String,
             val createAt: String,
             val acceptedTotal: Int,
@@ -92,8 +92,8 @@ interface IAuthenticationService {
         ) : MineResp
 
         @Serializable
-        data class AdministratorMineResp(val placeholder: Unit) : MineResp
+        data class Administrator(val placeholder: Unit) : MineResp
     }
 
-    suspend fun mine(value: AuthenticationToken?): MineResp
+    suspend fun mine(token: Token?): MineResp
 }

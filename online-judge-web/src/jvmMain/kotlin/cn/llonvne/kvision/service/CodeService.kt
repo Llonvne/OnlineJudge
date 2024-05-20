@@ -1,11 +1,10 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.LanguageRepository
-import cn.llonvne.database.resolver.code.GetCodeSafetyCheckResolver
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.dtos.CreateCommentDto
+import cn.llonvne.dtos.CreateCommentReq
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.problem.ShareCodeComment
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType
@@ -21,8 +20,8 @@ import cn.llonvne.kvision.service.ICodeService.SetCodeCommentTypeResp.SuccessSet
 import cn.llonvne.kvision.service.ICodeService.SetCodeCommentVisibilityTypeResp.SuccessSetCodeCommentVisibilityType
 import cn.llonvne.kvision.service.ICodeService.SetCodeVisibilityResp.SuccessToPublicOrPrivate
 import cn.llonvne.kvision.service.ICodeService.SetCodeVisibilityResp.SuccessToRestrict
-import cn.llonvne.security.AuthenticationToken
-import cn.llonvne.security.RedisAuthenticationService
+import cn.llonvne.security.Token
+import cn.llonvne.security.UserLoginLogoutTokenValidator
 import com.benasher44.uuid.uuid4
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -36,12 +35,11 @@ import org.springframework.transaction.annotation.Transactional
 actual class CodeService(
     private val codeRepository: CodeRepository,
     private val languageRepository: LanguageRepository,
-    private val authenticationUserRepository: AuthenticationUserRepository,
-    private val authentication: RedisAuthenticationService,
-    private val getCodeSafetyCheckResolver: GetCodeSafetyCheckResolver
+    private val userRepository: UserRepository,
+    private val authentication: UserLoginLogoutTokenValidator,
 ) : ICodeService {
-    override suspend fun saveCode(
-        token: AuthenticationToken?,
+    override suspend fun save(
+        token: Token?,
         saveCodeReq: SaveCodeReq
     ): SaveCodeResp {
         val user = authentication.validate(token) {
@@ -62,7 +60,7 @@ actual class CodeService(
     private suspend fun getCodeSafetyCheck(
         getCodeId: GetCodeId,
         code: Code,
-        value: AuthenticationToken?
+        value: Token?
     ): GetCodeResp {
         when (code.visibilityType) {
             Public -> {
@@ -104,7 +102,7 @@ actual class CodeService(
                 rawCode = code.code,
                 language = languageRepository.getByIdOrNull(code.languageId),
                 shareUserId = code.authenticationUserId,
-                shareUsername = authenticationUserRepository.getByIdOrNull(code.authenticationUserId)?.username
+                shareUsername = userRepository.getByIdOrNull(code.authenticationUserId)?.username
                     ?: "未知",
                 visibilityType = code.visibilityType,
                 commentType = code.commentType,
@@ -114,18 +112,18 @@ actual class CodeService(
         )
     }
 
-    override suspend fun getCode(value: AuthenticationToken?, shareId: Int): GetCodeResp {
+    override suspend fun getCode(value: Token?, shareId: Int): GetCodeResp {
         val code = codeRepository.get(shareId) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.Id, code, value)
     }
 
-    override suspend fun getCodeByHash(value: AuthenticationToken?, hash: String): GetCodeResp {
+    override suspend fun getCodeByHash(value: Token?, hash: String): GetCodeResp {
         val code = codeRepository.getCodeByHash(hash) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.HashLink, code, value)
     }
 
     override suspend fun setCodeCommentType(
-        token: AuthenticationToken?, shareId: Int, type: CodeCommentType
+        token: Token?, shareId: Int, type: CodeCommentType
     ): SetCodeCommentTypeResp {
         if (!codeRepository.isIdExist(shareId)) {
             return CodeNotFound
@@ -141,7 +139,7 @@ actual class CodeService(
     }
 
     override suspend fun setCodeCommentVisibilityType(
-        token: AuthenticationToken?, shareId: Int, commentId: Int, type: ShareCodeCommentType
+        token: Token?, shareId: Int, commentId: Int, type: ShareCodeCommentType
     ): SetCodeCommentVisibilityTypeResp {
         val user = authentication.getAuthenticationUser(token)
         if (user == null) {
@@ -193,7 +191,7 @@ actual class CodeService(
         }
 
         return CommitOnCodeResp.SuccessfulCommit(
-            CreateCommentDto(
+            CreateCommentReq(
                 result.commentId,
                 user.username,
                 commitOnCodeReq.codeId,
@@ -205,30 +203,30 @@ actual class CodeService(
     }
 
     override suspend fun getComments(
-        authenticationToken: AuthenticationToken?, sharCodeId: Int
+        token: Token?, sharCodeId: Int
     ): GetCommitsOnCodeResp {
         if (!codeRepository.isIdExist(sharCodeId)) {
             return CodeNotFound
         } else {
             return codeRepository.getComments(sharCodeId).mapNotNull {
 
-                val committerUsername = authenticationUserRepository.getByIdOrNull(it.committerAuthenticationUserId)
+                val committerUsername = userRepository.getByIdOrNull(it.committerAuthenticationUserId)
                     ?: return@mapNotNull null
 
                 val sharCodeOwnerId = codeRepository.getCodeOwnerId(sharCodeId)
 
                 val user =
-                    authentication.getAuthenticationUser(authenticationToken) ?: return@mapNotNull null
+                    authentication.getAuthenticationUser(token) ?: return@mapNotNull null
 
                 if (it.type == ShareCodeCommentType.Private) {
-                    if (authenticationToken == null) {
+                    if (token == null) {
                         return@mapNotNull null
                     } else if (!(it.committerAuthenticationUserId == user.id || user.id == sharCodeOwnerId)) {
                         return@mapNotNull null
                     }
                 }
 
-                CreateCommentDto(
+                CreateCommentReq(
                     it.commentId ?: return@mapNotNull null,
                     committerUsername.username,
                     sharCodeId,
@@ -247,7 +245,7 @@ actual class CodeService(
     }
 
     override suspend fun setCodeVisibility(
-        token: AuthenticationToken?, shareId: Int, result: CodeVisibilityType
+        token: Token?, shareId: Int, result: CodeVisibilityType
     ): SetCodeVisibilityResp {
         val user = authentication.getAuthenticationUser(token) ?: return PermissionDenied
 

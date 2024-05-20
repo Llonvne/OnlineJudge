@@ -1,6 +1,6 @@
 package cn.llonvne.database.resolver.group
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.role.TeamIdRole
 import cn.llonvne.security.asJson
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
  * 用于从用户表查找对应权限的成员
  */
 @Service
-class GroupMembersResolver(private val userRepository: AuthenticationUserRepository) {
+class GroupMembersResolver(private val userRepository: UserRepository) {
     /**
      * 查找一个具有[TeamIdRole]且匹配[TeamIdRole.teamId]的成员
      * @param need 需要的权限

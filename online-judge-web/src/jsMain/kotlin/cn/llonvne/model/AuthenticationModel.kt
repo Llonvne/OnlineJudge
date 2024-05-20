@@ -2,12 +2,12 @@ package cn.llonvne.model
 
 import cn.llonvne.AppScope
 import cn.llonvne.kvision.service.IAuthenticationService
-import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.*
-import cn.llonvne.kvision.service.IAuthenticationService.GetLogoutResp.Logout
-import cn.llonvne.kvision.service.IAuthenticationService.LoginResult
-import cn.llonvne.kvision.service.IAuthenticationService.LoginResult.SuccessfulLogin
+import cn.llonvne.kvision.service.IAuthenticationService.LoginInfoResp.*
+import cn.llonvne.kvision.service.IAuthenticationService.LogoutResp.Logout
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResp
+import cn.llonvne.kvision.service.IAuthenticationService.LoginResp.Successful
 import cn.llonvne.message.Messager
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.remote.getService
 import io.kvision.state.ObservableValue
 import kotlinx.browser.localStorage
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 
 object AuthenticationModel {
     private val authenticationService = getService<IAuthenticationService>()
-    var userToken: ObservableValue<AuthenticationToken?> = ObservableValue(null)
+    var userToken: ObservableValue<Token?> = ObservableValue(null)
 
     init {
         restore()
@@ -26,24 +26,24 @@ object AuthenticationModel {
 
     suspend fun register(username: String, password: String) = authenticationService.register(username, password)
 
-    suspend fun login(username: String, password: String): LoginResult {
+    suspend fun login(username: String, password: String): LoginResp {
         val result = authenticationService.login(username, password)
 
         when (result) {
-            is SuccessfulLogin -> {
+            is Successful -> {
                 userToken.value = result.token
                 save()
             }
 
-            LoginResult.IncorrectUsernameOrPassword -> {
+            LoginResp.IncorrectUsernameOrPassword -> {
                 Messager.toastInfo("用户名或密码错误")
             }
 
-            LoginResult.UserDoNotExist -> {
+            LoginResp.UserNotExist -> {
                 Messager.toastInfo("用户不存在")
             }
 
-            LoginResult.BannedUser -> Messager.send(result.message)
+            LoginResp.Banned -> Messager.send(result.message)
         }
 
         return result
@@ -79,7 +79,7 @@ object AuthenticationModel {
         if (tokenStr.isNullOrEmpty()) {
             return
         }
-        userToken.value = Json.decodeFromString<AuthenticationToken?>(tokenStr)
+        userToken.value = Json.decodeFromString<Token?>(tokenStr)
 
         AppScope.launch {
             info()?.let { Messager.toastInfo("欢迎回来，${it.username}") }
@@ -88,9 +88,9 @@ object AuthenticationModel {
     }
 
 
-    suspend fun info(): Login? {
-        return when (val resp = authenticationService.getLoginInfo(this.userToken.value)) {
-            is Login -> resp
+    suspend fun info(): Logined? {
+        return when (val resp = authenticationService.loginInfo(this.userToken.value)) {
+            is Logined -> resp
             LoginExpired -> null
             NotLogin -> null
         }

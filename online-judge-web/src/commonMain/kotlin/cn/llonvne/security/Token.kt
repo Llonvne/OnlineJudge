@@ -3,13 +3,13 @@ package cn.llonvne.security
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface AuthenticationToken {
+sealed interface Token {
     val token: String
     val id: Int
 }
 
 @Serializable
-data class RedisToken(override val id: Int, override val token: String) : AuthenticationToken {
+data class RedisToken(override val id: Int, override val token: String) : Token {
     override fun toString(): String {
         return "<Redis-Token-$id>"
     }

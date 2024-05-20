@@ -7,7 +7,7 @@ import cn.llonvne.entity.group.GroupVisibility
 import cn.llonvne.entity.role.TeamIdRole
 import cn.llonvne.kvision.service.Validatable.Companion.on
 import cn.llonvne.kvision.service.Validatable.Companion.validate
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.SerialName
@@ -41,7 +41,7 @@ interface IGroupService {
     }
 
     suspend fun createTeam(
-        authenticationToken: AuthenticationToken, createGroupReq: CreateGroupReq
+        token: Token, createGroupReq: CreateGroupReq
     ): CreateGroupResp
 
     @Serializable
@@ -127,7 +127,7 @@ interface IGroupService {
         ) : GroupMemberDto
     }
 
-    suspend fun load(authenticationToken: AuthenticationToken?, groupId: GroupId): LoadGroupResp
+    suspend fun load(token: Token?, groupId: GroupId): LoadGroupResp
 
     @Serializable
     sealed interface JoinGroupResp {
@@ -141,7 +141,7 @@ interface IGroupService {
         data class NoManagersFound(val groupId: GroupId) : JoinGroupResp
     }
 
-    suspend fun join(groupId: GroupId, authenticationToken: AuthenticationToken): JoinGroupResp
+    suspend fun join(groupId: GroupId, token: Token): JoinGroupResp
 
     @Serializable
     sealed interface QuitGroupResp
@@ -149,7 +149,7 @@ interface IGroupService {
     @Serializable
     data object QuitOk : QuitGroupResp
 
-    suspend fun quit(groupId: GroupId, value: AuthenticationToken?): QuitGroupResp
+    suspend fun quit(groupId: GroupId, value: Token?): QuitGroupResp
 
     @Serializable
     sealed interface KickGroupResp {
@@ -163,7 +163,7 @@ interface IGroupService {
         data object Kicked : KickGroupResp
     }
 
-    suspend fun kick(token: AuthenticationToken?, groupId: GroupId, kickMemberId: Int): KickGroupResp
+    suspend fun kick(token: Token?, groupId: GroupId, kickMemberId: Int): KickGroupResp
 
     @Serializable
     data class BeUpOrDowngradedUserNotfound(val userId: Int) : UpgradeGroupManagerResp, DowngradeToMemberResp
@@ -181,7 +181,7 @@ interface IGroupService {
     }
 
     suspend fun upgradeGroupManager(
-        token: AuthenticationToken?,
+        token: Token?,
         groupId: GroupId,
         updatee: Int
     ): UpgradeGroupManagerResp
@@ -193,7 +193,7 @@ interface IGroupService {
     }
 
     suspend fun downgradeToMember(
-        authenticationToken: AuthenticationToken?,
+        token: Token?,
         groupId: GroupId,
         userId: Int
     ): DowngradeToMemberResp

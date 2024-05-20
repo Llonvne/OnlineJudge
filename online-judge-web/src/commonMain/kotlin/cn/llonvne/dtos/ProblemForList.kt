@@ -7,7 +7,7 @@ import cn.llonvne.entity.types.ProblemStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ProblemListDto(
+data class ProblemForList(
     val problem: Problem,
     val problemId: Int,
     val author: Author,

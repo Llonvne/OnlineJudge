@@ -33,7 +33,7 @@ data class UserRole(val roles: List<Role> = listOf()) {
 
     companion object {
         fun default() = UserRole(
-            TeamRole.default()
+            TeamRole.default() + Backend.BackendImpl
         )
     }
 

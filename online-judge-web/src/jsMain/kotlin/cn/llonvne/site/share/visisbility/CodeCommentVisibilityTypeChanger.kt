@@ -17,7 +17,7 @@ class  CodeCommentVisibilityTypeChanger(override val codeDto: CodeDto) : Visibil
         change("更改该评论的可见性", ShareCodeComment.Companion.ShareCodeCommentType.entries) { type ->
             when (val resp = CodeModel.setCodeCommentVisibilityType(
                 shareId = codeDto.codeId, commentId = commentId, type
-            )) {
+            )) {        
                 CommentNotFound -> return@change Messager.toastInfo("未找到该评论")
                 PermissionDenied -> return@change Messager.toastInfo("权限不足")
                 SuccessSetCodeCommentVisibilityType -> return@change Messager.toastInfo(

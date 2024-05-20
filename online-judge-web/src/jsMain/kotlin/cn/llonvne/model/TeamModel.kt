@@ -9,7 +9,7 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.kvision.service.Validatable.Companion.Failed
 import cn.llonvne.kvision.service.Validatable.Companion.Ok
 import cn.llonvne.message.Messager
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.remote.getService
 
 object TeamModel {
@@ -37,8 +37,8 @@ object TeamModel {
         return teamService.load(AuthenticationModel.userToken.value, groupId)
     }
 
-    suspend fun join(authenticationToken: AuthenticationToken, groupId: GroupId): JoinGroupResp {
-        return teamService.join(groupId, authenticationToken)
+    suspend fun join(token: Token, groupId: GroupId): JoinGroupResp {
+        return teamService.join(groupId, token)
     }
 
     suspend fun quit(groupId: GroupId): QuitGroupResp {

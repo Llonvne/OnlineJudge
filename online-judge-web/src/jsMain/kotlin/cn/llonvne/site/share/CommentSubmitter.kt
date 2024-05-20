@@ -4,7 +4,7 @@ import cn.llonvne.AppScope
 import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.dtos.CreateCommentDto
+import cn.llonvne.dtos.CreateCommentReq
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Private
 import cn.llonvne.entity.problem.ShareCodeComment.Companion.ShareCodeCommentType.Public
 import cn.llonvne.message.Messager
@@ -24,11 +24,11 @@ interface CommentSubmitter {
     fun load(root: Container)
 
     companion object {
-        fun public(shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>): CommentSubmitter =
+        fun public(shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>): CommentSubmitter =
             PublicCommentSubmitter(shareId, shareCommentComponent)
 
         fun protected(
-            shareId: Int, code: CodeDto, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+            shareId: Int, code: CodeDto, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
         ): CommentSubmitter = ProtectedCommentSubmitter(shareId, shareCommentComponent, code)
 
         fun closed(): CommentSubmitter = object : CommentSubmitter {
@@ -42,7 +42,7 @@ interface CommentSubmitter {
 }
 
 private class ProtectedCommentSubmitter(
-    shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>,
+    shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
     private val code: CodeDto
 ) : PublicCommentSubmitter(shareId, shareCommentComponent) {
     override fun getCommentVisibilityOptions(): List<Pair<String, String>> {
@@ -69,7 +69,7 @@ private class ProtectedCommentSubmitter(
 
 private open class PublicCommentSubmitter(
     private val shareId: Int,
-    private val shareCommentComponent: ShareCodeCommentComponent<CreateCommentDto>,
+    private val shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
 ) : CommentSubmitter {
 
     companion object {

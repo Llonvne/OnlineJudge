@@ -1,17 +1,16 @@
 package cn.llonvne.database.resolver.mine
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.repository.ContestRepository
 import cn.llonvne.database.repository.SubmissionRepository
 import cn.llonvne.exts.now
-import cn.llonvne.kvision.service.IMineService
 import cn.llonvne.kvision.service.IMineService.DashboardResp.OnlineJudgeStatistics
 import kotlinx.datetime.*
 import org.springframework.stereotype.Service
 
 @Service
 class OnlineJudgeStatisticsResolver(
-    private val userRepository: AuthenticationUserRepository,
+    private val userRepository: UserRepository,
     private val submissionRepository: SubmissionRepository,
     private val contestRepository: ContestRepository
 ) {

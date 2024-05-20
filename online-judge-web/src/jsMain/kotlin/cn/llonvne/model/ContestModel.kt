@@ -23,7 +23,7 @@ object ContestModel {
         createContestForm: CreateContestForm, problems: List<ContestContext.ContestProblem>
     ): IContestService.CreateContestResp {
         return contestService.create(
-            authenticationToken = AuthenticationModel.userToken.value, IContestService.CreateContestReq(
+            token = AuthenticationModel.userToken.value, IContestService.CreateContestReq(
                 title = createContestForm.title,
                 description = createContestForm.description,
                 startAt = createContestForm.startAt.toKotlinInstant()

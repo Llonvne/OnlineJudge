@@ -1,9 +1,8 @@
 package cn.llonvne.compoent.layout
 
-import cn.llonvne.AppScope
 import cn.llonvne.compoent.observable.observableOf
 import cn.llonvne.constants.Frontend
-import cn.llonvne.kvision.service.IAuthenticationService.GetLoginInfoResp.Login
+import cn.llonvne.kvision.service.IAuthenticationService.LoginInfoResp.Logined
 import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.site.loginPanel
@@ -12,9 +11,7 @@ import io.kvision.dropdown.dropDown
 import io.kvision.html.div
 import io.kvision.navbar.*
 import io.kvision.routing.Routing
-import io.kvision.state.ObservableValue
 import io.kvision.state.bind
-import kotlinx.coroutines.launch
 
 private fun Navbar.showNavigator(routing: Routing) {
     nav {
@@ -71,7 +68,7 @@ fun Container.header(routing: Routing) {
                             routing.navigate(Frontend.Register.uri)
                         }
                     }
-                    navLink("登入", icon = "fab fa-windows") {
+                    navLink("登录", icon = "fab fa-windows") {
                         onClick {
                             loginPanel()
                         }
@@ -79,7 +76,7 @@ fun Container.header(routing: Routing) {
                 }
             } else {
 
-                observableOf<Login>(null) {
+                observableOf<Logined>(null) {
                     setUpdater {
                         AuthenticationModel.info()
                     }

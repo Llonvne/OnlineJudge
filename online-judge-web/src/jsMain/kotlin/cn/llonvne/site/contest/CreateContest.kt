@@ -9,6 +9,7 @@ import cn.llonvne.entity.contest.ContestContext
 import cn.llonvne.kvision.service.*
 import cn.llonvne.kvision.service.IContestService.AddProblemResp.AddOkResp
 import cn.llonvne.kvision.service.ISubmissionService.ProblemNotFound
+import cn.llonvne.kvision.service.AddProblemPermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.ContestModel
 import cn.llonvne.model.RoutingModule

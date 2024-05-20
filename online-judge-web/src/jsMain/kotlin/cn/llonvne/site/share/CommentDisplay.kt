@@ -5,7 +5,7 @@ import cn.llonvne.compoent.AlertType
 import cn.llonvne.compoent.alert
 import cn.llonvne.compoent.badge
 import cn.llonvne.dtos.CodeDto
-import cn.llonvne.dtos.CreateCommentDto
+import cn.llonvne.dtos.CreateCommentReq
 import cn.llonvne.dtos.getVisibilityDecr
 import cn.llonvne.entity.types.badge.BadgeColor
 import cn.llonvne.ll
@@ -35,11 +35,11 @@ interface CommentDisplay {
         }
 
         fun public(
-            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
         ): CommentDisplay = PublicShareCodeCommentDisplay(code, shareCodeCommentComponent)
 
         fun freezing(
-            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
         ): CommentDisplay {
             return FreezingShareCodeCommentDisplay(code, shareCodeCommentComponent)
         }
@@ -47,12 +47,12 @@ interface CommentDisplay {
 }
 
 private class FreezingShareCodeCommentDisplay(
-    code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+    code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
 ) : PublicShareCodeCommentDisplay(code, shareCodeCommentComponent) {
-    override fun getDeleteComponent(root: Container, comment: CreateCommentDto) {
+    override fun getDeleteComponent(root: Container, comment: CreateCommentReq) {
     }
 
-    override fun getVisibilityChangerComponent(root: Container, comment: CreateCommentDto) {
+    override fun getVisibilityChangerComponent(root: Container, comment: CreateCommentReq) {
         root.badge(BadgeColor.Blue) {
             +comment.getVisibilityDecr()
         }
@@ -63,10 +63,10 @@ private class FreezingShareCodeCommentDisplay(
 }
 
 private open class PublicShareCodeCommentDisplay(
-    val code: CodeDto, val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentDto>
+    val code: CodeDto, val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
 ) : CommentDisplay {
 
-    open fun getDeleteComponent(root: Container, comment: CreateCommentDto) {
+    open fun getDeleteComponent(root: Container, comment: CreateCommentReq) {
         AppScope.launch {
             if (comment.committerUsername == AuthenticationModel.info()?.username || AuthenticationModel.info()?.id == code.shareUserId) {
                 root.badge(BadgeColor.Red) {
@@ -81,7 +81,7 @@ private open class PublicShareCodeCommentDisplay(
         }
     }
 
-    open fun getVisibilityChangerComponent(root: Container, comment: CreateCommentDto) {
+    open fun getVisibilityChangerComponent(root: Container, comment: CreateCommentReq) {
         root.badge(BadgeColor.Blue) {
             +comment.getVisibilityDecr()
 

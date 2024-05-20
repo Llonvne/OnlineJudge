@@ -20,7 +20,7 @@ internal data class LoginPanel(
 internal fun loginPanel() {
 
     val dialog = Dialog(
-        "登入",
+        "登录",
     ) {
 
         val loginPanel = formPanel<LoginPanel> {
@@ -28,7 +28,7 @@ internal fun loginPanel() {
             addPassword(LoginPanel::password)
         }
 
-        button("登入") {
+        button("登录") {
             onClick {
                 setResult(loginPanel)
             }

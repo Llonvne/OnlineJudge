@@ -2,9 +2,9 @@
 
 package cn.llonvne.kvision.service
 
-import cn.llonvne.dtos.AuthenticationUserDto
+import cn.llonvne.dtos.Username
 import cn.llonvne.dtos.SubmissionListDto
-import cn.llonvne.dtos.ViewCodeDto
+import cn.llonvne.dtos.CodeForView
 import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.Language
@@ -16,7 +16,7 @@ import cn.llonvne.entity.problem.context.SubmissionTestCases
 import cn.llonvne.entity.problem.context.passer.PasserResult
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.gojudge.api.SupportLanguages
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
@@ -28,7 +28,7 @@ interface ISubmissionService {
 
     @Serializable
     data class ListSubmissionReq(
-        val token: AuthenticationToken? = null,
+        val token: Token? = null,
     )
 
     suspend fun list(req: ListSubmissionReq): List<SubmissionListDto>
@@ -44,7 +44,7 @@ interface ISubmissionService {
     @Serializable
     sealed interface ViewCodeGetByIdResp {
         @Serializable
-        data class SuccessfulGetById(val viewCodeDto: ViewCodeDto) : ViewCodeGetByIdResp
+        data class SuccessfulGetById(val codeForView: CodeForView) : ViewCodeGetByIdResp
     }
 
 
@@ -57,7 +57,7 @@ interface ISubmissionService {
     }
 
     suspend fun getSupportLanguageId(
-        authenticationToken: AuthenticationToken?, problemId: Int
+        token: Token?, problemId: Int
     ): GetSupportLanguageByProblemIdResp
 
     @Serializable
@@ -93,7 +93,7 @@ interface ISubmissionService {
     }
 
     suspend fun create(
-        authenticationToken: AuthenticationToken?, createSubmissionReq: CreateSubmissionReq
+        token: Token?, createSubmissionReq: CreateSubmissionReq
     ): CreateSubmissionResp
 
     @Serializable
@@ -149,7 +149,7 @@ interface ISubmissionService {
     }
 
     suspend fun getOutputByCodeId(
-        authenticationToken: AuthenticationToken?, codeId: Int
+        token: Token?, codeId: Int
     ): GetJudgeResultByCodeIdResp
 
     @Serializable
@@ -157,7 +157,7 @@ interface ISubmissionService {
         @Serializable
         data class PlaygroundSubmissionDto(
             val language: Language,
-            val user: AuthenticationUserDto,
+            val user: Username,
             val submissionId: Int,
             val status: SubmissionStatus,
             val submitTime: LocalDateTime,
@@ -171,7 +171,7 @@ interface ISubmissionService {
     }
 
     suspend fun getLastNPlaygroundSubmission(
-        authenticationToken: AuthenticationToken?, last: Int = 5
+        token: Token?, last: Int = 5
     ): GetLastNPlaygroundSubmissionResp
 
     @Serializable
@@ -200,7 +200,7 @@ interface ISubmissionService {
     }
 
     suspend fun submit(
-        value: AuthenticationToken?,
+        value: Token?,
         submissionSubmit: ProblemSubmissionReq
     ): ProblemSubmissionResp
 
@@ -221,7 +221,7 @@ interface ISubmissionService {
     }
 
     suspend fun getLastNProblemSubmission(
-        value: AuthenticationToken?,
+        value: Token?,
         problemId: Int,
         lastN: Int
     ): GetLastNProblemSubmissionResp
@@ -233,5 +233,5 @@ interface ISubmissionService {
             GetParticipantContestResp
     }
 
-    suspend fun getParticipantContest(value: AuthenticationToken?): GetParticipantContestResp
+    suspend fun getParticipantContest(value: Token?): GetParticipantContestResp
 }

@@ -5,8 +5,7 @@ import cn.llonvne.database.entity.def.problem.submission
 import cn.llonvne.entity.problem.Submission
 import cn.llonvne.entity.problem.share.Code
 import cn.llonvne.entity.types.ProblemStatus
-import cn.llonvne.security.AuthenticationToken
-import kotlinx.coroutines.flow.Flow
+import cn.llonvne.security.Token
 import kotlinx.datetime.LocalDateTime
 import org.komapper.core.dsl.Meta
 import org.komapper.core.dsl.QueryDsl
@@ -66,7 +65,7 @@ class SubmissionRepository(
         }
     }
 
-    fun getUserProblemStatus(token: AuthenticationToken?, problemId: Int): ProblemStatus {
+    fun getUserProblemStatus(token: Token?, problemId: Int): ProblemStatus {
         // TODO
         return ProblemStatus.NotBegin
     }

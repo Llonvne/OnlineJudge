@@ -6,7 +6,7 @@ import cn.llonvne.entity.problem.SubmissionStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ViewCodeDto(
+data class CodeForView(
     val rawCode: String,
     val language: Language,
     val problemName: String,

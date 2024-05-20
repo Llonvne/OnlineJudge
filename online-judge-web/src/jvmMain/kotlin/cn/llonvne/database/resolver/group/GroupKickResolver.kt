@@ -1,6 +1,6 @@
 package cn.llonvne.database.resolver.group
 
-import cn.llonvne.database.repository.AuthenticationUserRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.entity.AuthenticationUser
 import cn.llonvne.entity.group.GroupId
 import cn.llonvne.entity.role.GroupManager
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class GroupKickResolver(
-    private val userRepository: AuthenticationUserRepository,
+    private val userRepository: UserRepository,
     private val roleService: RoleService
 ) {
     suspend fun resolve(

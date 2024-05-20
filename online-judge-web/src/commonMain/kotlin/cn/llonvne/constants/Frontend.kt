@@ -23,7 +23,7 @@ object Frontend {
 
     object Login : Site {
         override val uri = "/login"
-        override val name: String = "登入"
+        override val name: String = "登录"
     }
 
     object Register : Site {

@@ -49,8 +49,8 @@ private interface Mine {
 
         fun from(mineResp: MineResp): Mine {
             return when (mineResp) {
-                is MineResp.AdministratorMineResp -> AdministratorMine()
-                is MineResp.NormalUserMineResp -> NormalUserMine(mineResp)
+                is MineResp.Administrator -> AdministratorMine()
+                is MineResp.NormalUser -> NormalUserMine(mineResp)
                 PermissionDenied -> notLogin
             }
         }
@@ -87,7 +87,7 @@ class AdministratorMine : Mine {
     }
 }
 
-private class NormalUserMine(private val mineResp: MineResp.NormalUserMineResp) : Mine {
+private class NormalUserMine(private val mineResp: MineResp.NormalUser) : Mine {
     override fun load(root: Container) {
         root.div {
             alert(AlertType.Light) {

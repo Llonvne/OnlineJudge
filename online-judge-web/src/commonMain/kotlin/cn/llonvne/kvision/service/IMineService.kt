@@ -2,7 +2,7 @@ package cn.llonvne.kvision.service
 
 import cn.llonvne.entity.ModifyUserForm
 import cn.llonvne.entity.role.IUserRole
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
@@ -49,7 +49,7 @@ interface IMineService {
         ) : DashboardResp
     }
 
-    suspend fun dashboard(authenticationToken: AuthenticationToken?): DashboardResp
+    suspend fun dashboard(token: Token?): DashboardResp
 
     @Serializable
     sealed interface UsersResp {
@@ -68,6 +68,6 @@ interface IMineService {
     }
 
     suspend fun users(): UsersResp
-    suspend fun deleteUser(value: AuthenticationToken?, id: Int): Boolean
-    suspend fun modifyUser(value: AuthenticationToken?, result: ModifyUserForm): Boolean
+    suspend fun deleteUser(value: Token?, id: Int): Boolean
+    suspend fun modifyUser(value: Token?, result: ModifyUserForm): Boolean
 }

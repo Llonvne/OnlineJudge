@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateCommentDto(
+data class CreateCommentReq(
     val commentId: Int,
     val committerUsername: String,
     val shareCodeId: Int,
@@ -18,7 +18,7 @@ data class CreateCommentDto(
 /**
  * 获取评论的可见性中文描述
  */
-fun CreateCommentDto.getVisibilityDecr(): String = when (visibilityType) {
+fun CreateCommentReq.getVisibilityDecr(): String = when (visibilityType) {
     Deleted -> "已被删除"
     Public -> "对所有人可见"
     Private -> "仅对你与代码所有者可见"

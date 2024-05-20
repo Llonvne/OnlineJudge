@@ -1,4 +1,4 @@
-package cn.llonvne.database.aware
+ package cn.llonvne.database.aware
 
 import cn.llonvne.database.aware.GroupInfoAwareProvider.GroupInfoAware
 import cn.llonvne.database.resolver.group.GroupMembersResolver

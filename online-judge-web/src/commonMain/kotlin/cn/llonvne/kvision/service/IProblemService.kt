@@ -1,6 +1,6 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.dtos.ProblemListDto
+import cn.llonvne.dtos.ProblemForList
 import cn.llonvne.entity.problem.Language
 import cn.llonvne.entity.problem.ProblemListShowType
 import cn.llonvne.entity.problem.ProblemTag
@@ -8,7 +8,7 @@ import cn.llonvne.entity.problem.context.Problem
 import cn.llonvne.entity.problem.context.ProblemContext
 import cn.llonvne.entity.problem.context.ProblemType
 import cn.llonvne.entity.problem.context.ProblemVisibility
-import cn.llonvne.security.AuthenticationToken
+import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.serialization.Serializable
 
@@ -37,9 +37,9 @@ interface IProblemService {
     }
 
 
-    suspend fun create(authenticationToken: AuthenticationToken?, createProblemReq: CreateProblemReq): CreateProblemResp
+    suspend fun create(token: Token?, createProblemReq: CreateProblemReq): CreateProblemResp
 
-    suspend fun list(authenticationToken: AuthenticationToken?, showType: ProblemListShowType): List<ProblemListDto>
+    suspend fun list(token: Token?, showType: ProblemListShowType): List<ProblemForList>
 
     @Serializable
     sealed interface ProblemGetByIdResult {
@@ -55,5 +55,5 @@ interface IProblemService {
     }
 
     suspend fun getById(id: Int): ProblemGetByIdResult
-    suspend fun search(token: AuthenticationToken?, text: String): List<ProblemListDto>
+    suspend fun search(token: Token?, text: String): List<ProblemForList>
 }

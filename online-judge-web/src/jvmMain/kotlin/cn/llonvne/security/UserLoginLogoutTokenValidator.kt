@@ -19,18 +19,18 @@ import java.util.*
  * [passwordEncoder] 提供加密方案
  */
 @Service
-class RedisAuthenticationService(
+class UserLoginLogoutTokenValidator(
     private val redis: Redis,
     private val passwordEncoder: PasswordEncoder,
     env: Environment,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     private val redisKeyPrefix: String = env.getProperty("oj.redis.user.prefix") ?: "user-id"
-) {
+) : TokenValidator, LoginLogoutResolver {
 
     val log: Logger = getLogger()
     private val AuthenticationUser.asRedisKey get() = "$redisKeyPrefix-$id-" + UUID.randomUUID()
 
-    suspend fun login(user: AuthenticationUser): AuthenticationToken {
+    override suspend fun login(user: AuthenticationUser): Token {
 
         val token = user.asRedisKey
 
@@ -39,7 +39,7 @@ class RedisAuthenticationService(
         return RedisToken(user.id, token)
     }
 
-    suspend fun isLogin(token: AuthenticationToken?): Boolean {
+    suspend fun isLogin(token: Token?): Boolean {
         val user = getAuthenticationUser(token) ?: return false
         return !user.check(Banned.BannedImpl)
     }
@@ -48,7 +48,7 @@ class RedisAuthenticationService(
         return redis.keys("$redisKeyPrefix-$id-*").firstOrNull()?.let { redis.get(it) }
     }
 
-    suspend fun getAuthenticationUser(token: AuthenticationToken?): AuthenticationUser? {
+    suspend fun getAuthenticationUser(token: Token?): AuthenticationUser? {
         if (token == null) {
             return null
         }
@@ -56,7 +56,7 @@ class RedisAuthenticationService(
         return redis.get(token.token)
     }
 
-    suspend fun logout(token: AuthenticationToken?) {
+    override suspend fun logout(token: Token?) {
         if (token != null) {
             redis.clear(token.token)
         }
@@ -67,7 +67,7 @@ class RedisAuthenticationService(
     }
 
     inner class UserValidatorDsl(
-        val token: AuthenticationToken?
+        val token: Token?
     ) {
 
         private val validators = mutableListOf<Validator>()
@@ -113,20 +113,20 @@ class RedisAuthenticationService(
         }
     }
 
-    suspend fun validate(
-        authenticationToken: AuthenticationToken?, action: suspend UserValidatorDsl.() -> Unit
+    override suspend fun validate(
+        token: Token?, action: suspend UserValidatorDsl.() -> Unit
     ): AuthenticationUser? {
 
-        val userValidatorDsl = UserValidatorDsl(authenticationToken)
+        val userValidatorDsl = UserValidatorDsl(token)
 
-        log.info("[${userValidatorDsl.validateId}] validate for $authenticationToken")
+        log.info("[${userValidatorDsl.validateId}] validate for $token")
 
         userValidatorDsl.action()
         return if (!userValidatorDsl.result()) {
             null
         } else {
             log.info("[${userValidatorDsl.validateId}] pass")
-            getAuthenticationUser(authenticationToken)
+            getAuthenticationUser(token)
         }
     }
 
