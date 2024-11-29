@@ -8,8 +8,6 @@ import kotlinx.serialization.Serializable
 sealed interface Backend : Role {
     @Serializable
     data object BackendImpl : Backend {
-        override fun check(provide: Role): Boolean {
-            return provide is Backend
-        }
+        override fun check(provide: Role): Boolean = provide is Backend
     }
 }

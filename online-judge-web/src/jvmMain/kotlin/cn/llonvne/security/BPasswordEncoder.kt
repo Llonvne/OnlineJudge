@@ -11,7 +11,9 @@ class BPasswordEncoder {
     fun passwordEncoder(): BCryptPasswordEncoder = BCryptPasswordEncoder()
 
     companion object {
-        suspend operator fun <R> PasswordEncoder.invoke(block: suspend context(PasswordEncoder) () -> R): R =
-            block(this)
+        suspend operator fun <R> PasswordEncoder.invoke(
+            block: suspend context(PasswordEncoder)
+            () -> R,
+        ): R = block(this)
     }
 }

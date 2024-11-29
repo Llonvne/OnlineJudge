@@ -11,14 +11,13 @@ fun interface ProblemContextShower {
     fun show(root: Container)
 
     companion object {
-        fun from(resp: GetProblemByIdOk): ProblemContextShower {
-            return AbstractProblemContextShower(resp)
-        }
+        fun from(resp: GetProblemByIdOk): ProblemContextShower = AbstractProblemContextShower(resp)
     }
 }
 
-private open class AbstractProblemContextShower(private val resp: GetProblemByIdOk) : ProblemContextShower {
-
+private open class AbstractProblemContextShower(
+    private val resp: GetProblemByIdOk,
+) : ProblemContextShower {
     protected val context = resp.problem.context
 
     override fun show(root: Container) {

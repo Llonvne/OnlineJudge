@@ -11,15 +11,23 @@ import io.kvision.html.button
 import io.kvision.html.div
 
 interface ProblemChooser {
-    fun show(container: Container, observableDsl: ObservableDsl<Display>)
+    fun show(
+        container: Container,
+        observableDsl: ObservableDsl<Display>,
+    )
 
     companion object {
         fun from(loadOk: LoadOk): ProblemChooser = BaseProblemChooser(loadOk)
     }
 }
 
-private class BaseProblemChooser(private val loadOk: LoadOk) : ProblemChooser {
-    override fun show(container: Container, observableDsl: ObservableDsl<Display>) {
+private class BaseProblemChooser(
+    private val loadOk: LoadOk,
+) : ProblemChooser {
+    override fun show(
+        container: Container,
+        observableDsl: ObservableDsl<Display>,
+    ) {
         container.div {
             alert(AlertType.Light) {
                 loadOk.contest.context.problems.forEachIndexed { index, problem ->

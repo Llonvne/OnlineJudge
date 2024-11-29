@@ -6,7 +6,5 @@ import org.springframework.stereotype.Service
 
 @Service
 class BackendMineResolver {
-    suspend fun resolve(user: AuthenticationUser): IAuthenticationService.MineResp {
-        return IAuthenticationService.MineResp.Administrator(Unit)
-    }
+    suspend fun resolve(user: AuthenticationUser): IAuthenticationService.MineResp = IAuthenticationService.MineResp.Administrator(Unit)
 }

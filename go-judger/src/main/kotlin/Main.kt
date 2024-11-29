@@ -10,25 +10,28 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.netty.*
 import kotlinx.coroutines.awaitCancellation
 
-private fun main() = SuspendApp {
-    val log = KotlinLogging.logger(name = "go-judger-main")
-    log.info { "Initialization Go Judge ...." }
+private fun main() =
+    SuspendApp {
+        val log = KotlinLogging.logger(name = "go-judger-main")
+        log.info { "Initialization Go Judge ...." }
 
-    val env = loadConfigFromEnv()
+        val env = loadConfigFromEnv()
 
-    resourceScope {
-        val judgeContext = env.judgeSpec.map {
-            GoJudgeResolver(it).resolve().bind()
-        }.getOrElse {
-            throw RuntimeException("Failed to init judge")
-        }.toJudgeContext()
+        resourceScope {
+            val judgeContext =
+                env.judgeSpec
+                    .map {
+                        GoJudgeResolver(it).resolve().bind()
+                    }.getOrElse {
+                        throw RuntimeException("Failed to init judge")
+                    }.toJudgeContext()
 
-        val port = 8081
+            val port = 8081
 
-        server(Netty, port = port) {
-            judging(judgeContext, port)
+            server(Netty, port = port) {
+                judging(judgeContext, port)
+            }
+
+            awaitCancellation()
         }
-
-        awaitCancellation()
     }
-}

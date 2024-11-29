@@ -1,6 +1,5 @@
 package cn.llonvne
 
-
 import cn.llonvne.database.entity.def.authenticationUser
 import cn.llonvne.entity.AuthenticationUser
 import org.komapper.core.dsl.Meta
@@ -16,15 +15,19 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual class UserService(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val database: R2dbcDatabase
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val database: R2dbcDatabase,
 ) : IUserService {
     private val userMeta = Meta.authenticationUser
+
     class UserNotFound : Exception()
+
     override suspend fun byId(id: Int): AuthenticationUser {
-        val query = QueryDsl.from(userMeta)
-            .where {
-                userMeta.id.eq(id)
-            }
+        val query =
+            QueryDsl
+                .from(userMeta)
+                .where {
+                    userMeta.id.eq(id)
+                }
         return database.runQuery(query).firstOrNull() ?: throw UserNotFound()
     }
 }

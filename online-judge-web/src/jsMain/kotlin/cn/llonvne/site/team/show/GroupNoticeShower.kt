@@ -13,8 +13,8 @@ fun interface GroupNoticeShower {
     fun load(root: Container)
 
     companion object {
-        fun from(resp: LoadGroupResp): GroupNoticeShower {
-            return when (resp) {
+        fun from(resp: LoadGroupResp): GroupNoticeShower =
+            when (resp) {
                 is GroupIdNotFound -> emptyNoticeShower
                 is GuestLoadGroup -> GuestGroupNoticeShower(resp)
                 PermissionDenied -> emptyNoticeShower
@@ -22,14 +22,14 @@ fun interface GroupNoticeShower {
                 is MemberLoadGroup -> MemberGroupNoticeShower(resp)
                 is OwnerLoadGroup -> OwnerGroupNoticeShower(resp)
             }
-        }
 
         private val emptyNoticeShower = GroupNoticeShower { }
     }
 }
 
-private abstract class AbstractGroupNoticeShower(private val resp: LoadGroupSuccessResp) :
-    GroupNoticeShower {
+private abstract class AbstractGroupNoticeShower(
+    private val resp: LoadGroupSuccessResp,
+) : GroupNoticeShower {
     override fun load(root: Container) {
         root.alert(AlertType.Light) {
             h4 {
@@ -39,10 +39,18 @@ private abstract class AbstractGroupNoticeShower(private val resp: LoadGroupSucc
     }
 }
 
-private class GuestGroupNoticeShower(private val resp: GuestLoadGroup) : AbstractGroupNoticeShower(resp)
+private class GuestGroupNoticeShower(
+    private val resp: GuestLoadGroup,
+) : AbstractGroupNoticeShower(resp)
 
-private class ManagerGroupNoticeShower(private val resp: ManagerLoadGroup) : AbstractGroupNoticeShower(resp)
+private class ManagerGroupNoticeShower(
+    private val resp: ManagerLoadGroup,
+) : AbstractGroupNoticeShower(resp)
 
-private class MemberGroupNoticeShower(private val resp: MemberLoadGroup) : AbstractGroupNoticeShower(resp)
+private class MemberGroupNoticeShower(
+    private val resp: MemberLoadGroup,
+) : AbstractGroupNoticeShower(resp)
 
-private class OwnerGroupNoticeShower(private val resp: OwnerLoadGroup) : AbstractGroupNoticeShower(resp)
+private class OwnerGroupNoticeShower(
+    private val resp: OwnerLoadGroup,
+) : AbstractGroupNoticeShower(resp)

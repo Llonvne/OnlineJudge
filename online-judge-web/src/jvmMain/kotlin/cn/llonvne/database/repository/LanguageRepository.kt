@@ -29,33 +29,41 @@ class LanguageRepository(
         }
     }
 
-    fun getByIdOrNullQuery(id: Int): Query<Language?> {
-        return QueryDsl.from(languageMeta).where {
-            languageMeta.languageId eq id
-        }.singleOrNull()
-    }
+    fun getByIdOrNullQuery(id: Int): Query<Language?> =
+        QueryDsl
+            .from(languageMeta)
+            .where {
+                languageMeta.languageId eq id
+            }.singleOrNull()
 
-    suspend fun isIdExist(id: Int) = db.runQuery {
-        QueryDsl.from(languageMeta).where {
-            languageMeta.languageId eq id
-        }.select(count()).map {
-            if (it == null) {
-                return@map false
-            } else {
-                return@map it != 0L
-            }
+    suspend fun isIdExist(id: Int) =
+        db.runQuery {
+            QueryDsl
+                .from(languageMeta)
+                .where {
+                    languageMeta.languageId eq id
+                }.select(count())
+                .map {
+                    if (it == null) {
+                        return@map false
+                    } else {
+                        return@map it != 0L
+                    }
+                }
         }
-    }
 
-    suspend fun setSupportLanguages(problemId: Int, languages: List<Int>) {
+    suspend fun setSupportLanguages(
+        problemId: Int,
+        languages: List<Int>,
+    ) {
         db.runQuery {
             QueryDsl.insert(problemSupportLanguages).multiple(
                 languages.map {
                     ProblemSupportLanguage(
                         problemId = problemId,
-                        languageId = it
+                        languageId = it,
                     )
-                }
+                },
             )
         }
     }

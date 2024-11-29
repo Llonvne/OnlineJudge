@@ -8,7 +8,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.js.Date
 
-class ContestStatusResolver(private val startAt: LocalDateTime,private val endAt: LocalDateTime) {
+class ContestStatusResolver(
+    private val startAt: LocalDateTime,
+    private val endAt: LocalDateTime,
+) {
     fun status(): Contest.ContestStatus {
         val instant = Instant.fromEpochMilliseconds(Date.now().toLong())
         return if (instant < startAt.toInstant(TimeZone.currentSystemDefault())) {
@@ -20,11 +23,10 @@ class ContestStatusResolver(private val startAt: LocalDateTime,private val endAt
         }
     }
 
-    fun statusColor(): AlertType {
-        return when (status()) {
+    fun statusColor(): AlertType =
+        when (status()) {
             Contest.ContestStatus.NotBegin -> AlertType.Info
             Contest.ContestStatus.Running -> AlertType.Success
             Contest.ContestStatus.Ended -> AlertType.Danger
         }
-    }
 }

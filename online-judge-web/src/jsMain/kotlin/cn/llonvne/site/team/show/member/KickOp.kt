@@ -7,15 +7,17 @@ import cn.llonvne.kvision.service.IGroupService.LoadGroupResp.*
 import io.kvision.core.onClickLaunch
 import io.kvision.html.Span
 
-
 fun interface KickOp {
-    fun load(target: Span, user: GroupMemberDto, kickMemberResolver: KickMemberResolver)
+    fun load(
+        target: Span,
+        user: GroupMemberDto,
+        kickMemberResolver: KickMemberResolver,
+    )
 
     companion object {
         private val emptyKickOp = KickOp { _, _, _ -> }
 
         fun from(resp: LoadGroupSuccessResp): KickOp {
-
             val impl = KickOpImpl()
 
             return when (resp) {
@@ -46,8 +48,11 @@ fun interface KickOp {
 }
 
 private class KickOpImpl : KickOp {
-
-    override fun load(target: Span, user: GroupMemberDto, kickMemberResolver: KickMemberResolver) {
+    override fun load(
+        target: Span,
+        user: GroupMemberDto,
+        kickMemberResolver: KickMemberResolver,
+    ) {
         target.badge(BadgeColor.Red) {
             onClickLaunch {
                 kickMemberResolver.resolve(user.userId)

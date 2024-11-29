@@ -19,8 +19,10 @@ import io.kvision.html.div
 import io.kvision.routing.Routing
 import io.kvision.state.bind
 
-fun Container.submissionDetail(routing: Routing, submissionId: Int) {
-
+fun Container.submissionDetail(
+    routing: Routing,
+    submissionId: Int,
+) {
     val alert = div {}
     add(alert)
 
@@ -77,13 +79,18 @@ fun Container.showStatus(submission: CodeForView) {
     code(submission.rawCode)
 }
 
-fun Container.codeNotfound(type: ViewCodeGetByIdResp, id: Int) {
-    notFound(object : NotFoundAble {
-        override val header: String
-            get() = "代码走丢啦"
-        override val notice: String
-            get() = "请检查你的提交ID是否正确，如果确认ID正确，但无法打开代码，请联系我们 ^_^"
-        override val errorCode: String
-            get() = "ErrorCode:${type}-${id}"
-    })
+fun Container.codeNotfound(
+    type: ViewCodeGetByIdResp,
+    id: Int,
+) {
+    notFound(
+        object : NotFoundAble {
+            override val header: String
+                get() = "代码走丢啦"
+            override val notice: String
+                get() = "请检查你的提交ID是否正确，如果确认ID正确，但无法打开代码，请联系我们 ^_^"
+            override val errorCode: String
+                get() = "ErrorCode:$type-$id"
+        },
+    )
 }

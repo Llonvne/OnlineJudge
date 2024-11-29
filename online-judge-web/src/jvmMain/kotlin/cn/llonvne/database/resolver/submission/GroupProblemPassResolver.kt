@@ -14,7 +14,7 @@ class GroupProblemPassResolver {
     suspend fun resolve(
         authenticationUser: AuthenticationUser,
         problemSubmissionReq: ISubmissionService.ProblemSubmissionReq,
-        onPass: suspend (Problem) -> ISubmissionService.ProblemSubmissionResp
+        onPass: suspend (Problem) -> ISubmissionService.ProblemSubmissionResp,
     ): ISubmissionService.ProblemSubmissionResp {
         return when (problem.visibility) {
             Public -> onPass(problem)

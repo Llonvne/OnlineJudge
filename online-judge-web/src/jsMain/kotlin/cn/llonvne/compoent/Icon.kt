@@ -6,15 +6,20 @@ import io.kvision.html.i
 
 private fun fa(name: String) = "fa-$name"
 
-private fun fas(vararg names: String) = names.map {
-    fa(it)
-}.joinToString(" ")
+private fun fas(vararg names: String) =
+    names
+        .map {
+            fa(it)
+        }.joinToString(" ")
 
 private const val SOLID = "solid"
 
 private const val SHAKE = "shake"
 
-private fun Container.faIcon(vararg names: String, init: I.() -> Unit) {
+private fun Container.faIcon(
+    vararg names: String,
+    init: I.() -> Unit,
+) {
     i(className = fas(*names)) {
         init()
     }

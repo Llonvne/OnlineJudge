@@ -30,44 +30,55 @@ class ProblemRepository(
             return false
         }
         return db.runQuery {
-            QueryDsl.from(problemMeta).where {
-                problemMeta.problemId eq id
-            }.select(count())
+            QueryDsl
+                .from(problemMeta)
+                .where {
+                    problemMeta.problemId eq id
+                }.select(count())
         } != 0.toLong()
     }
 
-    suspend fun list(limit: Int = 500): List<Problem> = db.runQuery {
-        QueryDsl.from(problemMeta)
-            .limit(limit)
-    }
+    suspend fun list(limit: Int = 500): List<Problem> =
+        db.runQuery {
+            QueryDsl
+                .from(problemMeta)
+                .limit(limit)
+        }
 
     suspend fun getById(id: Int?): Problem? {
         if (id == null) {
             return null
         }
         return db.runQuery {
-            QueryDsl.from(problemMeta)
+            QueryDsl
+                .from(problemMeta)
                 .where {
                     problemMeta.problemId eq id
                 }.singleOrNull()
         }
     }
 
-    suspend fun getProblemTags(problemId: Int): List<ProblemTag> = db.runQuery {
-        QueryDsl.from(problemTagMeta).where {
-            problemTagMeta.problemId eq problemId
-        }
-    }
-
-    suspend fun getSupportLanguage(problemId: Int, limit: Int = 500): List<Language> {
-        val q1 = QueryDsl.from(problemLanguageMeta).where {
-            problemLanguageMeta.problemId eq problemId
-        }
-        val q2 = q1.flatMap {
-            QueryDsl.from(languageMeta).where {
-                languageMeta.languageId inList it.map { it.languageId }
+    suspend fun getProblemTags(problemId: Int): List<ProblemTag> =
+        db.runQuery {
+            QueryDsl.from(problemTagMeta).where {
+                problemTagMeta.problemId eq problemId
             }
         }
+
+    suspend fun getSupportLanguage(
+        problemId: Int,
+        limit: Int = 500,
+    ): List<Language> {
+        val q1 =
+            QueryDsl.from(problemLanguageMeta).where {
+                problemLanguageMeta.problemId eq problemId
+            }
+        val q2 =
+            q1.flatMap {
+                QueryDsl.from(languageMeta).where {
+                    languageMeta.languageId inList it.map { it.languageId }
+                }
+            }
 
         return db.runQuery { q2 }
     }
@@ -78,7 +89,8 @@ class ProblemRepository(
         val lowerText = text.lowercase()
 
         return db.runQuery {
-            QueryDsl.from(problemMeta)
+            QueryDsl
+                .from(problemMeta)
                 .where {
                     or {
                         lower(problemMeta.problemName) contains lowerText
@@ -98,7 +110,8 @@ class ProblemRepository(
         }
     }
 
-    suspend fun create(problem: Problem) = db.runQuery {
-        QueryDsl.insert(problemMeta).single(problem)
-    }
+    suspend fun create(problem: Problem) =
+        db.runQuery {
+            QueryDsl.insert(problemMeta).single(problem)
+        }
 }

@@ -10,21 +10,29 @@ import io.kvision.core.Container
 import io.kvision.html.div
 import io.kvision.routing.Routing
 
-fun showGroup(root: Container, groupId: GroupId, routing: Routing) {
+fun showGroup(
+    root: Container,
+    groupId: GroupId,
+    routing: Routing,
+) {
     val groupLoader = GroupLoader.of(groupId)
     GroupShower(groupLoader).show(root, routing)
 }
 
-private class GroupShower(private val groupLoader: GroupLoader) {
-
-    private val obv = observableOf<LoadGroupResp>(null) {
-        setUpdater {
-            groupLoader.load()
+private class GroupShower(
+    private val groupLoader: GroupLoader,
+) {
+    private val obv =
+        observableOf<LoadGroupResp>(null) {
+            setUpdater {
+                groupLoader.load()
+            }
         }
-    }
 
-
-    fun show(root: Container, routing: Routing) {
+    fun show(
+        root: Container,
+        routing: Routing,
+    ) {
         obv.sync(root) { resp ->
             if (resp == null) {
                 return@sync
@@ -45,7 +53,3 @@ private class GroupShower(private val groupLoader: GroupLoader) {
         }
     }
 }
-
-
-
-

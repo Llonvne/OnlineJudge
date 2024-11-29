@@ -8,11 +8,10 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 
-
 @Component
 class Schema(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
-    private val schemaInitializer: List<SchemaInitializer>
+    private val schemaInitializer: List<SchemaInitializer>,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         runBlocking {

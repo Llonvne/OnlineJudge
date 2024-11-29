@@ -9,7 +9,6 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 object Storage {
-
     interface RememberObject<K> : ReadWriteProperty<Any?, K> {
         fun get(): K
 
@@ -26,14 +25,18 @@ object Storage {
             localStorage[key] = Json.encodeToString(initial)
         }
         return object : RememberObject<K> {
-
             private val observers = mutableListOf<(K) -> Unit>()
 
-            override fun getValue(thisRef: Any?, property: KProperty<*>): K {
-                return get()
-            }
+            override fun getValue(
+                thisRef: Any?,
+                property: KProperty<*>,
+            ): K = get()
 
-            override fun setValue(thisRef: Any?, property: KProperty<*>, value: K) {
+            override fun setValue(
+                thisRef: Any?,
+                property: KProperty<*>,
+                value: K,
+            ) {
                 observers.forEach { it.invoke(value) }
                 set(value)
             }

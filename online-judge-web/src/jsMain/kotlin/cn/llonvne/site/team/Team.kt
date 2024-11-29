@@ -11,9 +11,7 @@ interface TeamIndex {
     fun show(root: Container)
 
     companion object {
-        fun from(): TeamIndex {
-            return TeamIndexBase()
-        }
+        fun from(): TeamIndex = TeamIndexBase()
     }
 }
 

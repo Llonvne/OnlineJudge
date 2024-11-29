@@ -16,12 +16,15 @@ import io.ktor.util.pipeline.*
 import kotlinx.html.body
 
 context(Routing)
-internal fun LinkTreeConfigurer.install(supportLanguages: SupportLanguages, languageRouter: LanguageRouter) {
+internal fun LinkTreeConfigurer.install(
+    supportLanguages: SupportLanguages,
+    languageRouter: LanguageRouter,
+) {
     installLanguageRouter(
         supportLanguages.name,
         path = "/${supportLanguages.path}",
         decr = supportLanguages.name + supportLanguages.languageVersion,
-        languageRouter
+        languageRouter,
     )
 }
 
@@ -30,7 +33,7 @@ internal fun LinkTreeConfigurer.installLanguageRouter(
     name: String,
     path: String,
     decr: String = name,
-    languageRouter: LanguageRouter
+    languageRouter: LanguageRouter,
 ) {
     linkIn(name, decr, "$path/link")
     LanguageRouterLoader(name, path, languageRouter, decr = decr)
@@ -50,10 +53,16 @@ internal interface LanguageRouter {
      * [judge] 传入代码，开始评测语言
      */
     context(PipelineContext<Unit, ApplicationCall>)
-    suspend fun judge(code: String, stdin: String)
+    suspend fun judge(
+        code: String,
+        stdin: String,
+    )
 
     context(PipelineContext<Unit, ApplicationCall>)
-    suspend fun playground(languageName: String, judgePath: String) {
+    suspend fun playground(
+        languageName: String,
+        judgePath: String,
+    ) {
         call.respondHtml {
             body {
                 this.playground(languageName, judgePath)
@@ -64,10 +73,11 @@ internal interface LanguageRouter {
 
 context(Route)
 private class LanguageRouterLoader(
-    private val name: String, private val path: String,
-    private val languageRouter: LanguageRouter, private val decr: String = name
+    private val name: String,
+    private val path: String,
+    private val languageRouter: LanguageRouter,
+    private val decr: String = name,
 ) {
-
     private val logger = KotlinLogging.logger("LanguageRouter")
 
     init {
@@ -82,10 +92,12 @@ private class LanguageRouterLoader(
                 }
 
                 post {
-                    val code = call.receiveParameters()["code"]
-                        ?: return@post call.respond(HttpStatusCode.BadRequest, "代码为空")
-                    val stdin = call.receiveParameters()["stdin"]
-                        ?: return@post call.respond(HttpStatusCode.BadRequest, "输入为空")
+                    val code =
+                        call.receiveParameters()["code"]
+                            ?: return@post call.respond(HttpStatusCode.BadRequest, "代码为空")
+                    val stdin =
+                        call.receiveParameters()["stdin"]
+                            ?: return@post call.respond(HttpStatusCode.BadRequest, "输入为空")
 
                     logger.info {
                         "$name 评测代码 $code,标准输入为 $stdin"

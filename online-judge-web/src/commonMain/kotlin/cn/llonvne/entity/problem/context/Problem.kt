@@ -11,7 +11,6 @@ data class Problem(
     // 作者 ID
     val authorId: Int,
     val ownerId: Int,
-
     // 题目名字
     val problemName: String,
     // 题目描述
@@ -26,11 +25,10 @@ data class Problem(
      * [ProblemContext] 序列化后的类型
      */
     val contextJson: String,
-
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 ) {
     suspend fun <R> onIdNotNull(
         onNull: R,
@@ -44,6 +42,3 @@ data class Problem(
 
     val context = Json.decodeFromString<ProblemContext>(contextJson)
 }
-
-
-

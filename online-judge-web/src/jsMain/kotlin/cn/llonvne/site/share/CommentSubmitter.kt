@@ -24,30 +24,34 @@ interface CommentSubmitter {
     fun load(root: Container)
 
     companion object {
-        fun public(shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>): CommentSubmitter =
-            PublicCommentSubmitter(shareId, shareCommentComponent)
+        fun public(
+            shareId: Int,
+            shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
+        ): CommentSubmitter = PublicCommentSubmitter(shareId, shareCommentComponent)
 
         fun protected(
-            shareId: Int, code: CodeDto, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
+            shareId: Int,
+            code: CodeDto,
+            shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
         ): CommentSubmitter = ProtectedCommentSubmitter(shareId, shareCommentComponent, code)
 
-        fun closed(): CommentSubmitter = object : CommentSubmitter {
-            override fun load(root: Container) {
-                root.alert(AlertType.Dark) {
-                    +"评论区已经被冻结"
+        fun closed(): CommentSubmitter =
+            object : CommentSubmitter {
+                override fun load(root: Container) {
+                    root.alert(AlertType.Dark) {
+                        +"评论区已经被冻结"
+                    }
                 }
             }
-        }
     }
 }
 
 private class ProtectedCommentSubmitter(
-    shareId: Int, shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
-    private val code: CodeDto
+    shareId: Int,
+    shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
+    private val code: CodeDto,
 ) : PublicCommentSubmitter(shareId, shareCommentComponent) {
     override fun getCommentVisibilityOptions(): List<Pair<String, String>> {
-
-
         return super.getCommentVisibilityOptions().filter {
             if (AuthenticationModel.userToken.value?.id == null) {
                 return@filter false
@@ -71,29 +75,28 @@ private open class PublicCommentSubmitter(
     private val shareId: Int,
     private val shareCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
 ) : CommentSubmitter {
-
     companion object {
         const val PRIVATE_CODE = "1"
         const val PUBLIC_CODE = "2"
     }
 
-    protected open fun getCommentVisibilityOptions(): List<Pair<String, String>> {
-        return listOf(
-            PUBLIC_CODE to "对所有人可见", PRIVATE_CODE to "仅对你与代码所有者可见"
+    protected open fun getCommentVisibilityOptions(): List<Pair<String, String>> =
+        listOf(
+            PUBLIC_CODE to "对所有人可见",
+            PRIVATE_CODE to "仅对你与代码所有者可见",
         )
-    }
 
     protected open fun notice(container: Container) {
-
     }
 
-    protected open fun getCommentVisibilitySelect() = TomSelect(
-        label = "代码可见性",
-        options = getCommentVisibilityOptions(),
-    ) {
-        addCssClass("col")
-        maxWidth = 300.px
-    }
+    protected open fun getCommentVisibilitySelect() =
+        TomSelect(
+            label = "代码可见性",
+            options = getCommentVisibilityOptions(),
+        ) {
+            addCssClass("col")
+            maxWidth = 300.px
+        }
 
     override fun load(root: Container) {
         root.alert(AlertType.Info) {
@@ -118,26 +121,29 @@ private open class PublicCommentSubmitter(
                     requiredMessage = "必须选择一个代码可见性",
                 )
 
-                add(CommentForm::content, TextArea {
-                    width = 600.px
-                })
+                add(
+                    CommentForm::content,
+                    TextArea {
+                        width = 600.px
+                    },
+                )
 
                 button("提交") {
-
                     onClick {
-
                         if (AuthenticationModel.userToken.value == null) {
                             Messager.toastError("请先登入后发表评论")
                             return@onClick
                         }
 
                         AppScope.launch {
-
                             val username = AuthenticationModel.info()?.username ?: return@launch
 
-                            if (shareCommentComponent.getComments().filter {
-                                    it.committerUsername == username
-                                }.size >= 5) {
+                            if (shareCommentComponent
+                                    .getComments()
+                                    .filter {
+                                        it.committerUsername == username
+                                    }.size >= 5
+                            ) {
                                 Messager.toastInfo("根据我们的反垃圾信息政策，在代码所有者回复你之前，你至多可以发送 5 条评论")
                                 return@launch
                             }
@@ -147,11 +153,12 @@ private open class PublicCommentSubmitter(
                                 return@launch Messager.toastInfo("评论不可为空")
                             }
 
-                            val type = when (data.type) {
-                                PUBLIC_CODE -> Public
-                                PRIVATE_CODE -> Private
-                                else -> return@launch Messager.toastInfo("无效的可见性选择")
-                            }
+                            val type =
+                                when (data.type) {
+                                    PUBLIC_CODE -> Public
+                                    PRIVATE_CODE -> Private
+                                    else -> return@launch Messager.toastInfo("无效的可见性选择")
+                                }
 
                             Messager.toastInfo(CodeModel.commit(shareId, data.content, type).toString())
                             shareCommentComponent.refreshComments()

@@ -7,5 +7,5 @@ enum class ProblemStatus {
     Accepted,
     WrongAnswer,
     NotLogin,
-    NotBegin
+    NotBegin,
 }

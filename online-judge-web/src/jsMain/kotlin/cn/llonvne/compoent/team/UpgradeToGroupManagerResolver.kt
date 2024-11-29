@@ -9,10 +9,12 @@ import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
 
-class UpgradeToGroupManagerResolver(private val groupId: GroupId) {
+class UpgradeToGroupManagerResolver(
+    private val groupId: GroupId,
+) {
     suspend fun resolve(user: GroupMemberDto) {
         when (val resp = TeamModel.upgradeGroupManger(groupId, user.userId)) {
-            is GroupIdNotFound -> Messager.toastInfo("未找到该小组-${groupId}")
+            is GroupIdNotFound -> Messager.toastInfo("未找到该小组-$groupId")
             is PermissionDeniedWithMessage -> Messager.toastInfo(resp.message)
             is IGroupService.UpOrDowngradeToIdNotMatchToGroupId -> Messager.toastInfo("更新的角色不匹配")
             UpgradeManagerOk -> Messager.toastInfo("升级成功")

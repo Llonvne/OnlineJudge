@@ -10,7 +10,9 @@ import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import cn.llonvne.message.Messager
 import cn.llonvne.model.TeamModel
 
-class DowngradeToGroupMemberResolver(private val groupId: GroupId) {
+class DowngradeToGroupMemberResolver(
+    private val groupId: GroupId,
+) {
     suspend fun resolve(user: GroupMemberDto) {
         when (val resp = TeamModel.downgradeToMember(groupId, user.userId)) {
             is BeUpOrDowngradedUserNotfound -> Messager.toastInfo("用户不存在")

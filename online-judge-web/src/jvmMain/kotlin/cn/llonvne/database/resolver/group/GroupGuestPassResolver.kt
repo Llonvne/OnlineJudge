@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service
 @Service
 class GroupGuestPassResolver {
     context(GroupInfoAware)
-    suspend fun resolve(
-        loadAsGuest: suspend () -> LoadGroupResp
-    ): LoadGroupResp {
-        return when (group.visibility) {
+    suspend fun resolve(loadAsGuest: suspend () -> LoadGroupResp): LoadGroupResp =
+        when (group.visibility) {
             Public -> loadAsGuest()
             Private -> {
                 PermissionDenied
@@ -31,5 +29,4 @@ class GroupGuestPassResolver {
                 }
             }
         }
-    }
 }

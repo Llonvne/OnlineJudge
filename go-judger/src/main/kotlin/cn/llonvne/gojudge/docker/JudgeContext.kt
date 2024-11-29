@@ -14,6 +14,9 @@ interface JudgeContext {
 /**
  * 将 [JudgeContext] 作为上下文接收器传入
  */
-operator fun JudgeContext.invoke(operation: context(JudgeContext) () -> Unit) {
+operator fun JudgeContext.invoke(
+    operation: context(JudgeContext)
+    () -> Unit,
+) {
     operation(this)
 }

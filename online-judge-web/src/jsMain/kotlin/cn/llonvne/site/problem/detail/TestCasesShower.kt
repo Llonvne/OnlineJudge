@@ -17,19 +17,15 @@ fun interface TestCasesShower {
             resp: GetProblemByIdOk,
             withoutTitle: Boolean = false,
             filter: (ProblemTestCase) -> Boolean = { true },
-            badges: BadgesDsl.(ProblemTestCase) -> Unit = {}
-        ): TestCasesShower {
-            return AbstractTestCasesShower(resp.problem.context.testCases.testCases, withoutTitle, filter, badges)
-        }
+            badges: BadgesDsl.(ProblemTestCase) -> Unit = {},
+        ): TestCasesShower = AbstractTestCasesShower(resp.problem.context.testCases.testCases, withoutTitle, filter, badges)
 
         fun from(
             testCase: List<ProblemTestCase>,
             withoutTitle: Boolean = false,
             filter: (ProblemTestCase) -> Boolean = { true },
-            badges: BadgesDsl.(ProblemTestCase) -> Unit = {}
-        ): TestCasesShower {
-            return AbstractTestCasesShower(testCase, withoutTitle, filter, badges)
-        }
+            badges: BadgesDsl.(ProblemTestCase) -> Unit = {},
+        ): TestCasesShower = AbstractTestCasesShower(testCase, withoutTitle, filter, badges)
     }
 }
 
@@ -37,9 +33,8 @@ private open class AbstractTestCasesShower(
     private val testCase: List<ProblemTestCase>,
     private val withoutTitle: Boolean,
     private val filter: (ProblemTestCase) -> Boolean = { true },
-    private val doBadges: BadgesDsl.(ProblemTestCase) -> Unit = {}
+    private val doBadges: BadgesDsl.(ProblemTestCase) -> Unit = {},
 ) : TestCasesShower {
-
     protected val testcases = testCase.filter { filter(it) }
 
     private fun Container.doShow() {
@@ -74,12 +69,14 @@ private open class AbstractTestCasesShower(
         }
     }
 
-    private fun Container.showTitleOn(withoutTitle: Boolean, action: Container.() -> Unit) {
+    private fun Container.showTitleOn(
+        withoutTitle: Boolean,
+        action: Container.() -> Unit,
+    ) {
         if (withoutTitle) {
             action()
         } else {
             alert(AlertType.Light) {
-
                 h4 {
                     +"输入/输出样例"
                 }

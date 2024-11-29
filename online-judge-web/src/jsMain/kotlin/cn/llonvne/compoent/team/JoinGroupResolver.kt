@@ -11,8 +11,14 @@ import cn.llonvne.security.Token
 import io.kvision.routing.Routing
 import kotlinx.coroutines.launch
 
-class JoinGroupResolver(private val routing: Routing) {
-    fun resolve(groupId: GroupId, groupName: String, token: Token) {
+class JoinGroupResolver(
+    private val routing: Routing,
+) {
+    fun resolve(
+        groupId: GroupId,
+        groupName: String,
+        token: Token,
+    ) {
         AppScope.launch {
             when (TeamModel.join(token, groupId)) {
                 is GroupIdNotFound -> Messager.toastError("小组不存在，可能是小组已经被删除")
@@ -24,7 +30,10 @@ class JoinGroupResolver(private val routing: Routing) {
         }
     }
 
-    private fun joined(groupName: String, groupId: GroupId) {
+    private fun joined(
+        groupName: String,
+        groupId: GroupId,
+    ) {
         Messager.toastInfo("加入成功，$groupName 欢迎您")
         routing.navigate("/team/${groupId.path}")
     }

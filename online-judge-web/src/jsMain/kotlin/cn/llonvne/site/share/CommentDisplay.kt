@@ -26,47 +26,60 @@ import io.kvision.state.bind
 import kotlinx.coroutines.launch
 
 interface CommentDisplay {
-
     fun load(root: Container)
 
     companion object {
-        fun empty() = object : CommentDisplay {
-            override fun load(root: Container) {}
-        }
+        fun empty() =
+            object : CommentDisplay {
+                override fun load(root: Container) {}
+            }
 
         fun public(
-            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
+            code: CodeDto,
+            shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
         ): CommentDisplay = PublicShareCodeCommentDisplay(code, shareCodeCommentComponent)
 
         fun freezing(
-            code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
-        ): CommentDisplay {
-            return FreezingShareCodeCommentDisplay(code, shareCodeCommentComponent)
-        }
+            code: CodeDto,
+            shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
+        ): CommentDisplay = FreezingShareCodeCommentDisplay(code, shareCodeCommentComponent)
     }
 }
 
 private class FreezingShareCodeCommentDisplay(
-    code: CodeDto, shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
+    code: CodeDto,
+    shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
 ) : PublicShareCodeCommentDisplay(code, shareCodeCommentComponent) {
-    override fun getDeleteComponent(root: Container, comment: CreateCommentReq) {
+    override fun getDeleteComponent(
+        root: Container,
+        comment: CreateCommentReq,
+    ) {
     }
 
-    override fun getVisibilityChangerComponent(root: Container, comment: CreateCommentReq) {
+    override fun getVisibilityChangerComponent(
+        root: Container,
+        comment: CreateCommentReq,
+    ) {
         root.badge(BadgeColor.Blue) {
             +comment.getVisibilityDecr()
         }
     }
 
-    override fun getDeleteAllComponent(root: Container, commentIds: List<Int>) {
+    override fun getDeleteAllComponent(
+        root: Container,
+        commentIds: List<Int>,
+    ) {
     }
 }
 
 private open class PublicShareCodeCommentDisplay(
-    val code: CodeDto, val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>
+    val code: CodeDto,
+    val shareCodeCommentComponent: ShareCodeCommentComponent<CreateCommentReq>,
 ) : CommentDisplay {
-
-    open fun getDeleteComponent(root: Container, comment: CreateCommentReq) {
+    open fun getDeleteComponent(
+        root: Container,
+        comment: CreateCommentReq,
+    ) {
         AppScope.launch {
             if (comment.committerUsername == AuthenticationModel.info()?.username || AuthenticationModel.info()?.id == code.shareUserId) {
                 root.badge(BadgeColor.Red) {
@@ -81,7 +94,10 @@ private open class PublicShareCodeCommentDisplay(
         }
     }
 
-    open fun getVisibilityChangerComponent(root: Container, comment: CreateCommentReq) {
+    open fun getVisibilityChangerComponent(
+        root: Container,
+        comment: CreateCommentReq,
+    ) {
         root.badge(BadgeColor.Blue) {
             +comment.getVisibilityDecr()
 
@@ -95,7 +111,10 @@ private open class PublicShareCodeCommentDisplay(
         }
     }
 
-    open fun getDeleteAllComponent(root: Container, commentIds: List<Int>) {
+    open fun getDeleteAllComponent(
+        root: Container,
+        commentIds: List<Int>,
+    ) {
         root.badge(BadgeColor.Red) {
             +"删除全部"
 
@@ -107,52 +126,53 @@ private open class PublicShareCodeCommentDisplay(
 
     override fun load(root: Container) {
         root.div().bind(
-            shareCodeCommentComponent.getComments()
+            shareCodeCommentComponent.getComments(),
         ) { comments ->
-            comments.groupBy { dto ->
-                dto.committerUsername
-            }.forEach { (username, comments) ->
-                alert(AlertType.Dark) {
-                    val commentIds = comments.map { it.commentId }
+            comments
+                .groupBy { dto ->
+                    dto.committerUsername
+                }.forEach { (username, comments) ->
+                    alert(AlertType.Dark) {
+                        val commentIds = comments.map { it.commentId }
 
-                    h5 {
-                        +"$username 评论:"
-                    }
+                        h5 {
+                            +"$username 评论:"
+                        }
 
-                    comments.forEach { comment ->
-                        span {
+                        comments.forEach { comment ->
+                            span {
+                                alert(AlertType.Light) {
+                                    div {
+                                        +comment.content
+                                    }
 
-                            alert(AlertType.Light) {
-                                div {
-                                    +comment.content
-                                }
-
-                                div {
-                                    getDeleteComponent(this, comment)
-                                    getVisibilityChangerComponent(this, comment)
-                                    addCssStyle(style {
-                                        textAlign = TextAlign.RIGHT
-                                    })
+                                    div {
+                                        getDeleteComponent(this, comment)
+                                        getVisibilityChangerComponent(this, comment)
+                                        addCssStyle(
+                                            style {
+                                                textAlign = TextAlign.RIGHT
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    val lastUpdate = comments.map { it.createdAt }.maxOf { it }
+                        val lastUpdate = comments.map { it.createdAt }.maxOf { it }
 
-                    badge(BadgeColor.Green) {
-                        +"最后更新于 ${lastUpdate.ll()}"
+                        badge(BadgeColor.Green) {
+                            +"最后更新于 ${lastUpdate.ll()}"
+                        }
+                        getDeleteAllComponent(this, commentIds)
                     }
-                    getDeleteAllComponent(this, commentIds)
                 }
-            }
         }
     }
 
-    fun deletePanel(
-        commentIds: List<Int>,
-    ) {
-        Confirm.show("你正在尝试删除评论",
+    fun deletePanel(commentIds: List<Int>) {
+        Confirm.show(
+            "你正在尝试删除评论",
             "此操作将删除您的所有评论，请确认您的选择",
             animation = true,
             align = Align.LEFT,
@@ -172,6 +192,7 @@ private open class PublicShareCodeCommentDisplay(
                     }
                     shareCodeCommentComponent.refreshComments()
                 }
-            })
+            },
+        )
     }
 }

@@ -14,30 +14,34 @@ import org.springframework.stereotype.Service
 
 @Service
 class NormalMineResolver(
-    private val userSubmissionRangeResolver: UserSubmissionRangeResolver
+    private val userSubmissionRangeResolver: UserSubmissionRangeResolver,
 ) {
     suspend fun resolve(user: AuthenticationUser): IAuthenticationService.MineResp {
-
         return coroutineScope {
-            val total = async {
-                userSubmissionRangeResolver.resolve(
-                    user, java.time.LocalDateTime.MIN.toKotlinLocalDateTime()
-                ).filter {
-                    it.result is ProblemJudgeResult
-                }.count {
-                    (it.result as ProblemJudgeResult).passerResult.pass
+            val total =
+                async {
+                    userSubmissionRangeResolver
+                        .resolve(
+                            user,
+                            java.time.LocalDateTime.MIN
+                                .toKotlinLocalDateTime(),
+                        ).filter {
+                            it.result is ProblemJudgeResult
+                        }.count {
+                            (it.result as ProblemJudgeResult).passerResult.pass
+                        }
                 }
-            }
             val at7Days = async { userSubmissionRangeResolver.acceptedIn(user, 7) }
             val atToday = async { userSubmissionRangeResolver.acceptedIn(user, 1) }
             val at30Day = async { userSubmissionRangeResolver.acceptedIn(user, 30) }
 
             return@coroutineScope NormalUser(
-                user.username, user.createdAt?.ll() ?: LocalDateTime.now().ll(),
+                user.username,
+                user.createdAt?.ll() ?: LocalDateTime.now().ll(),
                 acceptedTotal = total.await(),
                 accepted7Days = at7Days.await(),
                 acceptedToday = atToday.await(),
-                accepted30Days = at30Day.await()
+                accepted30Days = at30Day.await(),
             )
         }
     }

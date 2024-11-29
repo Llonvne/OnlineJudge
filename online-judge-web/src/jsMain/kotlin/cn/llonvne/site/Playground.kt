@@ -24,11 +24,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlaygroundSubmission(
-    val language: String, val code: String, val stdin: String? = ""
+    val language: String,
+    val code: String,
+    val stdin: String? = "",
 )
 
 fun Container.playground() {
-
     alert(AlertType.Light) {
         h1 { +"代码训练场" }
 
@@ -40,31 +41,40 @@ fun Container.playground() {
     div(className = "row") {
         div(className = "col") {
             alert(AlertType.Secondary) {
-                val form = formPanel<PlaygroundSubmission> {
-                    add(PlaygroundSubmission::language, TomSelect(
-                        options = SupportLanguages.entries.map {
-                            it.languageId.toString() to "${it.languageName} ${it.languageVersion}"
-                        }, label = "语言"
-                    ) {
-                        maxWidth = 300.px
-                    })
+                val form =
+                    formPanel<PlaygroundSubmission> {
+                        add(
+                            PlaygroundSubmission::language,
+                            TomSelect(
+                                options =
+                                    SupportLanguages.entries.map {
+                                        it.languageId.toString() to "${it.languageName} ${it.languageVersion}"
+                                    },
+                                label = "语言",
+                            ) {
+                                maxWidth = 300.px
+                            },
+                        )
 
-                    add(PlaygroundSubmission::stdin, TextArea(label = "标准输入"))
+                        add(PlaygroundSubmission::stdin, TextArea(label = "标准输入"))
 
-                    add(PlaygroundSubmission::code, TextArea(label = "代码") {
-                        rows = 11
-                    })
-
-                }
+                        add(
+                            PlaygroundSubmission::code,
+                            TextArea(label = "代码") {
+                                rows = 11
+                            },
+                        )
+                    }
 
                 button("提交") {
                     onClick {
                         AppScope.launch {
                             val data = form.getData()
 
-                            val resp = SubmissionModel.submit(
-                                PlaygroundSubmission(data.language, data.code, data.stdin)
-                            )
+                            val resp =
+                                SubmissionModel.submit(
+                                    PlaygroundSubmission(data.language, data.code, data.stdin),
+                                )
 
                             Messager.toastInfo(resp.toString())
                         }
@@ -73,14 +83,12 @@ fun Container.playground() {
             }
         }
         div(className = "col") {
-
             h4 { +"最近一次运行结果" }
             val lastRun = div { }
 
             h4 { +"历史记录" }
 
             alert(AlertType.Dark) {
-
                 AppScope.launch {
                     when (val resp = SubmissionModel.getLastNPlaygroundSubmission()) {
                         is InternalError -> {
@@ -96,12 +104,12 @@ fun Container.playground() {
                         }
 
                         is SuccessGetLastNPlaygroundSubmission -> {
-
                             Messager.toastInfo(resp.subs.toString())
 
-                            val sortByTime = resp.subs.sortedByDescending {
-                                it.submitTime
-                            }
+                            val sortByTime =
+                                resp.subs.sortedByDescending {
+                                    it.submitTime
+                                }
 
                             val first = sortByTime.firstOrNull()
 

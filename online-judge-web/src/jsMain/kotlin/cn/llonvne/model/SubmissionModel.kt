@@ -12,48 +12,48 @@ import io.kvision.remote.getService
 object SubmissionModel {
     private val submissionService = getService<ISubmissionService>()
 
-    suspend fun list() = submissionService.list(
-        ListSubmissionReq(AuthenticationModel.userToken.value)
-    )
+    suspend fun list() =
+        submissionService.list(
+            ListSubmissionReq(AuthenticationModel.userToken.value),
+        )
 
     suspend fun getById(id: Int): SubmissionGetByIdResp = submissionService.getById(id)
 
     suspend fun codeGetById(id: Int) = submissionService.getViewCode(id)
 
-    suspend fun getSupportLanguage(problemId: Int) =
-        submissionService.getSupportLanguageId(AuthenticationModel.userToken.value, problemId)
+    suspend fun getSupportLanguage(problemId: Int) = submissionService.getSupportLanguageId(AuthenticationModel.userToken.value, problemId)
 
-    suspend fun submit(playgroundSubmission: PlaygroundSubmission): CreateSubmissionResp {
-        return submissionService.create(
+    suspend fun submit(playgroundSubmission: PlaygroundSubmission): CreateSubmissionResp =
+        submissionService.create(
             AuthenticationModel.userToken.value,
             PlaygroundCreateSubmissionReq(
                 languageId = playgroundSubmission.language.toInt(),
                 rawCode = playgroundSubmission.code,
                 stdin = playgroundSubmission.stdin ?: "",
-                codeType = Code.CodeType.Playground
-            )
+                codeType = Code.CodeType.Playground,
+            ),
         )
-    }
 
-    suspend fun getJudgeResultByCodeID(codeId: Int) =
-        submissionService.getOutputByCodeId(AuthenticationModel.userToken.value, codeId)
+    suspend fun getJudgeResultByCodeID(codeId: Int) = submissionService.getOutputByCodeId(AuthenticationModel.userToken.value, codeId)
 
     suspend fun getLastNPlaygroundSubmission(lastN: Int = 5) =
         submissionService.getLastNPlaygroundSubmission(
-            AuthenticationModel.userToken.value, lastN
+            AuthenticationModel.userToken.value,
+            lastN,
         )
 
     suspend fun getLastNProblemSubmission(
         problemId: Int,
-        lastN: Int = 5
+        lastN: Int = 5,
     ) = submissionService.getLastNProblemSubmission(
-        AuthenticationModel.userToken.value, problemId, lastN
+        AuthenticationModel.userToken.value,
+        problemId,
+        lastN,
     )
-
 
     suspend fun submit(
         problemSubmissionReq: ProblemSubmissionReq,
-        onSuccess: suspend (ProblemSubmissionRespImpl) -> Unit
+        onSuccess: suspend (ProblemSubmissionRespImpl) -> Unit,
     ) {
         when (val resp = submissionService.submit(AuthenticationModel.userToken.value, problemSubmissionReq)) {
             LanguageNotFound -> Messager.toastInfo("提交的语言不受支持，请刷新网页重新提交")
@@ -65,7 +65,6 @@ object SubmissionModel {
         }
     }
 
-    suspend fun getParticipantContest(): GetParticipantContestResp {
-        return submissionService.getParticipantContest(AuthenticationModel.userToken.value)
-    }
+    suspend fun getParticipantContest(): GetParticipantContestResp =
+        submissionService.getParticipantContest(AuthenticationModel.userToken.value)
 }

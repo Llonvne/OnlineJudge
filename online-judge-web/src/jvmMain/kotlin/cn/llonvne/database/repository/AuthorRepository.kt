@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AuthorRepository(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
-    private val authenticationService: UserRepository
+    private val authenticationService: UserRepository,
 ) {
     private val authorMeta = Meta.author
-    suspend fun create(author: Author): Author {
 
+    suspend fun create(author: Author): Author {
         // 检查 authenticationUserId 是否有效
         isAuthenticationUserIdValid(author)
 
@@ -29,37 +29,39 @@ class AuthorRepository(
         }
     }
 
-    suspend fun isAuthorIdExist(id: Int): Boolean {
-        return db.runQuery {
-            QueryDsl.from(authorMeta)
+    suspend fun isAuthorIdExist(id: Int): Boolean =
+        db.runQuery {
+            QueryDsl
+                .from(authorMeta)
                 .where {
                     authorMeta.authorId eq id
-                }.singleOrNull().map {
+                }.singleOrNull()
+                .map {
                     it != null
                 }
         }
-    }
 
     @Throws(AuthorNotExist::class)
-    suspend fun getByIdOrThrow(id: Int): Author {
-        return db.runQuery {
-            QueryDsl.from(authorMeta)
+    suspend fun getByIdOrThrow(id: Int): Author =
+        db.runQuery {
+            QueryDsl
+                .from(authorMeta)
                 .where {
                     authorMeta.authorId eq id
-                }.singleOrNull().map {
+                }.singleOrNull()
+                .map {
                     it ?: throw AuthorNotExist()
                 }
         }
-    }
 
     suspend fun getByIdOrNull(id: Int?): Author? {
-
         if (id == null) {
             return null
         }
 
         return db.runQuery {
-            QueryDsl.from(authorMeta)
+            QueryDsl
+                .from(authorMeta)
                 .where {
                     authorMeta.authorId eq id
                 }.singleOrNull()

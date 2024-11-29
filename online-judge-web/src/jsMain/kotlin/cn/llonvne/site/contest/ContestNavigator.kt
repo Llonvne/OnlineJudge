@@ -13,14 +13,16 @@ import io.kvision.html.p
 import kotlinx.serialization.Serializable
 
 @Serializable
-private data class ContestIdForm(val id: String)
+private data class ContestIdForm(
+    val id: String,
+)
 
 interface ContestNavigator {
     fun show(container: Container)
 
     companion object {
-        fun get(): ContestNavigator {
-            return object : ContestNavigator {
+        fun get(): ContestNavigator =
+            object : ContestNavigator {
                 override fun show(container: Container) {
                     container.alert(AlertType.Secondary) {
                         h4 {
@@ -40,10 +42,8 @@ interface ContestNavigator {
                                 }
                             }
                         }
-
                     }
                 }
             }
-        }
     }
 }

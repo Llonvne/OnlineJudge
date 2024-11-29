@@ -11,7 +11,12 @@ import kotlinx.html.*
  * @property uri 链接的地址
  * @property render 自定义渲染函数，可选
  */
-internal data class LinkEntity(val name: String, val decr: String, val uri: String, val render: A.() -> Unit = {})
+internal data class LinkEntity(
+    val name: String,
+    val decr: String,
+    val uri: String,
+    val render: A.() -> Unit = {},
+)
 
 /**
  * 链接树描述器
@@ -102,7 +107,6 @@ internal fun Route.linkTr(
 }
 
 private class LinkTreeConfigurerImpl : LinkTreeConfigurer {
-
     private val links = mutableListOf<LinkEntity>()
 
     override fun link(linkEntity: LinkEntity) {

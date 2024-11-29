@@ -9,25 +9,29 @@ import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
 
 @Repository
-class RoleRepository(@Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase) {
-
+class RoleRepository(
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
+) {
     private val userMeta = Meta.authenticationUser
 
-    suspend fun getRoleStrByUserId(id: Int): String? {
-        return db.runQuery {
-            QueryDsl.from(userMeta)
+    suspend fun getRoleStrByUserId(id: Int): String? =
+        db.runQuery {
+            QueryDsl
+                .from(userMeta)
                 .where { userMeta.id eq id }
                 .select(userMeta.role)
                 .singleOrNull()
         }
-    }
 
-    suspend fun setRoleStrByUserId(id: Int, role: UserRole): Long {
-
+    suspend fun setRoleStrByUserId(
+        id: Int,
+        role: UserRole,
+    ): Long {
         val str = role.asJson
 
         return db.runQuery {
-            QueryDsl.update(userMeta)
+            QueryDsl
+                .update(userMeta)
                 .set {
                     userMeta.role eq str
                 }.where {

@@ -15,7 +15,10 @@ inline fun <reified T> T.getLogger(): Logger = LoggerFactory.getLogger(T::class.
  * 将 [value] 的 hashcode 作为标识符，执行 [action]
  */
 @OptIn(ExperimentalContracts::class)
-suspend fun <T, R> Logger.track(vararg value: T, action: suspend Logger.() -> R): R {
+suspend fun <T, R> Logger.track(
+    vararg value: T,
+    action: suspend Logger.() -> R,
+): R {
     contract {
         callsInPlace(action, InvocationKind.EXACTLY_ONCE)
     }
@@ -25,7 +28,10 @@ suspend fun <T, R> Logger.track(vararg value: T, action: suspend Logger.() -> R)
 /**
  * 带有标识符号(Hashcode)的Logger
  */
-class TrackedLogger<T>(private val logger: Logger, private val value: T) : Logger by logger {
+class TrackedLogger<T>(
+    private val logger: Logger,
+    private val value: T,
+) : Logger by logger {
     override fun info(msg: String?) {
         logger.info("[id-${value.hashCode()}] $msg")
     }

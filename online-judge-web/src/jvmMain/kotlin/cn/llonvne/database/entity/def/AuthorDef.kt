@@ -9,14 +9,12 @@ private data class AuthorDef(
     val authorId: Nothing,
     val authorName: Nothing,
     val introduction: Nothing,
-
     val authenticationUserId: Int? = null,
-
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     @KomapperVersion
     val version: Nothing,
     @KomapperCreatedAt
     val createdAt: Nothing,
     @KomapperUpdatedAt
-    val updatedAt: Nothing
+    val updatedAt: Nothing,
 )

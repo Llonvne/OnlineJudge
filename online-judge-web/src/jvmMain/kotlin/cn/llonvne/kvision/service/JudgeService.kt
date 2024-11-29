@@ -24,31 +24,33 @@ actual class JudgeService(
     env: Environment,
     private val judgeUrl: String = env.getProperty("oj.url") ?: throw RuntimeException("无法获得 oj.url "),
     private val languageDispatcher: LanguageDispatcher = default(judgeUrl),
-    private val judgeServerApi: JudgeServerApi = JudgeServerApi.get(judgeUrl, httpClient)
+    private val judgeServerApi: JudgeServerApi = JudgeServerApi.get(judgeUrl, httpClient),
 ) : IJudgeService {
-
-    override suspend fun judge(languages: SupportLanguages, stdin: String, code: String): Output {
-        return languageDispatcher.dispatch(languages) {
+    override suspend fun judge(
+        languages: SupportLanguages,
+        stdin: String,
+        code: String,
+    ): Output =
+        languageDispatcher.dispatch(languages) {
             judge(code, stdin)
         }
-    }
 
     suspend fun info() = judgeServerApi.info()
 
     companion object {
-        private val httpClient: HttpClient = HttpClient(OkHttp) {
-            install(ContentNegotiation) {
-                json(Json)
+        private val httpClient: HttpClient =
+            HttpClient(OkHttp) {
+                install(ContentNegotiation) {
+                    json(Json)
+                }
             }
-        }
 
-        private fun default(judgeUrl: String): LanguageDispatcher {
-            return LanguageDispatcher.get(
+        private fun default(judgeUrl: String): LanguageDispatcher =
+            LanguageDispatcher.get(
                 LanguageFactory.get(
                     judgeUrl,
-                    httpClient = httpClient
-                )
+                    httpClient = httpClient,
+                ),
             )
-        }
     }
 }

@@ -11,22 +11,27 @@ import io.kvision.core.Container
 import io.kvision.html.div
 
 interface ContestProblemDisplay {
-
     companion object {
         fun from(
             contestId: ContestId,
-            statusResolver: ContestStatusResolver
+            statusResolver: ContestStatusResolver,
         ): ContestProblemDisplay = BaseContestProblemDisplay(contestId, statusResolver)
     }
 
-    fun show(container: Container, index: Display.ProblemIndex)
+    fun show(
+        container: Container,
+        index: Display.ProblemIndex,
+    )
 }
 
 private class BaseContestProblemDisplay(
     private val contestId: ContestId,
-    private val statusResolver: ContestStatusResolver
+    private val statusResolver: ContestStatusResolver,
 ) : ContestProblemDisplay {
-    override fun show(container: Container, index: Display.ProblemIndex) {
+    override fun show(
+        container: Container,
+        index: Display.ProblemIndex,
+    ) {
         container.div {
             detail(div { }, index.id) {
                 notShowProblem =
@@ -34,12 +39,13 @@ private class BaseContestProblemDisplay(
                 notShowProblemMessage = "比赛还未开始"
                 disableHistory = true
                 submitProblemResolver = SubmitProblemResolver(contestId = contestId)
-                codeEditorConfigurer = CodeEditorShower.CodeEditorConfigurer {
-                    forceVisibility = SubmissionVisibilityType.Contest
-                    submitProblemResolver = SubmitProblemResolver(contestId)
-                    showSubmitPanel = statusResolver.status() == Contest.ContestStatus.Running
-                    notShowSubmitPanelMessage = "比赛尚未开始或者已经结束"
-                }
+                codeEditorConfigurer =
+                    CodeEditorShower.CodeEditorConfigurer {
+                        forceVisibility = SubmissionVisibilityType.Contest
+                        submitProblemResolver = SubmitProblemResolver(contestId)
+                        showSubmitPanel = statusResolver.status() == Contest.ContestStatus.Running
+                        notShowSubmitPanelMessage = "比赛尚未开始或者已经结束"
+                    }
             }
         }
     }

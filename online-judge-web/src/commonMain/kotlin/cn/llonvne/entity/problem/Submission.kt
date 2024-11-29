@@ -17,12 +17,11 @@ data class Submission(
     val status: SubmissionStatus = SubmissionStatus.Received,
     // 以 Json 形式存在内部
     val judgeResult: String,
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 ) {
-
     companion object {
         private val json = Json
     }

@@ -3,7 +3,6 @@ package cn.llonvne.entity
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
-
 /**
  * 注册用户实体
  * @see [cn.llonvne.database.entity.def.AuthenticationUserDef]
@@ -16,9 +15,5 @@ data class AuthenticationUser(
     val version: Int? = null,
     val role: String,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
-) {
-}
-
-
-
+    val updatedAt: LocalDateTime? = null,
+)

@@ -11,16 +11,21 @@ import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
 context(JudgeContext)
-internal fun python3() = object : LanguageRouter {
+internal fun python3() =
+    object : LanguageRouter {
+        val pythonCompileTask = python3CompileTask()
 
-    val pythonCompileTask = python3CompileTask()
+        context(PipelineContext<Unit, ApplicationCall>)
+        override suspend fun version() {
+            call.respondText(exec("python3 --version").stderr, contentType = ContentType.Application.Json)
+        }
 
-    context(PipelineContext<Unit, ApplicationCall>) override suspend fun version() {
-        call.respondText(exec("python3 --version").stderr, contentType = ContentType.Application.Json)
+        context(PipelineContext<Unit, ApplicationCall>)
+        override suspend fun judge(
+            code: String,
+            stdin: String,
+        ) {
+            val result = pythonCompileTask.run(CodeInput(code, stdin), judgeClient)
+            call.respond(result)
+        }
     }
-
-    context(PipelineContext<Unit, ApplicationCall>) override suspend fun judge(code: String, stdin: String) {
-        val result = pythonCompileTask.run(CodeInput(code, stdin), judgeClient)
-        call.respond(result)
-    }
-}

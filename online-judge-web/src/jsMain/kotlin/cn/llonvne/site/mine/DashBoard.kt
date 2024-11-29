@@ -13,11 +13,10 @@ import io.kvision.html.Div
 import io.kvision.html.div
 import io.kvision.html.h4
 
-data class DashBoard(override val name: String = "仪表盘") : AdminMineChoice {
-
-
+data class DashBoard(
+    override val name: String = "仪表盘",
+) : AdminMineChoice {
     override fun show(root: Container) {
-
         observableOf<IMineService.DashboardResp>(null) {
             setUpdater { MineModel.dashboard() }
 
@@ -33,7 +32,6 @@ data class DashBoard(override val name: String = "仪表盘") : AdminMineChoice 
 
     private fun Div.onSuccess(resp: DashboardRespImpl) {
         alert(AlertType.Light) {
-
             h4 {
                 +"统计数据"
             }
@@ -64,7 +62,6 @@ data class DashBoard(override val name: String = "仪表盘") : AdminMineChoice 
         }
 
         alert(AlertType.Light) {
-
             h4 {
                 +"后端系统"
             }
@@ -109,7 +106,6 @@ data class DashBoard(override val name: String = "仪表盘") : AdminMineChoice 
         }
 
         alert(AlertType.Light) {
-
             h4 {
                 +"评测机"
             }

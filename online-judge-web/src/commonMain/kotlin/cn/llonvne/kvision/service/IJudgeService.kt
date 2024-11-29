@@ -6,5 +6,9 @@ import io.kvision.annotations.KVService
 
 @KVService
 interface IJudgeService {
-    suspend fun judge(languages: SupportLanguages, stdin: String, code: String): Output
+    suspend fun judge(
+        languages: SupportLanguages,
+        stdin: String,
+        code: String,
+    ): Output
 }

@@ -6,7 +6,7 @@ enum class CppVersion {
     Cpp14,
     Cpp17,
     Cpp20,
-    Cpp23
+    Cpp23,
 }
 
 fun CppVersion.asArg() = "-std=c++" + this.name.substring(3)

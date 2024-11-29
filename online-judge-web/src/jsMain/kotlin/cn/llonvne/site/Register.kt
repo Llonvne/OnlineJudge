@@ -18,11 +18,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class RegisterForm(
     val username: String,
-    val password: String
+    val password: String,
 )
 
 internal fun Container.registerPanel(routing: Routing) {
-
     val alert = div { }
     add(alert)
 
@@ -32,10 +31,11 @@ internal fun Container.registerPanel(routing: Routing) {
 
     navigateButton(routing, Frontend.Index)
 
-    val registerPanel = formPanel<RegisterForm> {
-        addUsername(RegisterForm::username)
-        addPassword(RegisterForm::password)
-    }
+    val registerPanel =
+        formPanel<RegisterForm> {
+            addUsername(RegisterForm::username)
+            addPassword(RegisterForm::password)
+        }
 
     button("注册") {
         onClick {

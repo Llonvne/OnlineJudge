@@ -3,9 +3,9 @@ package cn.llonvne.model
 import cn.llonvne.AppScope
 import cn.llonvne.kvision.service.IAuthenticationService
 import cn.llonvne.kvision.service.IAuthenticationService.LoginInfoResp.*
-import cn.llonvne.kvision.service.IAuthenticationService.LogoutResp.Logout
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResp
 import cn.llonvne.kvision.service.IAuthenticationService.LoginResp.Successful
+import cn.llonvne.kvision.service.IAuthenticationService.LogoutResp.Logout
 import cn.llonvne.message.Messager
 import cn.llonvne.security.Token
 import io.kvision.remote.getService
@@ -23,10 +23,15 @@ object AuthenticationModel {
         restore()
     }
 
+    suspend fun register(
+        username: String,
+        password: String,
+    ) = authenticationService.register(username, password)
 
-    suspend fun register(username: String, password: String) = authenticationService.register(username, password)
-
-    suspend fun login(username: String, password: String): LoginResp {
+    suspend fun login(
+        username: String,
+        password: String,
+    ): LoginResp {
         val result = authenticationService.login(username, password)
 
         when (result) {
@@ -66,7 +71,8 @@ object AuthenticationModel {
 
     private fun save() {
         localStorage.setItem(
-            key, Json.encodeToString(userToken.value)
+            key,
+            Json.encodeToString(userToken.value),
         )
     }
 
@@ -87,14 +93,12 @@ object AuthenticationModel {
         }
     }
 
-
-    suspend fun info(): Logined? {
-        return when (val resp = authenticationService.loginInfo(this.userToken.value)) {
+    suspend fun info(): Logined? =
+        when (val resp = authenticationService.loginInfo(this.userToken.value)) {
             is Logined -> resp
             LoginExpired -> null
             NotLogin -> null
         }
-    }
 
     suspend fun mine() = authenticationService.mine(userToken.value)
 }

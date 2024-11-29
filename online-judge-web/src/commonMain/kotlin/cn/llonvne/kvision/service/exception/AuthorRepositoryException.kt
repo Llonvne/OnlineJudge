@@ -12,7 +12,9 @@ class AuthorAuthenticationUserIdNotExist : AbstractServiceException() {
 /**
  * 题目服务异常
  */
-open class ProblemServiceException(msg: String) : JvmMainException(msg)
+open class ProblemServiceException(
+    msg: String,
+) : JvmMainException(msg)
 
 /**
  * 题目ID在创建后仍不存在
@@ -21,4 +23,3 @@ class ProblemIdDoNotExistAfterCreation : ProblemServiceException("题目ID在创
 
 @KVServiceException
 class AuthorNotExist : AbstractServiceException()
-

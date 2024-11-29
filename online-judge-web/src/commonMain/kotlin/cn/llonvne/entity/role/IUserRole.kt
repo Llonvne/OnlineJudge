@@ -7,11 +7,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class IUserRole(
-    val roles: List<Role>
+    val roles: List<Role>,
 )
 
-inline fun <reified R : Role> List<Role>.check(required: R): Boolean {
-    return map { provide ->
+inline fun <reified R : Role> List<Role>.check(required: R): Boolean =
+    map { provide ->
         required.check(provide)
     }.contains(true)
-}

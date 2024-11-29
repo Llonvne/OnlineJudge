@@ -6,10 +6,12 @@ import io.kvision.html.code
 import io.kvision.html.customTag
 import io.kvision.html.div
 
-fun Container.codeHighlighter(code: String, init: Div.() -> Unit = {}) = div {
+fun Container.codeHighlighter(
+    code: String,
+    init: Div.() -> Unit = {},
+) = div {
     customTag("pre") {
         code(code) {
-
         }
     }.addAfterInsertHook {
         js("hljs.highlightAll()")

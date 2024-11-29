@@ -14,10 +14,5 @@ data class Group(
     val type: GroupType,
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 )
-
-
-
-
-

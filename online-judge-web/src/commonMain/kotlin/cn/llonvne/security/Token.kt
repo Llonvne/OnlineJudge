@@ -9,8 +9,9 @@ sealed interface Token {
 }
 
 @Serializable
-data class RedisToken(override val id: Int, override val token: String) : Token {
-    override fun toString(): String {
-        return "<Redis-Token-$id>"
-    }
+data class RedisToken(
+    override val id: Int,
+    override val token: String,
+) : Token {
+    override fun toString(): String = "<Redis-Token-$id>"
 }

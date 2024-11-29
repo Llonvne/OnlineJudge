@@ -13,7 +13,7 @@ enum class CodeCommentType : DescriptionGetter {
     ClosedByAdmin,
     Freezing,
     Protected,
-    ContestCode
+    ContestCode,
     ;
 
     override val decr: String
@@ -22,15 +22,14 @@ enum class CodeCommentType : DescriptionGetter {
         get() = name
 }
 
-private fun CodeCommentType.decr() = when (this) {
-    Open -> "任何人均可查看，均可发表评论"
-    Closed -> "评论区被关闭"
-    ClosedByAdmin -> "评论区被管理员关闭"
-    Protected -> "评论区被保护（需经过审核才能公开展示）"
-    Freezing -> "评论区被冻结，无法添加/删除/修改评论"
-    ContestCode -> "比赛代码不支持评论"
-}
+private fun CodeCommentType.decr() =
+    when (this) {
+        Open -> "任何人均可查看，均可发表评论"
+        Closed -> "评论区被关闭"
+        ClosedByAdmin -> "评论区被管理员关闭"
+        Protected -> "评论区被保护（需经过审核才能公开展示）"
+        Freezing -> "评论区被冻结，无法添加/删除/修改评论"
+        ContestCode -> "比赛代码不支持评论"
+    }
 
-fun EnumEntries<CodeCommentType>.limited(token: Token): List<CodeCommentType> {
-    return this.filter { it != ContestCode }
-}
+fun EnumEntries<CodeCommentType>.limited(token: Token): List<CodeCommentType> = this.filter { it != ContestCode }

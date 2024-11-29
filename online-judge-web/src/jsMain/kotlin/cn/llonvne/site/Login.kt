@@ -14,27 +14,26 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class LoginPanel(
     val username: String,
-    val password: String
+    val password: String,
 )
 
 internal fun loginPanel() {
+    val dialog =
+        Dialog(
+            "登录",
+        ) {
+            val loginPanel =
+                formPanel<LoginPanel> {
+                    addUsername(LoginPanel::username)
+                    addPassword(LoginPanel::password)
+                }
 
-    val dialog = Dialog(
-        "登录",
-    ) {
-
-        val loginPanel = formPanel<LoginPanel> {
-            addUsername(LoginPanel::username)
-            addPassword(LoginPanel::password)
-        }
-
-        button("登录") {
-            onClick {
-                setResult(loginPanel)
+            button("登录") {
+                onClick {
+                    setResult(loginPanel)
+                }
             }
         }
-    }
-
 
     AppScope.launch {
         val data = dialog.getResult()
@@ -45,12 +44,13 @@ internal fun loginPanel() {
 
         if (data.validate()) {
             val value = data.getData()
-            kotlin.runCatching {
-                val result = AuthenticationModel.login(value.username, value.password)
-                Messager.send(result.message)
-            }.onFailure {
-                Messager.toastError("请检查你的网络设置")
-            }
+            kotlin
+                .runCatching {
+                    val result = AuthenticationModel.login(value.username, value.password)
+                    Messager.send(result.message)
+                }.onFailure {
+                    Messager.toastError("请检查你的网络设置")
+                }
         }
     }
 }

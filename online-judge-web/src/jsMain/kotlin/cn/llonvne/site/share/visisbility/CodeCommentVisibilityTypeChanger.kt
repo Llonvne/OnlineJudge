@@ -8,20 +8,27 @@ import cn.llonvne.kvision.service.PermissionDenied
 import cn.llonvne.message.Messager
 import cn.llonvne.model.CodeModel
 
-class  CodeCommentVisibilityTypeChanger(override val codeDto: CodeDto) : VisibilityChanger {
+class CodeCommentVisibilityTypeChanger(
+    override val codeDto: CodeDto,
+) : VisibilityChanger {
     fun change(commentId: Int) {
         if (!isCodeOwner()) {
             return
         }
 
         change("更改该评论的可见性", ShareCodeComment.Companion.ShareCodeCommentType.entries) { type ->
-            when (val resp = CodeModel.setCodeCommentVisibilityType(
-                shareId = codeDto.codeId, commentId = commentId, type
-            )) {        
+            when (
+                val resp =
+                    CodeModel.setCodeCommentVisibilityType(
+                        shareId = codeDto.codeId,
+                        commentId = commentId,
+                        type,
+                    )
+            ) {
                 CommentNotFound -> return@change Messager.toastInfo("未找到该评论")
                 PermissionDenied -> return@change Messager.toastInfo("权限不足")
                 SuccessSetCodeCommentVisibilityType -> return@change Messager.toastInfo(
-                    "修改成功"
+                    "修改成功",
                 )
             }
         }

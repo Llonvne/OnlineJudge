@@ -16,17 +16,27 @@ interface IAuthenticationService {
         fun isOk() = this is Successful
 
         @Serializable
-        data class Successful(val token: Token, val username: String) : RegisterResp {
-            override val message: ToastMessage = ToastMessage(
-                MessageLevel.Success, "成功注册，欢迎新用户:${username}"
-            )
+        data class Successful(
+            val token: Token,
+            val username: String,
+        ) : RegisterResp {
+            override val message: ToastMessage =
+                ToastMessage(
+                    MessageLevel.Success,
+                    "成功注册，欢迎新用户:$username",
+                )
         }
 
         @Serializable
-        data class Failed(override val message: ToastMessage) : RegisterResp
+        data class Failed(
+            override val message: ToastMessage,
+        ) : RegisterResp
     }
 
-    suspend fun register(username: String, password: String): RegisterResp
+    suspend fun register(
+        username: String,
+        password: String,
+    ): RegisterResp
 
     @Serializable
     sealed interface LoginResp {
@@ -39,9 +49,12 @@ interface IAuthenticationService {
         }
 
         @Serializable
-        data class Successful(val token: Token, val username: String) : LoginResp {
+        data class Successful(
+            val token: Token,
+            val username: String,
+        ) : LoginResp {
             override val message: Message =
-                ToastMessage(MessageLevel.Success, "登入成功，欢迎:${username}")
+                ToastMessage(MessageLevel.Success, "登入成功，欢迎:$username")
         }
 
         @Serializable
@@ -55,7 +68,10 @@ interface IAuthenticationService {
         }
     }
 
-    suspend fun login(username: String, password: String): LoginResp
+    suspend fun login(
+        username: String,
+        password: String,
+    ): LoginResp
 
     @Serializable
     sealed interface LoginInfoResp {
@@ -66,7 +82,10 @@ interface IAuthenticationService {
         data object LoginExpired : LoginInfoResp
 
         @Serializable
-        data class Logined(val username: String, val id: Int) : LoginInfoResp
+        data class Logined(
+            val username: String,
+            val id: Int,
+        ) : LoginInfoResp
     }
 
     suspend fun loginInfo(token: Token?): LoginInfoResp
@@ -88,11 +107,13 @@ interface IAuthenticationService {
             val acceptedTotal: Int,
             val accepted7Days: Int,
             val accepted30Days: Int,
-            val acceptedToday: Int
+            val acceptedToday: Int,
         ) : MineResp
 
         @Serializable
-        data class Administrator(val placeholder: Unit) : MineResp
+        data class Administrator(
+            val placeholder: Unit,
+        ) : MineResp
     }
 
     suspend fun mine(token: Token?): MineResp

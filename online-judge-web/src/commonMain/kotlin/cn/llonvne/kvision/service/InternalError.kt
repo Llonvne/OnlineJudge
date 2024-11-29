@@ -7,9 +7,17 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InternalError(val reason: String) : CommitOnCodeResp, CreateSubmissionResp,
-    GetLastNPlaygroundSubmissionResp, IGroupService.CreateGroupResp, ISubmissionService.ProblemSubmissionResp,
-    IContestService.AddProblemResp, IContestService.CreateContestResp
+data class InternalError(
+    val reason: String,
+) : CommitOnCodeResp,
+    CreateSubmissionResp,
+    GetLastNPlaygroundSubmissionResp,
+    IGroupService.CreateGroupResp,
+    ISubmissionService.ProblemSubmissionResp,
+    IContestService.AddProblemResp,
+    IContestService.CreateContestResp
 
 @Serializable
-data class JudgeError(@Contextual val reason: String) : CreateSubmissionResp
+data class JudgeError(
+    @Contextual val reason: String,
+) : CreateSubmissionResp

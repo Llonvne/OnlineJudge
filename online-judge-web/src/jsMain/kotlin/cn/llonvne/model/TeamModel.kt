@@ -27,33 +27,32 @@ object TeamModel {
         }
     }
 
-    fun GroupLoader.Companion.of(groupId: GroupId): GroupLoader {
-        return GroupLoader {
+    fun GroupLoader.Companion.of(groupId: GroupId): GroupLoader =
+        GroupLoader {
             load(groupId)
         }
-    }
 
-    suspend fun load(groupId: GroupId): LoadGroupResp {
-        return teamService.load(AuthenticationModel.userToken.value, groupId)
-    }
+    suspend fun load(groupId: GroupId): LoadGroupResp = teamService.load(AuthenticationModel.userToken.value, groupId)
 
-    suspend fun join(token: Token, groupId: GroupId): JoinGroupResp {
-        return teamService.join(groupId, token)
-    }
+    suspend fun join(
+        token: Token,
+        groupId: GroupId,
+    ): JoinGroupResp = teamService.join(groupId, token)
 
-    suspend fun quit(groupId: GroupId): QuitGroupResp {
-        return teamService.quit(groupId, AuthenticationModel.userToken.value)
-    }
+    suspend fun quit(groupId: GroupId): QuitGroupResp = teamService.quit(groupId, AuthenticationModel.userToken.value)
 
-    suspend fun kick(groupId: GroupId, kickMemberId: Int): KickGroupResp {
-        return teamService.kick(AuthenticationModel.userToken.value, groupId, kickMemberId)
-    }
+    suspend fun kick(
+        groupId: GroupId,
+        kickMemberId: Int,
+    ): KickGroupResp = teamService.kick(AuthenticationModel.userToken.value, groupId, kickMemberId)
 
-    suspend fun upgradeGroupManger(groupId: GroupId, userId: Int): UpgradeGroupManagerResp {
-        return teamService.upgradeGroupManager(AuthenticationModel.userToken.value, groupId, userId)
-    }
+    suspend fun upgradeGroupManger(
+        groupId: GroupId,
+        userId: Int,
+    ): UpgradeGroupManagerResp = teamService.upgradeGroupManager(AuthenticationModel.userToken.value, groupId, userId)
 
-    suspend fun downgradeToMember(groupId: GroupId, userId: Int): DowngradeToMemberResp {
-        return teamService.downgradeToMember(AuthenticationModel.userToken.value, groupId, userId)
-    }
+    suspend fun downgradeToMember(
+        groupId: GroupId,
+        userId: Int,
+    ): DowngradeToMemberResp = teamService.downgradeToMember(AuthenticationModel.userToken.value, groupId, userId)
 }

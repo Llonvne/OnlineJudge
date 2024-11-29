@@ -15,25 +15,24 @@ class BackendInfoResolver(
     env: Environment,
     private val backendName: String = env.getProperty("oj.name") ?: throw RuntimeException("后端未定义"),
     private val port: String = env.getProperty("server.port") ?: "8080",
-    private val runtime: Runtime = Runtime.getRuntime()
+    private val runtime: Runtime = Runtime.getRuntime(),
 ) {
-
     private val availableProcessors by lazy {
         runtime.availableProcessors()
     }
 
-    suspend fun resolve(): BackendInfo {
-        return BackendInfo(
+    suspend fun resolve(): BackendInfo =
+        BackendInfo(
             name = backendName,
-            host = withContext(Dispatchers.IO) {
-                InetAddress.getLocalHost()
-            }.hostAddress,
+            host =
+                withContext(Dispatchers.IO) {
+                    InetAddress.getLocalHost()
+                }.hostAddress,
             port = port,
             cpuCoresCount = availableProcessors,
             cpuUsage = ManagementFactory.getOperatingSystemMXBean().systemLoadAverage,
             usedMemory = runtime.maxMemory().toInt() - runtime.freeMemory().toInt(),
             totalMemory = runtime.maxMemory().toInt(),
-            isOnline = true
+            isOnline = true,
         )
-    }
 }

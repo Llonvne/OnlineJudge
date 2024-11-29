@@ -7,14 +7,16 @@ import org.springframework.stereotype.Service
 
 @Service
 class ContestProblemVisibilityCheckResolver {
-
     enum class ContestProblemVisibilityCheckResult {
         Pass,
-        Reject
+        Reject,
     }
 
-    fun check(authenticationUser: AuthenticationUser, problem: Problem): ContestProblemVisibilityCheckResult {
-        return when (problem.visibility) {
+    fun check(
+        authenticationUser: AuthenticationUser,
+        problem: Problem,
+    ): ContestProblemVisibilityCheckResult =
+        when (problem.visibility) {
             Public -> ContestProblemVisibilityCheckResult.Pass
             Private -> {
                 if (authenticationUser.id == problem.ownerId) {
@@ -28,5 +30,4 @@ class ContestProblemVisibilityCheckResolver {
                 ContestProblemVisibilityCheckResult.Reject
             }
         }
-    }
 }

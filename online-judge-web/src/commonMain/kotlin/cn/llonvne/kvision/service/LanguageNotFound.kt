@@ -5,6 +5,12 @@ import cn.llonvne.kvision.service.ISubmissionService.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object LanguageNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp,
-    SaveCodeResp, CreateSubmissionResp,
-    GetLastNPlaygroundSubmissionResp, PlaygroundOutput, ProblemSubmissionResp, GetLastNProblemSubmissionResp
+data object LanguageNotFound :
+    SubmissionGetByIdResp,
+    ViewCodeGetByIdResp,
+    SaveCodeResp,
+    CreateSubmissionResp,
+    GetLastNPlaygroundSubmissionResp,
+    PlaygroundOutput,
+    ProblemSubmissionResp,
+    GetLastNProblemSubmissionResp

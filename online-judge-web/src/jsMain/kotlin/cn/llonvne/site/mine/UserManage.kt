@@ -29,9 +29,10 @@ import io.kvision.tabulator.Layout
 import io.kvision.tabulator.TabulatorOptions
 import io.kvision.tabulator.tabulator
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 
-data class UserManage(override val name: String = "用户管理") : AdminMineChoice {
+data class UserManage(
+    override val name: String = "用户管理",
+) : AdminMineChoice {
     override fun show(root: Container) {
         root.div {
             alert(AlertType.Light) {
@@ -55,115 +56,131 @@ data class UserManage(override val name: String = "用户管理") : AdminMineCho
         }
     }
 
-    private fun onSuccess(div: Div, resp: IMineService.UsersResp.UsersRespImpl) {
+    private fun onSuccess(
+        div: Div,
+        resp: IMineService.UsersResp.UsersRespImpl,
+    ) {
         div.alert(AlertType.Light) {
             tabulator(
-                resp.users, options =
-                TabulatorOptions(
-                    layout = Layout.FITDATASTRETCH,
-                    columns = listOf(
-                        defineColumn("用户") {
-                            Span {
-                                +it.username
-                            }
-                        },
-                        defineColumn("创建时间") {
-                            Span {
-                                +it.createAt.ll()
-                            }
-                        },
-                        defineColumn("状态") {
-                            Span {
-                                if (it.userRole.roles.check(Banned.BannedImpl)) {
-                                    +"被封禁"
-                                } else {
-                                    +"正常"
-                                }
-                            }
-                        },
-                        defineColumn("是否为超级管理") {
-                            Span {
-                                if (it.userRole.roles.check(Backend.BackendImpl)) {
-                                    +"是"
-                                } else {
-                                    +"否"
-                                }
-                            }
-                        },
-                        defineColumn("操作") { user ->
-                            Span {
-                                badges {
-                                    add(color = BadgeColor.Red) {
-                                        +"删除"
-                                        onClick {
-                                            Confirm.show(
-                                                "确认删除用户",
-                                                "你确定要删除用户 ${user.username}",
-                                                animation = false,
-                                                align = Align.LEFT,
-                                                yesTitle = "确认",
-                                                noTitle = "取消",
-                                                cancelVisible = false,
-                                                noCallback = {
-                                                    Alert.show("删除用户通知", "你取消了删除用户的操作")
-                                                }) {
-                                                AppScope.launch {
-                                                    if (MineModel.deleteUser(user.userId)) {
-                                                        Alert.show("删除用户通知", "删除用户成功")
+                resp.users,
+                options =
+                    TabulatorOptions(
+                        layout = Layout.FITDATASTRETCH,
+                        columns =
+                            listOf(
+                                defineColumn("用户") {
+                                    Span {
+                                        +it.username
+                                    }
+                                },
+                                defineColumn("创建时间") {
+                                    Span {
+                                        +it.createAt.ll()
+                                    }
+                                },
+                                defineColumn("状态") {
+                                    Span {
+                                        if (it.userRole.roles.check(Banned.BannedImpl)) {
+                                            +"被封禁"
+                                        } else {
+                                            +"正常"
+                                        }
+                                    }
+                                },
+                                defineColumn("是否为超级管理") {
+                                    Span {
+                                        if (it.userRole.roles.check(Backend.BackendImpl)) {
+                                            +"是"
+                                        } else {
+                                            +"否"
+                                        }
+                                    }
+                                },
+                                defineColumn("操作") { user ->
+                                    Span {
+                                        badges {
+                                            add(color = BadgeColor.Red) {
+                                                +"删除"
+                                                onClick {
+                                                    Confirm.show(
+                                                        "确认删除用户",
+                                                        "你确定要删除用户 ${user.username}",
+                                                        animation = false,
+                                                        align = Align.LEFT,
+                                                        yesTitle = "确认",
+                                                        noTitle = "取消",
+                                                        cancelVisible = false,
+                                                        noCallback = {
+                                                            Alert.show("删除用户通知", "你取消了删除用户的操作")
+                                                        },
+                                                    ) {
+                                                        AppScope.launch {
+                                                            if (MineModel.deleteUser(user.userId)) {
+                                                                Alert.show("删除用户通知", "删除用户成功")
+                                                            } else {
+                                                                Alert.show("删除用户通知", "删除用户失败")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            add {
+                                                +"修改"
+                                                onClickLaunch {
+                                                    val dialog =
+                                                        Dialog<ModifyUserForm> {
+                                                            val form =
+                                                                formPanel<ModifyUserForm> {
+                                                                    add(
+                                                                        ModifyUserForm::userId,
+                                                                        Text {
+                                                                            label = "用户ID"
+                                                                            value = user.userId.toString()
+                                                                            disabled = true
+                                                                        },
+                                                                    )
+
+                                                                    add(
+                                                                        ModifyUserForm::username,
+                                                                        Text {
+                                                                            label = "用户名"
+                                                                            value = user.username
+                                                                        },
+                                                                    )
+
+                                                                    add(
+                                                                        ModifyUserForm::isBanned,
+                                                                        CheckBox(label = "是否封禁") {
+                                                                            value = user.userRole.roles.check(Banned.BannedImpl)
+                                                                        },
+                                                                    )
+                                                                }
+
+                                                            button("确认") {
+                                                                onClickLaunch {
+                                                                    setResult(form.getData())
+                                                                }
+                                                            }
+                                                            button("取消") {
+                                                                onClickLaunch {
+                                                                    setResult(null)
+                                                                }
+                                                            }
+                                                        }
+                                                    // TODO 重构！
+                                                    if (MineModel.modifyUser(dialog.getResult())) {
+                                                        Messager.toastInfo("设置成功")
                                                     } else {
-                                                        Alert.show("删除用户通知", "删除用户失败")
+                                                        Messager.toastInfo("设置失败")
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    add {
-                                        +"修改"
-                                        onClickLaunch {
-                                            val dialog = Dialog<ModifyUserForm> {
-                                                val form = formPanel<ModifyUserForm> {
-                                                    add(ModifyUserForm::userId, Text {
-                                                        label = "用户ID"
-                                                        value = user.userId.toString()
-                                                        disabled = true
-                                                    })
-
-                                                    add(ModifyUserForm::username, Text {
-                                                        label = "用户名"
-                                                        value = user.username
-                                                    })
-
-                                                    add(ModifyUserForm::isBanned, CheckBox(label = "是否封禁") {
-                                                        value = user.userRole.roles.check(Banned.BannedImpl)
-                                                    })
-                                                }
-
-                                                button("确认") {
-                                                    onClickLaunch {
-                                                        setResult(form.getData())
-                                                    }
-                                                }
-                                                button("取消") {
-                                                    onClickLaunch {
-                                                        setResult(null)
-                                                    }
-                                                }
-                                            }
-                                            // TODO 重构！
-                                            if (MineModel.modifyUser(dialog.getResult())) {
-                                                Messager.toastInfo("设置成功")
-                                            } else {
-                                                Messager.toastInfo("设置失败")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                    )
-                )
+                                },
+                            ),
+                    ),
             )
         }
     }
 }
-

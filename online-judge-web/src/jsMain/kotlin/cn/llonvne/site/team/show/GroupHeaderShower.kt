@@ -16,12 +16,11 @@ import io.kvision.html.h4
 import io.kvision.html.p
 
 sealed interface GroupHeaderShower {
-
     fun load(root: Container)
 
     companion object {
-        fun from(resp: LoadGroupResp): GroupHeaderShower {
-            return when (resp) {
+        fun from(resp: LoadGroupResp): GroupHeaderShower =
+            when (resp) {
                 is GroupIdNotFound -> GroupIdNotFoundShower
                 is GuestLoadGroup -> GuestGroupHeaderShower(resp)
                 PermissionDenied -> GroupIdNotFoundShower
@@ -29,7 +28,6 @@ sealed interface GroupHeaderShower {
                 is MemberLoadGroup -> MemberGroupHeaderShower(resp)
                 is OwnerLoadGroup -> OwnerLoadGroupShower(resp)
             }
-        }
     }
 }
 
@@ -47,8 +45,9 @@ private data object GroupIdNotFoundShower : GroupHeaderShower {
     }
 }
 
-private abstract class AbstractGroupHeaderShower(private val resp: LoadGroupResp.LoadGroupSuccessResp) :
-    GroupHeaderShower {
+private abstract class AbstractGroupHeaderShower(
+    private val resp: LoadGroupResp.LoadGroupSuccessResp,
+) : GroupHeaderShower {
     override fun load(root: Container) {
         root.alert(AlertType.Light) {
             h4 {
@@ -94,10 +93,18 @@ private abstract class AbstractGroupHeaderShower(private val resp: LoadGroupResp
     open fun Container.slot() {}
 }
 
-private open class GuestGroupHeaderShower(private val resp: GuestLoadGroup) : AbstractGroupHeaderShower(resp)
+private open class GuestGroupHeaderShower(
+    private val resp: GuestLoadGroup,
+) : AbstractGroupHeaderShower(resp)
 
-private open class ManagerGroupHeaderShower(val resp: ManagerLoadGroup) : AbstractGroupHeaderShower(resp)
+private open class ManagerGroupHeaderShower(
+    val resp: ManagerLoadGroup,
+) : AbstractGroupHeaderShower(resp)
 
-private class OwnerLoadGroupShower(resp: OwnerLoadGroup) : AbstractGroupHeaderShower(resp)
+private class OwnerLoadGroupShower(
+    resp: OwnerLoadGroup,
+) : AbstractGroupHeaderShower(resp)
 
-private class MemberGroupHeaderShower(val resp: MemberLoadGroup) : AbstractGroupHeaderShower(resp)
+private class MemberGroupHeaderShower(
+    val resp: MemberLoadGroup,
+) : AbstractGroupHeaderShower(resp)

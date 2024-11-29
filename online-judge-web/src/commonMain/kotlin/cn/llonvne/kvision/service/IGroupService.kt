@@ -21,27 +21,31 @@ interface IGroupService {
         val groupShortName: String,
         val teamVisibility: GroupVisibility,
         val groupType: GroupType,
-        val description: String
+        val description: String,
     ) : Validatable {
-        override fun validate() = validate {
-            on(groupName, "队伍名称必须在 6..100 之间") {
-                length in 6..100
-            }
+        override fun validate() =
+            validate {
+                on(groupName, "队伍名称必须在 6..100 之间") {
+                    length in 6..100
+                }
 
-            on(groupShortName, "短名称必须在 3..20之间") {
-                length in 3..20
+                on(groupShortName, "短名称必须在 3..20之间") {
+                    length in 3..20
+                }
             }
-        }
     }
 
     @Serializable
     sealed interface CreateGroupResp {
         @Serializable
-        data class CreateGroupOk(val group: Group) : CreateGroupResp
+        data class CreateGroupOk(
+            val group: Group,
+        ) : CreateGroupResp
     }
 
     suspend fun createTeam(
-        token: Token, createGroupReq: CreateGroupReq
+        token: Token,
+        createGroupReq: CreateGroupReq,
     ): CreateGroupResp
 
     @Serializable
@@ -84,7 +88,7 @@ interface IGroupService {
             override val ownerName: String,
             override val description: String,
             override val members: List<GroupMemberDtoImpl>,
-            override val createAt: LocalDateTime
+            override val createAt: LocalDateTime,
         ) : LoadGroupSuccessResp
 
         @Serializable
@@ -97,7 +101,7 @@ interface IGroupService {
             override val ownerName: String,
             override val description: String,
             override val members: List<GroupMemberDtoImpl>,
-            override val createAt: LocalDateTime
+            override val createAt: LocalDateTime,
         ) : LoadGroupSuccessResp
 
         @Serializable
@@ -110,7 +114,7 @@ interface IGroupService {
             override val ownerName: String,
             override val description: String,
             override val members: List<GroupMemberDtoImpl>,
-            override val createAt: LocalDateTime
+            override val createAt: LocalDateTime,
         ) : LoadGroupSuccessResp
 
         @Serializable
@@ -122,26 +126,39 @@ interface IGroupService {
 
         @Serializable
         data class GroupMemberDtoImpl(
-            override val username: String, override val role: TeamIdRole,
-            override val userId: Int
+            override val username: String,
+            override val role: TeamIdRole,
+            override val userId: Int,
         ) : GroupMemberDto
     }
 
-    suspend fun load(token: Token?, groupId: GroupId): LoadGroupResp
+    suspend fun load(
+        token: Token?,
+        groupId: GroupId,
+    ): LoadGroupResp
 
     @Serializable
     sealed interface JoinGroupResp {
         @Serializable
-        data class Joined(val groupId: GroupId) : JoinGroupResp
+        data class Joined(
+            val groupId: GroupId,
+        ) : JoinGroupResp
 
         @Serializable
-        data class Reject(val groupId: GroupId) : JoinGroupResp
+        data class Reject(
+            val groupId: GroupId,
+        ) : JoinGroupResp
 
         @Serializable
-        data class NoManagersFound(val groupId: GroupId) : JoinGroupResp
+        data class NoManagersFound(
+            val groupId: GroupId,
+        ) : JoinGroupResp
     }
 
-    suspend fun join(groupId: GroupId, token: Token): JoinGroupResp
+    suspend fun join(
+        groupId: GroupId,
+        token: Token,
+    ): JoinGroupResp
 
     @Serializable
     sealed interface QuitGroupResp
@@ -149,30 +166,50 @@ interface IGroupService {
     @Serializable
     data object QuitOk : QuitGroupResp
 
-    suspend fun quit(groupId: GroupId, value: Token?): QuitGroupResp
+    suspend fun quit(
+        groupId: GroupId,
+        value: Token?,
+    ): QuitGroupResp
 
     @Serializable
     sealed interface KickGroupResp {
         @Serializable
-        data class KickMemberNotFound(val memberId: Int) : KickGroupResp
+        data class KickMemberNotFound(
+            val memberId: Int,
+        ) : KickGroupResp
 
         @Serializable
-        data class KickMemberGroupIdRoleFound(val memberId: Int, val groupId: GroupId) : KickGroupResp
+        data class KickMemberGroupIdRoleFound(
+            val memberId: Int,
+            val groupId: GroupId,
+        ) : KickGroupResp
 
         @Serializable
         data object Kicked : KickGroupResp
     }
 
-    suspend fun kick(token: Token?, groupId: GroupId, kickMemberId: Int): KickGroupResp
+    suspend fun kick(
+        token: Token?,
+        groupId: GroupId,
+        kickMemberId: Int,
+    ): KickGroupResp
 
     @Serializable
-    data class BeUpOrDowngradedUserNotfound(val userId: Int) : UpgradeGroupManagerResp, DowngradeToMemberResp
+    data class BeUpOrDowngradedUserNotfound(
+        val userId: Int,
+    ) : UpgradeGroupManagerResp,
+        DowngradeToMemberResp
 
     @Serializable
-    data class UserAlreadyHasThisRole(val userId: Int) : UpgradeGroupManagerResp, DowngradeToMemberResp
+    data class UserAlreadyHasThisRole(
+        val userId: Int,
+    ) : UpgradeGroupManagerResp,
+        DowngradeToMemberResp
 
     @Serializable
-    data class UpOrDowngradeToIdNotMatchToGroupId(val userId: Int) : UpgradeGroupManagerResp
+    data class UpOrDowngradeToIdNotMatchToGroupId(
+        val userId: Int,
+    ) : UpgradeGroupManagerResp
 
     @Serializable
     sealed interface UpgradeGroupManagerResp {
@@ -183,18 +220,20 @@ interface IGroupService {
     suspend fun upgradeGroupManager(
         token: Token?,
         groupId: GroupId,
-        updatee: Int
+        updatee: Int,
     ): UpgradeGroupManagerResp
 
     @Serializable
     sealed interface DowngradeToMemberResp {
         @Serializable
-        data class DowngradeToMemberOk(val userId: Int) : DowngradeToMemberResp
+        data class DowngradeToMemberOk(
+            val userId: Int,
+        ) : DowngradeToMemberResp
     }
 
     suspend fun downgradeToMember(
         token: Token?,
         groupId: GroupId,
-        userId: Int
+        userId: Int,
     ): DowngradeToMemberResp
 }

@@ -10,8 +10,6 @@ sealed interface Banned : Role {
 
     @Serializable
     class BannedImplClass : Banned {
-        override fun check(provide: Role): Boolean {
-            return provide is Banned
-        }
+        override fun check(provide: Role): Boolean = provide is Banned
     }
 }

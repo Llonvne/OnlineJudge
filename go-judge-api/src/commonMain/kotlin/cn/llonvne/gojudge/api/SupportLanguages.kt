@@ -14,7 +14,7 @@ enum class SupportLanguages(
     override val languageId: Int,
     override val languageName: String,
     override val languageVersion: String,
-    override val path: String
+    override val path: String,
 ) : ISupportLanguages {
     Java(1, "java", "11", "java"),
     Python3(2, "python", "3", "python3"),

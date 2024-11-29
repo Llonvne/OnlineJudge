@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProblemTestCases(
     val testCases: List<ProblemTestCase>,
-    val passer: ProblemPasser<PasserResult>
+    val passer: ProblemPasser<PasserResult>,
 ) {
     @Serializable
     data class ProblemTestCase(
@@ -18,17 +18,21 @@ data class ProblemTestCases(
         override val visibility: TestCaseType,
     ) : TestCase
 
-    fun canShow() = testCases.filter {
-        it.visibility in setOf(
-            TestCaseType.OnlyForView,
-            TestCaseType.ViewAndJudge
-        )
-    }
+    fun canShow() =
+        testCases.filter {
+            it.visibility in
+                setOf(
+                    TestCaseType.OnlyForView,
+                    TestCaseType.ViewAndJudge,
+                )
+        }
 
-    fun canJudge() = testCases.filter {
-        it.visibility in setOf(
-            TestCaseType.ViewAndJudge,
-            TestCaseType.OnlyForJudge
-        )
-    }
+    fun canJudge() =
+        testCases.filter {
+            it.visibility in
+                setOf(
+                    TestCaseType.ViewAndJudge,
+                    TestCaseType.OnlyForJudge,
+                )
+        }
 }

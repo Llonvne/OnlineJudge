@@ -34,10 +34,10 @@ private fun Navbar.showNavigator(routing: Routing) {
             "比赛",
             listOf(
                 "比赛信息" to "#/contest",
-                "创建" to "#/contest/create"
+                "创建" to "#/contest/create",
             ),
             icon = "fas fa-star",
-            forNavbar = true
+            forNavbar = true,
         )
         navLink("训练场", icon = "fas fa-play") {
             onClick {
@@ -51,7 +51,7 @@ private fun Navbar.showNavigator(routing: Routing) {
                 "创建" to "#/team/create",
             ),
             icon = "fas fa-star",
-            forNavbar = true
+            forNavbar = true,
         )
     }
 }
@@ -75,7 +75,6 @@ fun Container.header(routing: Routing) {
                     }
                 }
             } else {
-
                 observableOf<Logined>(null) {
                     setUpdater {
                         AuthenticationModel.info()
@@ -89,7 +88,7 @@ fun Container.header(routing: Routing) {
                                 "Forms" to "#!/forms",
                             ),
                             icon = "fas fa-star",
-                            forNavbar = true
+                            forNavbar = true,
                         )
                         navLink("登出") {
                             onClick {

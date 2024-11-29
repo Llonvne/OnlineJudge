@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service
  * 用于从用户表查找对应权限的成员
  */
 @Service
-class GroupMembersResolver(private val userRepository: UserRepository) {
+class GroupMembersResolver(
+    private val userRepository: UserRepository,
+) {
     /**
      * 查找一个具有[TeamIdRole]且匹配[TeamIdRole.teamId]的成员
      * @param need 需要的权限
@@ -41,9 +43,12 @@ class GroupMembersResolver(private val userRepository: UserRepository) {
      * 查找所有具有 [TeamIdRole.teamId] 权限的成员
      */
     suspend fun fromGroupId(groupId: Int): List<AuthenticationUser> {
-        val matchedUser = userRepository.matchRoleStr(""""teamId":$groupId""".trimIndent()).filter {
-            it.userRole.roles.filterIsInstance<TeamIdRole>().any { idRole -> idRole.teamId == groupId }
-        }
+        val matchedUser =
+            userRepository.matchRoleStr(""""teamId":$groupId""".trimIndent()).filter {
+                it.userRole.roles
+                    .filterIsInstance<TeamIdRole>()
+                    .any { idRole -> idRole.teamId == groupId }
+            }
         return matchedUser
     }
 }

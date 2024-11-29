@@ -7,6 +7,5 @@ enum class MessageLevel {
     Info,
     Warning,
     Danger,
-    Success
+    Success,
 }
-

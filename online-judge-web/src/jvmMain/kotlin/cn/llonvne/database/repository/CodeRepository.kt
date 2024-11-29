@@ -19,152 +19,177 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class CodeRepository(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
 ) {
     private val codeMeta = Meta.code
-    private val commentMeta = Meta.shareCodeComment.define {
-        where {
-            // 默认不查询被删除的评论
-            it.type notEq Deleted
-        }
-    }
-
-    suspend fun save(code: Code) = db.runQuery {
-        QueryDsl.insert(codeMeta).single(code).returning()
-    }
-
-    suspend fun get(shareId: Int): Code? {
-        return db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.codeId eq shareId }.singleOrNull() }
-    }
-
-    suspend fun getCodeByHash(hash: String): Code? {
-        return db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.hashLink eq hash }.singleOrNull() }
-    }
-
-    suspend fun getCodeOwnerId(shareCodeId: Int): Int? {
-        return db.runQuery {
-            QueryDsl.from(codeMeta).where {
-                codeMeta.codeId eq shareCodeId
+    private val commentMeta =
+        Meta.shareCodeComment.define {
+            where {
+                // 默认不查询被删除的评论
+                it.type notEq Deleted
             }
-                .select(codeMeta.authenticationUserId)
+        }
+
+    suspend fun save(code: Code) =
+        db.runQuery {
+            QueryDsl.insert(codeMeta).single(code).returning()
+        }
+
+    suspend fun get(shareId: Int): Code? = db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.codeId eq shareId }.singleOrNull() }
+
+    suspend fun getCodeByHash(hash: String): Code? =
+        db.runQuery { QueryDsl.from(codeMeta).where { codeMeta.hashLink eq hash }.singleOrNull() }
+
+    suspend fun getCodeOwnerId(shareCodeId: Int): Int? =
+        db.runQuery {
+            QueryDsl
+                .from(codeMeta)
+                .where {
+                    codeMeta.codeId eq shareCodeId
+                }.select(codeMeta.authenticationUserId)
                 .singleOrNull()
         }
-    }
 
-    suspend fun isIdExist(shareCodeId: Int): Boolean = db.runQuery {
-        QueryDsl.from(codeMeta).where {
-            codeMeta.codeId eq shareCodeId
-        }.select(count())
-    } == 1.toLong()
+    suspend fun isIdExist(shareCodeId: Int): Boolean =
+        db.runQuery {
+            QueryDsl
+                .from(codeMeta)
+                .where {
+                    codeMeta.codeId eq shareCodeId
+                }.select(count())
+        } == 1.toLong()
 
-    suspend fun setCodeVisibility(shareId: Int, visibilityType: CodeVisibilityType): Long {
-        return db.runQuery {
-            QueryDsl.update(codeMeta).set {
-                codeMeta.visibilityType eq visibilityType
-            }.where {
-                codeMeta.codeId eq shareId
-            }
+    suspend fun setCodeVisibility(
+        shareId: Int,
+        visibilityType: CodeVisibilityType,
+    ): Long =
+        db.runQuery {
+            QueryDsl
+                .update(codeMeta)
+                .set {
+                    codeMeta.visibilityType eq visibilityType
+                }.where {
+                    codeMeta.codeId eq shareId
+                }
         }
-    }
 
-    suspend fun setHashLink(shareId: Int, hashLink: String?): Long {
-        return db.runQuery {
-            QueryDsl.update(codeMeta).set {
-                codeMeta.hashLink eq hashLink
-            }.where {
-                codeMeta.codeId eq shareId
-            }
+    suspend fun setHashLink(
+        shareId: Int,
+        hashLink: String?,
+    ): Long =
+        db.runQuery {
+            QueryDsl
+                .update(codeMeta)
+                .set {
+                    codeMeta.hashLink eq hashLink
+                }.where {
+                    codeMeta.codeId eq shareId
+                }
         }
-    }
 
-    suspend fun deleteComment(ids: List<Int>): List<ShareCodeComment> {
-        return db.runQuery {
-            QueryDsl.update(commentMeta).set {
-                commentMeta.type eq Deleted
-            }.where {
-                commentMeta.commentId inList ids
-            }.returning()
+    suspend fun deleteComment(ids: List<Int>): List<ShareCodeComment> =
+        db.runQuery {
+            QueryDsl
+                .update(commentMeta)
+                .set {
+                    commentMeta.type eq Deleted
+                }.where {
+                    commentMeta.commentId inList ids
+                }.returning()
         }
-    }
 
-    suspend fun comment(comment: ShareCodeComment): ShareCodeComment {
-        return db.runQuery {
-            QueryDsl.insert(commentMeta).single(
-                comment
-            ).returning()
+    suspend fun comment(comment: ShareCodeComment): ShareCodeComment =
+        db.runQuery {
+            QueryDsl
+                .insert(commentMeta)
+                .single(
+                    comment,
+                ).returning()
         }
-    }
 
-    suspend fun getComments(shareCodeId: Int, limit: Int = 500): List<ShareCodeComment> {
-        return db.runQuery {
-            QueryDsl.from(commentMeta).where {
-                commentMeta.shareCodeId eq shareCodeId
-            }.limit(500)
+    suspend fun getComments(
+        shareCodeId: Int,
+        limit: Int = 500,
+    ): List<ShareCodeComment> =
+        db.runQuery {
+            QueryDsl
+                .from(commentMeta)
+                .where {
+                    commentMeta.shareCodeId eq shareCodeId
+                }.limit(500)
         }
-    }
 
-    suspend fun setCodeCommentType(shareId: Int, type: CodeCommentType): Long {
-        return db.runQuery {
-            QueryDsl.update(codeMeta).set {
-                codeMeta.commentType eq type
-            }.where {
-                codeMeta.codeId eq shareId
-            }
+    suspend fun setCodeCommentType(
+        shareId: Int,
+        type: CodeCommentType,
+    ): Long =
+        db.runQuery {
+            QueryDsl
+                .update(codeMeta)
+                .set {
+                    codeMeta.commentType eq type
+                }.where {
+                    codeMeta.codeId eq shareId
+                }
         }
-    }
 
-    suspend fun isCommentIdExist(commentId: Int) = db.runQuery {
-        QueryDsl.from(commentMeta)
-            .where {
-                commentMeta.commentId eq commentId
-            }
-            .select(count()).map {
-                it == 1L
-            }
-    }
+    suspend fun isCommentIdExist(commentId: Int) =
+        db.runQuery {
+            QueryDsl
+                .from(commentMeta)
+                .where {
+                    commentMeta.commentId eq commentId
+                }.select(count())
+                .map {
+                    it == 1L
+                }
+        }
 
     suspend fun setShareCodeCommentVisibilityType(
         commentId: Int,
-        type: ShareCodeCommentType
+        type: ShareCodeCommentType,
     ) {
         db.runQuery {
-            QueryDsl.update(commentMeta)
+            QueryDsl
+                .update(commentMeta)
                 .set {
                     commentMeta.type eq type
-                }
-                .where {
+                }.where {
                     commentMeta.commentId eq commentId
                 }
         }
     }
 
-    suspend fun getCodeLanguageId(codeId: Int): Int? {
-        return db.runQuery {
-            QueryDsl.from(codeMeta)
+    suspend fun getCodeLanguageId(codeId: Int): Int? =
+        db.runQuery {
+            QueryDsl
+                .from(codeMeta)
                 .where {
                     codeMeta.codeId eq codeId
-                }
-                .select(codeMeta.languageId)
+                }.select(codeMeta.languageId)
                 .singleOrNull()
         }
-    }
 
-    suspend fun getCodeLength(codeId: Int): Int? {
-        return db.runQuery {
-            QueryDsl.from(codeMeta)
+    suspend fun getCodeLength(codeId: Int): Int? =
+        db.runQuery {
+            QueryDsl
+                .from(codeMeta)
                 .where {
                     codeMeta.codeId eq codeId
-                }
-                .select(codeMeta.code)
-                .singleOrNull().map {
+                }.select(codeMeta.code)
+                .singleOrNull()
+                .map {
                     it?.length
                 }
         }
-    }
 
-    suspend fun getCodeVisibilityType(codeId: Int): CodeVisibilityType? = db.runQuery {
-        QueryDsl.from(codeMeta).where {
-            codeMeta.codeId eq codeId
-        }.select(codeMeta.visibilityType).singleOrNull()
-    }
+    suspend fun getCodeVisibilityType(codeId: Int): CodeVisibilityType? =
+        db.runQuery {
+            QueryDsl
+                .from(codeMeta)
+                .where {
+                    codeMeta.codeId eq codeId
+                }.select(codeMeta.visibilityType)
+                .singleOrNull()
+        }
 }

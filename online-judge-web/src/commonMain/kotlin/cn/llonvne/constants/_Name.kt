@@ -6,9 +6,7 @@ object _Name {
     private const val VALIDATOR_MESSAGE =
         "用户名长度必须在${NAME_MIN_LENGTH}-${NAME_MAX_LENGTH}"
 
-    fun reason(username: String?): String {
-        return "$VALIDATOR_MESSAGE:${check(username)}"
-    }
+    fun reason(username: String?): String = "$VALIDATOR_MESSAGE:${check(username)}"
 
     fun check(username: String?): UsernameCheckResult {
         if (username == null) {
@@ -24,7 +22,6 @@ object _Name {
 
     @Serializable
     sealed interface UsernameCheckResult {
-
         fun isOk() = this is Ok
 
         @Serializable
@@ -32,20 +29,19 @@ object _Name {
 
         @Serializable
         data object UsernameIsNull : UsernameCheckResult {
-            override fun toString(): String {
-                return "用户名为空"
-            }
+            override fun toString(): String = "用户名为空"
         }
 
         @Serializable
-        data class UsernameTooLongOrTooShort(val username: String) : UsernameCheckResult {
-            override fun toString(): String {
-                return if (username.length < NAME_MIN_LENGTH) {
+        data class UsernameTooLongOrTooShort(
+            val username: String,
+        ) : UsernameCheckResult {
+            override fun toString(): String =
+                if (username.length < NAME_MIN_LENGTH) {
                     "用户名过短"
                 } else {
                     "用户名过长"
                 }
-            }
         }
     }
 }

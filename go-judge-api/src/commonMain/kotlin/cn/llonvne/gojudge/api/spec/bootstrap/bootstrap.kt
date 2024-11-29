@@ -9,7 +9,6 @@ import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-
 @Serializable
 sealed interface GoJudgeVersion {
     val tag: String
@@ -20,12 +19,15 @@ sealed interface GoJudgeVersion {
     }
 
     @Serializable
-    data class Customized(override val tag: String) : GoJudgeVersion
+    data class Customized(
+        override val tag: String,
+    ) : GoJudgeVersion
 }
 
 @Serializable
 data class GoJudgePortMapping(
-    val outer: Int = 5050, val inner: Int = 5050
+    val outer: Int = 5050,
+    val inner: Int = 5050,
 ) {
     init {
         require(isValidPort(outer)) {
@@ -49,7 +51,9 @@ sealed interface GoJudgePortMappings {
     }
 
     @Serializable
-    data class Customized(override val binds: List<GoJudgePortMapping>) : GoJudgePortMappings
+    data class Customized(
+        override val binds: List<GoJudgePortMapping>,
+    ) : GoJudgePortMappings
 }
 
 @Serializable
@@ -57,11 +61,16 @@ sealed interface ContainerName {
     val name: String
 
     @Serializable
-    data class GeneratorWithPrefix(val prefix: String, val randomLatterLength: Int = 6) : ContainerName {
+    data class GeneratorWithPrefix(
+        val prefix: String,
+        val randomLatterLength: Int = 6,
+    ) : ContainerName {
         override val name: String = "$prefix:${uuid4().toString().subSequence(0..randomLatterLength)}"
     }
 
-    data class Customized(override val name: String) : ContainerName
+    data class Customized(
+        override val name: String,
+    ) : ContainerName
 }
 
 @Serializable
@@ -70,14 +79,15 @@ sealed interface ContainerName {
  * 表示一个网络地址
  * 会对 [port] 正确性检查，不会对 [url] 进行任何检查
  */
-data class HttpAddr(val url: String, val port: Int) {
+data class HttpAddr(
+    val url: String,
+    val port: Int,
+) {
     init {
         require(isValidPort(port))
     }
 
-    override fun toString(): String {
-        return "$url:$port"
-    }
+    override fun toString(): String = "$url:$port"
 
     companion object
 }
@@ -118,7 +128,7 @@ data class GoJudgeEnvSpec(
     val openFileLimit: OpenFileLimitSetting = OpenFileLimitSetting.Default,
     val linuxOnlySpec: LinuxOnlySpec = LinuxOnlySpec.default(),
     val preFork: PreForkSetting = PreForkSetting.Default,
-    val fileTimeout: FileTimeoutSetting = FileTimeoutSetting.Disabled
+    val fileTimeout: FileTimeoutSetting = FileTimeoutSetting.Disabled,
 ) {
     companion object {
         val DEFAULT_HTTP_ADDR = HttpAddr(LOCALHOST, 5050)
@@ -163,7 +173,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Enable(val token: String) : GoJudgeAuthTokenSetting {
+        data class Enable(
+            val token: String,
+        ) : GoJudgeAuthTokenSetting {
             companion object
         }
     }
@@ -178,7 +190,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(val number: Int) : ConcurrencyNumberSetting {
+        data class Customized(
+            val number: Int,
+        ) : ConcurrencyNumberSetting {
             init {
                 require(number > 0)
             }
@@ -203,7 +217,6 @@ data class GoJudgeEnvSpec(
     @Serializable
     @optics
     sealed interface CGroupPrefixSetting : IsDefaultSetting {
-
         val prefix: String
 
         override val isDefault: Boolean get() = this is Default
@@ -215,7 +228,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(override val prefix: String) : CGroupPrefixSetting {
+        data class Customized(
+            override val prefix: String,
+        ) : CGroupPrefixSetting {
             companion object
         }
 
@@ -235,7 +250,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Ms(val ms: Int) : GoJudgeTimeInterval {
+        data class Ms(
+            val ms: Int,
+        ) : GoJudgeTimeInterval {
             override val time: String = "${ms}ms"
 
             companion object
@@ -243,7 +260,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Second(val second: Int) : GoJudgeTimeInterval {
+        data class Second(
+            val second: Int,
+        ) : GoJudgeTimeInterval {
             override val time: String = "${second}s"
 
             companion object
@@ -255,7 +274,6 @@ data class GoJudgeEnvSpec(
     @Serializable
     @optics
     sealed interface OutputLimitSetting : IsDefaultSetting {
-
         val byte: Long
 
         override val isDefault: Boolean
@@ -269,7 +287,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customize(override val byte: Long) : OutputLimitSetting {
+        data class Customize(
+            override val byte: Long,
+        ) : OutputLimitSetting {
             companion object
         }
 
@@ -291,7 +311,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(override val byte: Long) : ExtraMemoryLimitSetting {
+        data class Customized(
+            override val byte: Long,
+        ) : ExtraMemoryLimitSetting {
             companion object
         }
 
@@ -312,7 +334,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(override val byte: Long) : CopyOutLimitSetting {
+        data class Customized(
+            override val byte: Long,
+        ) : CopyOutLimitSetting {
             companion object
         }
 
@@ -333,7 +357,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(override val limit: Long) : OpenFileLimitSetting {
+        data class Customized(
+            override val limit: Long,
+        ) : OpenFileLimitSetting {
             companion object
         }
 
@@ -364,7 +390,7 @@ data class GoJudgeEnvSpec(
             val seccompConf: SeccompConfSetting = SeccompConfSetting.Disable,
             // 指定使用默认挂载时 /tmp 的 /w tmpfs 参数（仅限 Linux）
             val tmpFsParam: TmsFsParamSetting = TmsFsParamSetting.Default,
-            val mountConf: MountConfSetting = MountConfSetting.Default
+            val mountConf: MountConfSetting = MountConfSetting.Default,
         ) : LinuxOnlySpec {
             override val isDefault: Boolean
                 get() = false
@@ -374,7 +400,6 @@ data class GoJudgeEnvSpec(
             @Serializable
             @optics
             sealed interface CpuSetting : IsDefaultSetting {
-
                 override val isDefault: Boolean
                     get() = this is Default
 
@@ -383,7 +408,9 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 @optics
-                data class Customized(val settings: String) : CpuSetting {
+                data class Customized(
+                    val settings: String,
+                ) : CpuSetting {
                     companion object
                 }
 
@@ -406,7 +433,9 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 @optics
-                data class Customized(override val start: Int) : ContainerCredStartSetting {
+                data class Customized(
+                    override val start: Int,
+                ) : ContainerCredStartSetting {
                     companion object
                 }
 
@@ -439,7 +468,9 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 @optics
-                data class Customized(val settings: String) : SeccompConfSetting {
+                data class Customized(
+                    val settings: String,
+                ) : SeccompConfSetting {
                     companion object
                 }
 
@@ -457,7 +488,9 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 @optics
-                data class Customized(val command: String) : TmsFsParamSetting {
+                data class Customized(
+                    val command: String,
+                ) : TmsFsParamSetting {
                     companion object
                 }
 
@@ -475,7 +508,9 @@ data class GoJudgeEnvSpec(
 
                 @Serializable
                 @optics
-                data class Customized(val settings: String) : MountConfSetting {
+                data class Customized(
+                    val settings: String,
+                ) : MountConfSetting {
                     companion object
                 }
 
@@ -496,7 +531,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Customized(val instance: Int) : PreForkSetting {
+        data class Customized(
+            val instance: Int,
+        ) : PreForkSetting {
             companion object
         }
 
@@ -514,7 +551,9 @@ data class GoJudgeEnvSpec(
 
         @Serializable
         @optics
-        data class Timeout(val minutes: Int) : FileTimeoutSetting {
+        data class Timeout(
+            val minutes: Int,
+        ) : FileTimeoutSetting {
             val seconds = (minutes * 60).toString() + "s"
 
             companion object

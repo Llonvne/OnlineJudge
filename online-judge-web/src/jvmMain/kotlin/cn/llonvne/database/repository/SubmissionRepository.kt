@@ -13,73 +13,88 @@ import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
 
-
 @Repository
 class SubmissionRepository(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
 ) {
     private val submissionMeta = Meta.submission
     private val codeMeta = Meta.code
 
-    suspend fun list(limit: Int = 500) = db.runQuery {
-        QueryDsl.from(submissionMeta)
-            .limit(limit)
-    }
+    suspend fun list(limit: Int = 500) =
+        db.runQuery {
+            QueryDsl
+                .from(submissionMeta)
+                .limit(limit)
+        }
 
-    suspend fun getById(id: Int) = db.runQuery {
-        QueryDsl.from(submissionMeta)
-            .where {
-                submissionMeta.submissionId eq id
-            }.singleOrNull()
-    }
+    suspend fun getById(id: Int) =
+        db.runQuery {
+            QueryDsl
+                .from(submissionMeta)
+                .where {
+                    submissionMeta.submissionId eq id
+                }.singleOrNull()
+        }
 
-    suspend fun save(submission: Submission): Submission {
-        return db.runQuery {
+    suspend fun save(submission: Submission): Submission =
+        db.runQuery {
             QueryDsl.insert(submissionMeta).single(submission).returning()
         }
-    }
 
-    suspend fun getByCodeId(codeId: Int): Submission? {
-        return db.runQuery {
-            QueryDsl.from(submissionMeta)
+    suspend fun getByCodeId(codeId: Int): Submission? =
+        db.runQuery {
+            QueryDsl
+                .from(submissionMeta)
                 .where {
                     submissionMeta.codeId eq codeId
                 }.singleOrNull()
         }
-    }
 
     suspend fun getByAuthenticationUserID(
-        userID: Int, codeType: Code.CodeType?, limit: Int = 500
-    ): List<Submission> {
-        return db.runQuery {
-            QueryDsl.from(submissionMeta).innerJoin(codeMeta) {
-                submissionMeta.codeId eq codeMeta.codeId
-            }.where {
-                submissionMeta.authenticationUserId eq userID
-                and {
-                    if (codeType != null) {
-                        codeMeta.codeType eq codeType
+        userID: Int,
+        codeType: Code.CodeType?,
+        limit: Int = 500,
+    ): List<Submission> =
+        db.runQuery {
+            QueryDsl
+                .from(submissionMeta)
+                .innerJoin(codeMeta) {
+                    submissionMeta.codeId eq codeMeta.codeId
+                }.where {
+                    submissionMeta.authenticationUserId eq userID
+                    and {
+                        if (codeType != null) {
+                            codeMeta.codeType eq codeType
+                        }
                     }
-                }
-            }.limit(limit)
+                }.limit(limit)
         }
-    }
 
-    fun getUserProblemStatus(token: Token?, problemId: Int): ProblemStatus {
+    fun getUserProblemStatus(
+        token: Token?,
+        problemId: Int,
+    ): ProblemStatus {
         // TODO
         return ProblemStatus.NotBegin
     }
 
-    suspend fun getByContestId(contestId: Int, limit: Int = 1000): List<Submission> {
-        return db.runQuery {
-            QueryDsl.from(submissionMeta).where {
-                submissionMeta.contestId eq contestId
-            }.limit(1000)
+    suspend fun getByContestId(
+        contestId: Int,
+        limit: Int = 1000,
+    ): List<Submission> =
+        db.runQuery {
+            QueryDsl
+                .from(submissionMeta)
+                .where {
+                    submissionMeta.contestId eq contestId
+                }.limit(1000)
         }
-    }
 
-    suspend fun getByTimeRange(start: LocalDateTime, end: LocalDateTime): List<Submission> {
-        return db.runQuery {
+    suspend fun getByTimeRange(
+        start: LocalDateTime,
+        end: LocalDateTime,
+    ): List<Submission> =
+        db.runQuery {
             QueryDsl.from(submissionMeta).where {
                 submissionMeta.createdAt greaterEq start
                 and {
@@ -87,5 +102,4 @@ class SubmissionRepository(
                 }
             }
         }
-    }
 }

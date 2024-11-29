@@ -11,10 +11,8 @@ data class ProblemTag(
     val problemId: Int,
     val tag: String,
     override val color: BadgeColor,
-
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     val version: Int? = null,
     val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 ) : BadgeColorGetter
-

@@ -8,14 +8,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class GroupMangerDowngradeResolver(
-    private val roleService: RoleService
+    private val roleService: RoleService,
 ) {
-
     enum class GroupManagerDowngradeResult {
         DowngradeToIdNotMatchToGroupId,
         BeDowngradeUserNotFound,
         UserAlreadyHasThisRole,
-        Success
+        Success,
     }
 
     suspend fun resolve(

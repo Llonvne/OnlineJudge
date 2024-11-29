@@ -9,19 +9,27 @@ sealed interface Output {
     @Serializable
     sealed interface Failure : Output {
         @Serializable
-        data class CompileResultIsNull(val compileRequest: RequestType.Request) : Failure
+        data class CompileResultIsNull(
+            val compileRequest: RequestType.Request,
+        ) : Failure
 
         @Serializable
-        data class CompileError(val compileRequest: RequestType.Request, val compileResult: Result) : Failure
+        data class CompileError(
+            val compileRequest: RequestType.Request,
+            val compileResult: Result,
+        ) : Failure
 
         @Serializable
-        data class TargetFileNotExist(val compileRequest: RequestType.Request, val compileResult: Result) : Failure
+        data class TargetFileNotExist(
+            val compileRequest: RequestType.Request,
+            val compileResult: Result,
+        ) : Failure
 
         @Serializable
         data class RunResultIsNull(
             val compileRequest: RequestType.Request,
             val compileResult: Result,
-            val runRequest: RequestType.Request
+            val runRequest: RequestType.Request,
         ) : Failure
     }
 
@@ -30,16 +38,18 @@ sealed interface Output {
         val compileRequest: RequestType.Request,
         val compileResult: Result,
         val runRequest: RequestType.Request,
-        val runResult: Result
+        val runResult: Result,
     ) : Output
 
     companion object {
-        fun Output.formatOnSuccess(notSuccess: String, onSuccess: (Success) -> String): String {
-            return when (this) {
+        fun Output.formatOnSuccess(
+            notSuccess: String,
+            onSuccess: (Success) -> String,
+        ): String =
+            when (this) {
                 is Success -> onSuccess(this)
                 else -> notSuccess
             }
-        }
 
         val Output?.runTimeRepr: String
             get() {
@@ -51,7 +61,7 @@ sealed interface Output {
             }
         val Output?.memoryRepr: String
             get() {
-               return format("-") {
+                return format("-") {
                     formatOnSuccess("-") {
                         it.runResult.memory.toString()
                     }

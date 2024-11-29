@@ -11,12 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder
  */
 context(PasswordEncoder)
 fun AuthenticationUser.Companion.createAtNow(
-    username: String, rawPassword: String
+    username: String,
+    rawPassword: String,
 ) = AuthenticationUser(
     username = username,
     encryptedPassword = encode(rawPassword),
     createdAt = LocalDateTime.now(),
     updatedAt = LocalDateTime.now(),
-    role = normalUserRole()
+    role = normalUserRole(),
 )
-

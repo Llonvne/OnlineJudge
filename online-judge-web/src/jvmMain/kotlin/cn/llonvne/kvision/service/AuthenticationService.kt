@@ -13,14 +13,12 @@ import cn.llonvne.kvision.service.IAuthenticationService.RegisterResp.Successful
 import cn.llonvne.message.Message
 import cn.llonvne.message.MessageLevel
 import cn.llonvne.security.LoginLogoutResolver
-import cn.llonvne.security.TokenValidator
 import cn.llonvne.security.Token
-import cn.llonvne.security.UserLoginLogoutTokenValidator
+import cn.llonvne.security.TokenValidator
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @Service
 @Transactional
@@ -31,14 +29,16 @@ actual class AuthenticationService(
     private val bannedUsernameCheckResolver: BannedUsernameCheckResolver,
     private val mineLoadAsNormalUserOrBackendDeterminer: MineLoadAsNormalUserOrBackendDeterminer,
     private val tokenValidator: TokenValidator,
-    private val loginLogoutResolver: LoginLogoutResolver
+    private val loginLogoutResolver: LoginLogoutResolver,
 ) : IAuthenticationService {
-    override suspend fun register(username: String, password: String): RegisterResp {
-
+    override suspend fun register(
+        username: String,
+        password: String,
+    ): RegisterResp {
         when (bannedUsernameCheckResolver.resolve(username)) {
             Pass -> {}
             BannedUsernameCheckResult.Failed -> return Failed(
-                Message.ToastMessage(MessageLevel.Danger, "名称包含违禁词")
+                Message.ToastMessage(MessageLevel.Danger, "名称包含违禁词"),
             )
         }
 
@@ -47,16 +47,16 @@ actual class AuthenticationService(
             val user = userRepository.new(username, password)
             // 返回成功注册
             Successful(loginLogoutResolver.login(user), username)
-
         } else {
             // 提示用户名已经存在
             Failed(Message.ToastMessage(MessageLevel.Warning, "用户名：$username 已经存在"))
         }
     }
 
-    override suspend fun login(username: String, password: String): LoginResp {
-        return userRepository.login(username, password)
-    }
+    override suspend fun login(
+        username: String,
+        password: String,
+    ): LoginResp = userRepository.login(username, password)
 
     override suspend fun loginInfo(token: Token?): LoginInfoResp {
         if (token == null) {
@@ -77,9 +77,10 @@ actual class AuthenticationService(
     }
 
     override suspend fun mine(token: Token?): MineResp {
-        val user = tokenValidator.validate(token) {
-            requireLogin()
-        } ?: return PermissionDenied
+        val user =
+            tokenValidator.validate(token) {
+                requireLogin()
+            } ?: return PermissionDenied
         return mineLoadAsNormalUserOrBackendDeterminer.resolve(user)
     }
 }

@@ -17,5 +17,5 @@ data class SubmissionListDto(
     val codeLength: Long,
     val submitTime: LocalDateTime,
     val passerResult: PasserResult,
-    val codeId: Int
+    val codeId: Int,
 )

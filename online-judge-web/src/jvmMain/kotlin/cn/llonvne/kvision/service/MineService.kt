@@ -29,7 +29,7 @@ actual class MineService(
     private val backendInfoResolver: BackendInfoResolver,
     private val judgeServerInfoResolver: JudgeServerInfoResolver,
     private val userRepository: UserRepository,
-    private val roleService: RoleService
+    private val roleService: RoleService,
 ) : IMineService {
     override suspend fun dashboard(token: Token?): IMineService.DashboardResp {
         authentication.validate(token) {
@@ -39,31 +39,36 @@ actual class MineService(
         return DashboardRespImpl(
             statistics = onlineJudgeStatisticsResolver.resolve(),
             backendInfo = backendInfoResolver.resolve(),
-            judgeServerInfo = judgeServerInfoResolver.resolve()
+            judgeServerInfo = judgeServerInfoResolver.resolve(),
         )
     }
 
     override suspend fun users(): IMineService.UsersResp {
-
-        val user = userRepository.all()
-            .map {
-                IMineService.UsersResp.UserManageListUserDto(
-                    userId = it.id,
-                    username = it.username,
-                    userRole = IUserRole(it.userRole.roles),
-                    createAt = it.createdAt ?: kotlinx.datetime.LocalDateTime.now()
-                )
-            }
+        val user =
+            userRepository
+                .all()
+                .map {
+                    IMineService.UsersResp.UserManageListUserDto(
+                        userId = it.id,
+                        username = it.username,
+                        userRole = IUserRole(it.userRole.roles),
+                        createAt = it.createdAt ?: kotlinx.datetime.LocalDateTime.now(),
+                    )
+                }
         return IMineService.UsersResp.UsersRespImpl(
-            users = user
+            users = user,
         )
     }
 
-    override suspend fun deleteUser(value: Token?, id: Int): Boolean {
-        return userRepository.deleteById(id)
-    }
+    override suspend fun deleteUser(
+        value: Token?,
+        id: Int,
+    ): Boolean = userRepository.deleteById(id)
 
-    override suspend fun modifyUser(value: Token?, result: ModifyUserForm): Boolean {
+    override suspend fun modifyUser(
+        value: Token?,
+        result: ModifyUserForm,
+    ): Boolean {
         val id = result.userId.toIntOrNull() ?: return false
         val user = authentication.getAuthenticationUser(id) ?: return false
         if (result.isBanned) {

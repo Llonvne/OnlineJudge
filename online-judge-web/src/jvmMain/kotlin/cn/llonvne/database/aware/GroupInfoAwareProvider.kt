@@ -1,4 +1,4 @@
- package cn.llonvne.database.aware
+package cn.llonvne.database.aware
 
 import cn.llonvne.database.aware.GroupInfoAwareProvider.GroupInfoAware
 import cn.llonvne.database.resolver.group.GroupMembersResolver
@@ -15,41 +15,35 @@ import org.springframework.stereotype.Service
 @Service
 class GroupInfoAwareProvider(
     private val groupMembersResolver: GroupMembersResolver,
-    private val groupRoleResolver: GroupRoleResolver
+    private val groupRoleResolver: GroupRoleResolver,
 ) {
-
-    suspend fun <R> awareOf(groupId: GroupId, id: Int, group: Group, action: suspend GroupInfoAware.() -> R): R {
-        return GroupInfoAware(groupId, id, group).action()
-    }
-
+    suspend fun <R> awareOf(
+        groupId: GroupId,
+        id: Int,
+        group: Group,
+        action: suspend GroupInfoAware.() -> R,
+    ): R = GroupInfoAware(groupId, id, group).action()
 
     inner class GroupInfoAware(
         val groupId: GroupId,
         val id: Int,
-        val group: Group
+        val group: Group,
     ) {
-
-        suspend fun ownerName(): String {
-            return groupMembersResolver.fromRole(GroupOwner.GroupOwnerImpl(id)).firstOrNull()?.username ?: "<未找到>"
-        }
+        suspend fun ownerName(): String = groupMembersResolver.fromRole(GroupOwner.GroupOwnerImpl(id)).firstOrNull()?.username ?: "<未找到>"
 
         suspend fun membersOfGuest(): List<GroupMemberDtoImpl> {
             return groupMembersResolver.fromGroupId(id).mapNotNull {
                 GroupMemberDtoImpl(
                     username = it.username,
                     role = groupRoleResolver.resolve(id, it) ?: return@mapNotNull null,
-                    userId = it.id
+                    userId = it.id,
                 )
             }
         }
 
-        suspend fun memberOfManager(): List<GroupMemberDtoImpl> {
-            return membersOfGuest()
-        }
+        suspend fun memberOfManager(): List<GroupMemberDtoImpl> = membersOfGuest()
 
-        suspend fun membersOfMember(): List<GroupMemberDtoImpl> {
-            return membersOfGuest()
-        }
+        suspend fun membersOfMember(): List<GroupMemberDtoImpl> = membersOfGuest()
 
         suspend fun membersOfOwner() = membersOfMember()
     }

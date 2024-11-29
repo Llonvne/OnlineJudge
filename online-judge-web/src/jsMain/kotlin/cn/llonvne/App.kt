@@ -36,60 +36,73 @@ class App : Application() {
         ThemeManager.init()
     }
 
-    private fun failTo404(routing: Routing, block: () -> Unit) = kotlin.runCatching { block() }.onFailure {
+    private fun failTo404(
+        routing: Routing,
+        block: () -> Unit,
+    ) = kotlin.runCatching { block() }.onFailure {
         routing.navigate("/404")
         throw it
     }
 
     override fun start(state: Map<String, Any>) {
         val routing = RoutingModule.routing
-        routing.on(Frontend.Index.uri, {
-            layout(routing) {
-                index(routing)
-            }
-        }).on(Frontend.Problems.uri, {
-            layout(routing) {
-                problems(routing)
-            }
-        }).on(Frontend.Register.uri, {
-            layout(routing) {
-                registerPanel(routing)
-            }
-        }).on(Frontend.Problems.Create.uri, {
-            layout(routing) {
-                createProblem(routing)
-            }
-        }).on(RegExp("^problems/(.*)"), { match: Match ->
-            failTo404(routing) {
+        routing
+            .on(Frontend.Index.uri, {
                 layout(routing) {
-                    detail(div { }, (match.data[0] as String).toInt())
+                    index(routing)
                 }
-            }
-        }).on(Frontend.Mine.uri, {
-            layout(routing) {
-                mine()
-            }
-        }).on(Frontend.Submission.uri, {
-            layout(routing) {
-                submission(routing)
-            }
-        }).on("/playground", { match: Match ->
-            layout(routing) {
-                playground()
-            }
-        }).on(RegExp("^code/(.*)"), { match: Match ->
-            failTo404(routing) {
+            })
+            .on(Frontend.Problems.uri, {
                 layout(routing) {
-                    submissionDetail(routing, (match.data[0] as String).toInt())
+                    problems(routing)
                 }
-            }
-        }).on("/contest/create", {
-            failTo404(routing) {
+            })
+            .on(Frontend.Register.uri, {
                 layout(routing) {
-                    createContest()
+                    registerPanel(routing)
                 }
-            }
-        })
+            })
+            .on(Frontend.Problems.Create.uri, {
+                layout(routing) {
+                    createProblem(routing)
+                }
+            })
+            .on(RegExp("^problems/(.*)"), { match: Match ->
+                failTo404(routing) {
+                    layout(routing) {
+                        detail(div { }, (match.data[0] as String).toInt())
+                    }
+                }
+            })
+            .on(Frontend.Mine.uri, {
+                layout(routing) {
+                    mine()
+                }
+            })
+            .on(Frontend.Submission.uri, {
+                layout(routing) {
+                    submission(routing)
+                }
+            })
+            .on("/playground", { match: Match ->
+                layout(routing) {
+                    playground()
+                }
+            })
+            .on(RegExp("^code/(.*)"), { match: Match ->
+                failTo404(routing) {
+                    layout(routing) {
+                        submissionDetail(routing, (match.data[0] as String).toInt())
+                    }
+                }
+            })
+            .on("/contest/create", {
+                failTo404(routing) {
+                    layout(routing) {
+                        createContest()
+                    }
+                }
+            })
             .on("/contest", {
                 failTo404(routing) {
                     layout(routing) {
@@ -113,22 +126,27 @@ class App : Application() {
 
                         if (intId != null) {
                             share(
-                                intId, CodeLoader.id()
+                                intId,
+                                CodeLoader.id(),
                             )
                         } else {
                             share(
-                                id, CodeLoader.hash()
+                                id,
+                                CodeLoader.hash(),
                             )
                         }
                     }
                 }
-            }).injectTeam(routing).on("/404", {
+            })
+            .injectTeam(routing)
+            .on("/404", {
                 layout(routing) {
                     alert(AlertType.Danger) {
                         +"解析失败了"
                     }
                 }
-            }).notFound(
+            })
+            .notFound(
                 {
                     routing.navigate("/404")
                 },
@@ -136,37 +154,37 @@ class App : Application() {
         Unit
     }
 
-    private fun Navigo.injectTeam(routing: Routing): Navigo {
-        return on("/team", {
+    private fun Navigo.injectTeam(routing: Routing): Navigo =
+        on("/team", {
             failTo404(routing) {
                 layout(routing) {
                     TeamIndex.from().show(div { })
                 }
             }
-        }).on("/team/create", {
-            failTo404(routing) {
-                layout(routing) {
-                    teamCreate(this, routing)
-                }
-            }
-        }).on(RegExp("^team/(.*)"), { match: Match ->
-            failTo404(routing) {
-                layout(routing) {
-                    val id = match.data[0] as String
-                    val intId = id.toIntOrNull()
-                    if (intId != null) {
-                        showGroup(div { }, GroupId.IntGroupId(intId), routing)
-                    } else if (id.length == 36) {
-                        showGroup(div { }, GroupId.HashGroupId(id), routing)
-                    } else {
-                        showGroup(div { }, GroupId.ShortGroupName(id), routing)
+        })
+            .on("/team/create", {
+                failTo404(routing) {
+                    layout(routing) {
+                        teamCreate(this, routing)
                     }
                 }
-            }
-        })
-    }
+            })
+            .on(RegExp("^team/(.*)"), { match: Match ->
+                failTo404(routing) {
+                    layout(routing) {
+                        val id = match.data[0] as String
+                        val intId = id.toIntOrNull()
+                        if (intId != null) {
+                            showGroup(div { }, GroupId.IntGroupId(intId), routing)
+                        } else if (id.length == 36) {
+                            showGroup(div { }, GroupId.HashGroupId(id), routing)
+                        } else {
+                            showGroup(div { }, GroupId.ShortGroupName(id), routing)
+                        }
+                    }
+                }
+            })
 }
-
 
 fun main() {
     startApplication(

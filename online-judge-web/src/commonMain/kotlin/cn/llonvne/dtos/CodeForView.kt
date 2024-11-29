@@ -13,5 +13,5 @@ data class CodeForView(
     val problemId: Int,
     val status: SubmissionStatus,
     val submissionId: Int,
-    val judgeResult: JudgeResult
+    val judgeResult: JudgeResult,
 )

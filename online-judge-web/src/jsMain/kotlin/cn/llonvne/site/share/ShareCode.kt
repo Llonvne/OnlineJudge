@@ -13,11 +13,14 @@ import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 
 interface ShareID {
-    data class IntId(val id: Int) : ShareID
+    data class IntId(
+        val id: Int,
+    ) : ShareID
 
-    data class HashId(val hash: String) : ShareID
+    data class HashId(
+        val hash: String,
+    ) : ShareID
 }
-
 
 fun Container.share(
     hash: String,
@@ -35,47 +38,58 @@ fun Container.share(
     shareInternal(load, ShareID.IntId(shareId))
 }
 
-private fun Container.shareInternal(load: Deferred<GetCodeResp>, id: ShareID) {
-
+private fun Container.shareInternal(
+    load: Deferred<GetCodeResp>,
+    id: ShareID,
+) {
     observableOf<GetCodeResp?>(null) {
         setUpdater { load.await() }
         sync { resp ->
-            resp?.onSuccess { (code) ->
-                val highlighter = ShareCodeHighlighter.loadHighlighter(code, id, div { })
+            resp
+                ?.onSuccess { (code) ->
+                    val highlighter = ShareCodeHighlighter.loadHighlighter(code, id, div { })
 
-                div(className = "row") {
-                    div(className = "col") {
-                        add(Div {
-                            highlighter.load(this, code)
-                        })
+                    div(className = "row") {
+                        div(className = "col") {
+                            add(
+                                Div {
+                                    highlighter.load(this, code)
+                                },
+                            )
 
-                        add(Div {
-                            when (code.codeType) {
-                                Share -> {}
-                                Playground -> JudgeResultDisplay.playground(code.codeId, this)
-                                Problem -> JudgeResultDisplay.problem(code.codeId, this)
-                            }
-                        })
+                            add(
+                                Div {
+                                    when (code.codeType) {
+                                        Share -> {}
+                                        Playground -> JudgeResultDisplay.playground(code.codeId, this)
+                                        Problem -> JudgeResultDisplay.problem(code.codeId, this)
+                                    }
+                                },
+                            )
+                        }
+                        div(className = "col") {
+                            val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code)
+                            shareCodeComment.loadComments(this)
+                        }
                     }
-                    div(className = "col") {
-                        val shareCodeComment = ShareCodeCommentComponent.from(code.commentType, code)
-                        shareCodeComment.loadComments(this)
-                    }
+                }?.onFailure {
+                    notFound(
+                        object : NotFoundAble {
+                            override val header: String
+                                get() = "未找到对应的代码分享/提交/训练场数据"
+                            override val notice: String
+                                get() = "有可能是该ID/Hash不存在，也可有可能是对方设置了权限"
+                            override val errorCode: String
+                                get() = "ShareNotFound-$id"
+                        },
+                    )
                 }
-            }?.onFailure {
-                notFound(object : NotFoundAble {
-                    override val header: String
-                        get() = "未找到对应的代码分享/提交/训练场数据"
-                    override val notice: String
-                        get() = "有可能是该ID/Hash不存在，也可有可能是对方设置了权限"
-                    override val errorCode: String
-                        get() = "ShareNotFound-${id}"
-                })
-            }
         }
     }
 }
 
 @Serializable
-data class CommentForm(val content: String?, val type: String)
-
+data class CommentForm(
+    val content: String?,
+    val type: String,
+)

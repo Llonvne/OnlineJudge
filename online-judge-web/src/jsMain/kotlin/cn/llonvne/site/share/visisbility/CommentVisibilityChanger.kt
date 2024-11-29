@@ -7,7 +7,9 @@ import cn.llonvne.message.Messager
 import cn.llonvne.model.AuthenticationModel
 import cn.llonvne.model.CodeModel
 
-class CommentVisibilityChanger(override val codeDto: CodeDto) : VisibilityChanger {
+class CommentVisibilityChanger(
+    override val codeDto: CodeDto,
+) : VisibilityChanger {
     fun change() {
         if (!isCodeOwner()) {
             return
@@ -21,10 +23,11 @@ class CommentVisibilityChanger(override val codeDto: CodeDto) : VisibilityChange
 
         change("更改评论可见性", types) {
             Messager.toastInfo(
-                CodeModel.setCodeCommentType(
-                    shareId = codeDto.codeId,
-                    type = it
-                ).toString()
+                CodeModel
+                    .setCodeCommentType(
+                        shareId = codeDto.codeId,
+                        type = it,
+                    ).toString(),
             )
         }
     }

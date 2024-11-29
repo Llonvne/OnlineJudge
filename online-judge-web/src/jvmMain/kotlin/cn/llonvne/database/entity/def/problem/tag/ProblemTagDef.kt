@@ -12,12 +12,11 @@ private data class ProblemTagDef(
     val problemId: Int,
     val tag: String,
     val color: BadgeColor,
-
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     @KomapperVersion
     val version: Int? = null,
     @KomapperCreatedAt
     val createdAt: LocalDateTime? = null,
     @KomapperUpdatedAt
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 )

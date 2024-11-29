@@ -11,14 +11,13 @@ interface Loadable<Data> {
     companion object {
         @OptIn(ExperimentalTypeInference::class)
         @OverloadResolutionByLambdaReturnType
-        fun <Data : Any> load(loader: suspend () -> Data): Loadable<Data> {
-            return LoadableImpl(loader)
-        }
+        fun <Data : Any> load(loader: suspend () -> Data): Loadable<Data> = LoadableImpl(loader)
     }
 }
 
-
-private class LoadableImpl<Data : Any>(private val loader: suspend () -> Data) : Loadable<Data> {
+private class LoadableImpl<Data : Any>(
+    private val loader: suspend () -> Data,
+) : Loadable<Data> {
     private val observableData = ObservableValue<Data?>(null)
 
     override suspend fun load(): ObservableValue<Data?> {

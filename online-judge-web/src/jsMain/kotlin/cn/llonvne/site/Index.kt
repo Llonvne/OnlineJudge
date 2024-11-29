@@ -85,7 +85,6 @@ fun Container.index(routing: Routing) {
                 }
 
                 tomSelect {
-
                 }
 
                 h6 {

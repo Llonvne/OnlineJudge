@@ -11,24 +11,21 @@ import io.kvision.core.onClickLaunch
 import io.kvision.html.h4
 
 interface PasserResultDisplay {
-
     fun load(root: Container)
 
     companion object {
-        fun from(passerResult: PasserResult): PasserResultDisplay {
-            return when (passerResult) {
+        fun from(passerResult: PasserResult): PasserResultDisplay =
+            when (passerResult) {
                 is PasserResult.BooleanResult -> BooleanPasserResultDisplay(passerResult)
             }
-        }
     }
 }
 
 class BooleanPasserResultDisplay(
     private val booleanResult: PasserResult.BooleanResult,
     private val codeId: Int? = null,
-    private val small: Boolean = false
-) :
-    PasserResultDisplay {
+    private val small: Boolean = false,
+) : PasserResultDisplay {
     private fun onSmall(root: Container) {
         root.badges {
             add(booleanResult.suggestColor) {
@@ -70,4 +67,3 @@ class BooleanPasserResultDisplay(
         }
     }
 }
-

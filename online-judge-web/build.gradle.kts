@@ -58,17 +58,19 @@ kotlin {
             runTask {
                 mainOutputFileName = "main.bundle.js"
                 sourceMaps = false
-                devServer = KotlinWebpackConfig.DevServer(
-                    open = false,
-                    port = 3000,
-                    proxy = mutableMapOf(
-                        "/kv/*" to "http://localhost:8080",
-                        "/login" to "http://localhost:8080",
-                        "/logout" to "http://localhost:8080",
-                        "/kvws/*" to mapOf("target" to "ws://localhost:8080", "ws" to true)
-                    ),
-                    static = mutableListOf("${layout.buildDirectory.asFile.get()}/processedResources/js/main")
-                )
+                devServer =
+                    KotlinWebpackConfig.DevServer(
+                        open = false,
+                        port = 3000,
+                        proxy =
+                            mutableMapOf(
+                                "/kv/*" to "http://localhost:8080",
+                                "/login" to "http://localhost:8080",
+                                "/logout" to "http://localhost:8080",
+                                "/kvws/*" to mapOf("target" to "ws://localhost:8080", "ws" to true),
+                            ),
+                        static = mutableListOf("${layout.buildDirectory.asFile.get()}/processedResources/js/main"),
+                    )
             }
             webpackTask {
                 mainOutputFileName = "main.bundle.js"
@@ -170,10 +172,11 @@ tasks.configureEach {
 
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions.freeCompilerArgs += listOf(
-            "-opt-in=org.komapper.annotation.KomapperExperimentalAssociation",
-            "-Xcontext-receivers"
-        )
+        kotlinOptions.freeCompilerArgs +=
+            listOf(
+                "-opt-in=org.komapper.annotation.KomapperExperimentalAssociation",
+                "-Xcontext-receivers",
+            )
     }
 }
 

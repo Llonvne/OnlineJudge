@@ -6,7 +6,11 @@ import kotlinx.serialization.Serializable
 sealed interface ContestId
 
 @Serializable
-class IntId(val id: Int) : ContestId
+class IntId(
+    val id: Int,
+) : ContestId
 
 @Serializable
-class HashId(val hash: String) : ContestId
+class HashId(
+    val hash: String,
+) : ContestId

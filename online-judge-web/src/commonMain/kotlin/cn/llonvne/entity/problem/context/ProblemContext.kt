@@ -11,10 +11,5 @@ data class ProblemContext(
     val inputDescription: String,
     val outputDescription: String,
     val hint: String,
-    val testCases: ProblemTestCases
+    val testCases: ProblemTestCases,
 )
-
-
-
-
-

@@ -6,8 +6,7 @@ import io.ktor.server.routing.*
 
 const val GLOBAL_AUTHENTICATION = "auth-bearer"
 
-fun Route.globalAuth(build: Route.() -> Unit) =
-    authenticate(GLOBAL_AUTHENTICATION, build = build)
+fun Route.globalAuth(build: Route.() -> Unit) = authenticate(GLOBAL_AUTHENTICATION, build = build)
 
 fun Application.installAuthentication() {
     authentication {

@@ -21,31 +21,34 @@ import org.springframework.stereotype.Service
 class ProblemSubmissionPersistenceResolver(
     private val codeRepository: CodeRepository,
     private val submissionRepository: SubmissionRepository,
-    private val contestIdGetResolver: ContestIdGetResolver
+    private val contestIdGetResolver: ContestIdGetResolver,
 ) {
-
     sealed interface ProblemSubmissionPersistenceResult {
-        data class Success(val submissionId: Int, val codeId: Int) : ProblemSubmissionPersistenceResult
+        data class Success(
+            val submissionId: Int,
+            val codeId: Int,
+        ) : ProblemSubmissionPersistenceResult
 
         data object NotNeedToPersist : ProblemSubmissionPersistenceResult
 
-        data class Failed(val reason: String) : ProblemSubmissionPersistenceResult
+        data class Failed(
+            val reason: String,
+        ) : ProblemSubmissionPersistenceResult
     }
 
     suspend fun resolve(
         user: AuthenticationUser,
         result: ISubmissionService.ProblemSubmissionRespNotPersist,
         problemSubmissionReq: ProblemSubmissionReq,
-        language: SupportLanguages
+        language: SupportLanguages,
     ): ProblemSubmissionPersistenceResult {
-
         if (problemSubmissionReq.contestId != null) {
             return persistAsContestSubmission(
                 user,
                 result,
                 problemSubmissionReq,
                 language,
-                contestId = problemSubmissionReq.contestId
+                contestId = problemSubmissionReq.contestId,
             )
         }
 
@@ -57,19 +60,20 @@ class ProblemSubmissionPersistenceResolver(
         result: ISubmissionService.ProblemSubmissionRespNotPersist,
         problemSubmissionReq: ProblemSubmissionReq,
         language: SupportLanguages,
-        contestId: ContestId
+        contestId: ContestId,
     ): ProblemSubmissionPersistenceResult {
-        val code = codeRepository.save(
-            Code(
-                codeId = null,
-                authenticationUserId = user.id,
-                code = problemSubmissionReq.code,
-                codeType = Code.CodeType.Problem,
-                languageId = problemSubmissionReq.languageId,
-                visibilityType = CodeVisibilityType.Restrict,
-                commentType = CodeCommentType.ContestCode,
+        val code =
+            codeRepository.save(
+                Code(
+                    codeId = null,
+                    authenticationUserId = user.id,
+                    code = problemSubmissionReq.code,
+                    codeType = Code.CodeType.Problem,
+                    languageId = problemSubmissionReq.languageId,
+                    visibilityType = CodeVisibilityType.Restrict,
+                    commentType = CodeCommentType.ContestCode,
+                ),
             )
-        )
 
         if (code.codeId == null) {
             return ProblemSubmissionPersistenceResult.Failed("Code 在持久化后 id 仍然为空·")
@@ -77,22 +81,25 @@ class ProblemSubmissionPersistenceResolver(
 
         val passerResult = result.problemTestCases.passer.pass(result.submissionTestCases)
 
-        val submission = submissionRepository.save(
-            Submission(
-                submissionId = null,
-                authenticationUserId = user.id,
-                codeId = code.codeId,
-                judgeResult = ProblemJudgeResult(
-                    result.problemTestCases,
-                    result.submissionTestCases,
-                    passerResult = passerResult
-                ).json(),
-                problemId = problemSubmissionReq.problemId,
-                status = SubmissionStatus.Finished,
-                contestId = contestIdGetResolver.resolve(contestId)?.contestId
-                    ?: return ProblemSubmissionPersistenceResult.Failed("无效的 ContestId")
+        val submission =
+            submissionRepository.save(
+                Submission(
+                    submissionId = null,
+                    authenticationUserId = user.id,
+                    codeId = code.codeId,
+                    judgeResult =
+                        ProblemJudgeResult(
+                            result.problemTestCases,
+                            result.submissionTestCases,
+                            passerResult = passerResult,
+                        ).json(),
+                    problemId = problemSubmissionReq.problemId,
+                    status = SubmissionStatus.Finished,
+                    contestId =
+                        contestIdGetResolver.resolve(contestId)?.contestId
+                            ?: return ProblemSubmissionPersistenceResult.Failed("无效的 ContestId"),
+                ),
             )
-        )
 
         if (submission.submissionId == null) {
             return ProblemSubmissionPersistenceResult.Failed("Submission 在持久后 id 仍然为空")
@@ -100,7 +107,7 @@ class ProblemSubmissionPersistenceResolver(
 
         return ProblemSubmissionPersistenceResult.Success(
             submissionId = submission.submissionId,
-            codeId = code.codeId
+            codeId = code.codeId,
         )
     }
 
@@ -108,23 +115,24 @@ class ProblemSubmissionPersistenceResolver(
         user: AuthenticationUser,
         result: ISubmissionService.ProblemSubmissionRespNotPersist,
         problemSubmissionReq: ProblemSubmissionReq,
-        language: SupportLanguages
+        language: SupportLanguages,
     ): ProblemSubmissionPersistenceResult {
-
-        val code = codeRepository.save(
-            Code(
-                codeId = null,
-                authenticationUserId = user.id,
-                code = problemSubmissionReq.code,
-                codeType = Code.CodeType.Problem,
-                languageId = problemSubmissionReq.languageId,
-                visibilityType = when (problemSubmissionReq.visibilityType) {
-                    PUBLIC -> CodeVisibilityType.Public
-                    PRIVATE -> CodeVisibilityType.Private
-                    Contest -> CodeVisibilityType.Restrict
-                }
+        val code =
+            codeRepository.save(
+                Code(
+                    codeId = null,
+                    authenticationUserId = user.id,
+                    code = problemSubmissionReq.code,
+                    codeType = Code.CodeType.Problem,
+                    languageId = problemSubmissionReq.languageId,
+                    visibilityType =
+                        when (problemSubmissionReq.visibilityType) {
+                            PUBLIC -> CodeVisibilityType.Public
+                            PRIVATE -> CodeVisibilityType.Private
+                            Contest -> CodeVisibilityType.Restrict
+                        },
+                ),
             )
-        )
 
         if (code.codeId == null) {
             return ProblemSubmissionPersistenceResult.Failed("Code 在持久化后 id 仍然为空·")
@@ -132,25 +140,28 @@ class ProblemSubmissionPersistenceResolver(
 
         val passerResult = result.problemTestCases.passer.pass(result.submissionTestCases)
 
-        val submission = submissionRepository.save(
-            Submission(
-                submissionId = null,
-                authenticationUserId = user.id,
-                codeId = code.codeId,
-                judgeResult = ProblemJudgeResult(
-                    result.problemTestCases,
-                    result.submissionTestCases,
-                    passerResult = passerResult
-                ).json(),
-                problemId = problemSubmissionReq.problemId,
-                status = SubmissionStatus.Finished,
-                contestId = if (problemSubmissionReq.contestId == null) {
-                    null
-                } else {
-                    contestIdGetResolver.resolve(problemSubmissionReq.contestId)?.contestId
-                }
+        val submission =
+            submissionRepository.save(
+                Submission(
+                    submissionId = null,
+                    authenticationUserId = user.id,
+                    codeId = code.codeId,
+                    judgeResult =
+                        ProblemJudgeResult(
+                            result.problemTestCases,
+                            result.submissionTestCases,
+                            passerResult = passerResult,
+                        ).json(),
+                    problemId = problemSubmissionReq.problemId,
+                    status = SubmissionStatus.Finished,
+                    contestId =
+                        if (problemSubmissionReq.contestId == null) {
+                            null
+                        } else {
+                            contestIdGetResolver.resolve(problemSubmissionReq.contestId)?.contestId
+                        },
+                ),
             )
-        )
 
         if (submission.submissionId == null) {
             return ProblemSubmissionPersistenceResult.Failed("Submission 在持久后 id 仍然为空")
@@ -158,7 +169,7 @@ class ProblemSubmissionPersistenceResolver(
 
         return ProblemSubmissionPersistenceResult.Success(
             submissionId = submission.submissionId,
-            codeId = code.codeId
+            codeId = code.codeId,
         )
     }
 }

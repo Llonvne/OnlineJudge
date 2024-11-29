@@ -1,4 +1,3 @@
 package cn.llonvne.site.contest.detail
 
-interface ContestStatus {
-}
+interface ContestStatus

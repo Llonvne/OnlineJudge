@@ -10,15 +10,14 @@ import cn.llonvne.kvision.service.PermissionDeniedWithMessage
 import org.springframework.stereotype.Service
 
 @Service
-class IndividualProblemPassResolver(
-) {
+class IndividualProblemPassResolver {
     context(ProblemAwarer)
     suspend fun resolve(
         authenticationUser: AuthenticationUser,
         problemSubmissionReq: ISubmissionService.ProblemSubmissionReq,
-        pass: suspend (Problem) -> ProblemSubmissionResp
-    ): ProblemSubmissionResp {
-        return when (problem.visibility) {
+        pass: suspend (Problem) -> ProblemSubmissionResp,
+    ): ProblemSubmissionResp =
+        when (problem.visibility) {
             Public -> {
                 pass(problem)
             }
@@ -35,5 +34,4 @@ class IndividualProblemPassResolver(
                 TODO()
             }
         }
-    }
 }

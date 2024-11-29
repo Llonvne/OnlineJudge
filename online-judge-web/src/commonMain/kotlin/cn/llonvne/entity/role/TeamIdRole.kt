@@ -15,25 +15,19 @@ sealed interface TeamIdRole : Role {
     val teamId: Int
 
     companion object : SuperRole {
-        fun TeamIdRole.simpleName(cls: KClass<*>): String {
-            return "<${cls.simpleName}-id-$teamId>"
-        }
+        fun TeamIdRole.simpleName(cls: KClass<*>): String = "<${cls.simpleName}-id-$teamId>"
 
-        override fun superRole(): Role {
-            return TeamSuperManager.get()
-        }
+        override fun superRole(): Role = TeamSuperManager.get()
 
-        fun getManagerRoles(groupId: Int): List<TeamIdRole> {
-            return listOf(
+        fun getManagerRoles(groupId: Int): List<TeamIdRole> =
+            listOf(
                 GroupManager.GroupMangerImpl(groupId),
-                GroupOwner.GroupOwnerImpl(groupId)
+                GroupOwner.GroupOwnerImpl(groupId),
             )
-        }
     }
 }
 
 inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Boolean {
-
     if (provide is TeamSuperManager) {
         return true
     }
@@ -47,65 +41,74 @@ inline fun <reified T : TeamIdRole> T.checkInternal(provide: Role): Boolean {
 @Serializable
 sealed interface TeamMember : TeamIdRole {
     @Serializable
-    data class TeamMemberImpl(override val teamId: Int) : TeamMember {
+    data class TeamMemberImpl(
+        override val teamId: Int,
+    ) : TeamMember {
         override fun check(provide: Role): Boolean = checkInternal<TeamMember>(provide)
-        override fun toString(): String {
-            return simpleName(TeamMember::class)
-        }
+
+        override fun toString(): String = simpleName(TeamMember::class)
     }
 }
 
 @Serializable
 sealed interface DeleteTeam : TeamIdRole {
     @Serializable
-    data class DeleteTeamImpl(override val teamId: Int) : DeleteTeam {
+    data class DeleteTeamImpl(
+        override val teamId: Int,
+    ) : DeleteTeam {
         override fun check(provide: Role): Boolean = checkInternal<DeleteTeam>(provide)
-        override fun toString(): String {
-            return simpleName(DeleteTeam::class)
-        }
+
+        override fun toString(): String = simpleName(DeleteTeam::class)
     }
 }
 
 @Serializable
 sealed interface InviteMember : TeamIdRole {
     @Serializable
-    data class InviteMemberImpl(override val teamId: Int) : InviteMember {
+    data class InviteMemberImpl(
+        override val teamId: Int,
+    ) : InviteMember {
         override fun check(provide: Role): Boolean = checkInternal<InviteMember>(provide)
-        override fun toString(): String {
-            return simpleName(InviteMember::class)
-        }
+
+        override fun toString(): String = simpleName(InviteMember::class)
     }
 }
 
 @Serializable
 sealed interface KickMember : TeamIdRole {
     @Serializable
-    data class KickMemberImpl(override val teamId: Int) : KickMember {
+    data class KickMemberImpl(
+        override val teamId: Int,
+    ) : KickMember {
         override fun check(provide: Role): Boolean = checkInternal<KickMember>(provide)
-        override fun toString(): String {
-            return simpleName(KickMember::class)
-        }
+
+        override fun toString(): String = simpleName(KickMember::class)
     }
 }
 
 @Serializable
-sealed interface GroupManager : DeleteTeam, InviteMember, KickMember {
+sealed interface GroupManager :
+    DeleteTeam,
+    InviteMember,
+    KickMember {
     @Serializable
-    data class GroupMangerImpl(override val teamId: Int) : GroupManager {
+    data class GroupMangerImpl(
+        override val teamId: Int,
+    ) : GroupManager {
         override fun check(provide: Role): Boolean = checkInternal<GroupManager>(provide)
-        override fun toString(): String {
-            return simpleName(GroupManager::class)
-        }
+
+        override fun toString(): String = simpleName(GroupManager::class)
     }
 }
 
 @Serializable
 sealed interface GroupOwner : GroupManager {
     @Serializable
-    data class GroupOwnerImpl(override val teamId: Int) : GroupOwner {
+    data class GroupOwnerImpl(
+        override val teamId: Int,
+    ) : GroupOwner {
         override fun check(provide: Role): Boolean = checkInternal<GroupOwner>(provide)
-        override fun toString(): String {
-            return simpleName(GroupOwner::class)
-        }
+
+        override fun toString(): String = simpleName(GroupOwner::class)
     }
 }

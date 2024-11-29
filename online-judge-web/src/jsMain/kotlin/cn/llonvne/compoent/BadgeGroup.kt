@@ -9,9 +9,9 @@ import io.kvision.html.span
 import io.kvision.state.ObservableValue
 import io.kvision.state.bind
 
-
 fun <E : BadgeColorGetter> Container.badgeGroup(
-    lst: Collection<E>, display: Span.(E) -> Unit
+    lst: Collection<E>,
+    display: Span.(E) -> Unit,
 ) {
     span {
         lst.forEach { tag ->
@@ -23,14 +23,17 @@ fun <E : BadgeColorGetter> Container.badgeGroup(
                 addCssClass("border")
 
                 addCssClass(
-                    tag.color.cssClass
+                    tag.color.cssClass,
                 )
             }
         }
     }
 }
 
-fun Container.badge(badgeColor: BadgeColor, display: Span.() -> Unit) = span {
+fun Container.badge(
+    badgeColor: BadgeColor,
+    display: Span.() -> Unit,
+) = span {
     display()
 
     addCssClass("badge")
@@ -38,29 +41,40 @@ fun Container.badge(badgeColor: BadgeColor, display: Span.() -> Unit) = span {
     addCssClass("border")
 
     addCssClass(
-        badgeColor.cssClass
+        badgeColor.cssClass,
     )
 }
 
 interface BadgesDsl {
     fun add(
-        color: BadgeColor? = null, action: Span.() -> Unit
+        color: BadgeColor? = null,
+        action: Span.() -> Unit,
     )
 
-    fun <V> addBind(observableValue: ObservableValue<V>, action: Span.(V) -> Unit)
+    fun <V> addBind(
+        observableValue: ObservableValue<V>,
+        action: Span.(V) -> Unit,
+    )
 }
 
-private class BadgesImpl(private val target: Container) : BadgesDsl {
-
+private class BadgesImpl(
+    private val target: Container,
+) : BadgesDsl {
     private var index = 0
 
-    override fun add(color: BadgeColor?, action: Span.() -> Unit) {
+    override fun add(
+        color: BadgeColor?,
+        action: Span.() -> Unit,
+    ) {
         target.badge(color ?: BadgeColor.entries[index++ % BadgeColor.entries.size]) {
             action()
         }
     }
 
-    override fun <V> addBind(observableValue: ObservableValue<V>, action: Span.(V) -> Unit) {
+    override fun <V> addBind(
+        observableValue: ObservableValue<V>,
+        action: Span.(V) -> Unit,
+    ) {
         target.badge(BadgeColor.entries[index++ % BadgeColor.entries.size]) {}.bind(observableValue) {
             action(it)
         }

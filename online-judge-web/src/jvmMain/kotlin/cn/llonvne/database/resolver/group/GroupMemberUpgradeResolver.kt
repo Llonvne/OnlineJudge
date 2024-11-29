@@ -9,14 +9,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class GroupMemberUpgradeResolver(
-    private val roleService: RoleService
+    private val roleService: RoleService,
 ) {
-
     enum class GroupMemberUpgradeResult {
         UpdateToIdNotMatchToGroupId,
         UserAlreadyHasThisRole,
         BeUpdatedUserNotFound,
-        Success
+        Success,
     }
 
     suspend fun resolve(
@@ -24,9 +23,8 @@ class GroupMemberUpgradeResolver(
         groupIntId: Int,
         updater: AuthenticationUser,
         beUpdatedUserId: Int,
-        updateTo: TeamIdRole
+        updateTo: TeamIdRole,
     ): GroupMemberUpgradeResult {
-
         if (updateTo.teamId != groupIntId) {
             return UpdateToIdNotMatchToGroupId
         }
@@ -37,7 +35,7 @@ class GroupMemberUpgradeResolver(
             return UserAlreadyHasThisRole
         }
 
-        return if (roleService.addRole(beUpdatedUserId, updateTo)){
+        return if (roleService.addRole(beUpdatedUserId, updateTo)) {
             Success
         } else {
             BeUpdatedUserNotFound

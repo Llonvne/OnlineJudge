@@ -15,7 +15,7 @@ interface IMineService {
         data class OnlineJudgeStatistics(
             val totalUserCount: Int,
             val totalSubmissionToday: Int,
-            val totalContestLastTwoWeek: Int
+            val totalContestLastTwoWeek: Int,
         )
 
         @Serializable
@@ -27,7 +27,7 @@ interface IMineService {
             val cpuUsage: Double,
             val totalMemory: Int,
             val usedMemory: Int,
-            val isOnline: Boolean
+            val isOnline: Boolean,
         )
 
         @Serializable
@@ -38,14 +38,14 @@ interface IMineService {
             val cpuCoresCount: Int,
             val cpuUsage: Double,
             val memoryUsage: Int,
-            val isOnline: Boolean
+            val isOnline: Boolean,
         )
 
         @Serializable
         data class DashboardRespImpl(
             val statistics: OnlineJudgeStatistics,
             val backendInfo: BackendInfo,
-            val judgeServerInfo: JudgeServerInfo
+            val judgeServerInfo: JudgeServerInfo,
         ) : DashboardResp
     }
 
@@ -55,7 +55,7 @@ interface IMineService {
     sealed interface UsersResp {
         @Serializable
         data class UsersRespImpl(
-            val users: List<UserManageListUserDto>
+            val users: List<UserManageListUserDto>,
         ) : UsersResp
 
         @Serializable
@@ -63,11 +63,19 @@ interface IMineService {
             val userId: Int,
             val username: String,
             val createAt: LocalDateTime,
-            val userRole: IUserRole
+            val userRole: IUserRole,
         )
     }
 
     suspend fun users(): UsersResp
-    suspend fun deleteUser(value: Token?, id: Int): Boolean
-    suspend fun modifyUser(value: Token?, result: ModifyUserForm): Boolean
+
+    suspend fun deleteUser(
+        value: Token?,
+        id: Int,
+    ): Boolean
+
+    suspend fun modifyUser(
+        value: Token?,
+        result: ModifyUserForm,
+    ): Boolean
 }

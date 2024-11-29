@@ -11,25 +11,25 @@ import org.springframework.stereotype.Component
 
 @Component
 private class SupportLanguagesSyncer : SchemaInitializer {
-
     private val languageMeta = Meta.language
 
     override suspend fun init(db: R2dbcDatabase) {
-        val languages = SupportLanguages.entries.map {
-            Language(
-                it.languageId,
-                it.languageName,
-                it.languageVersion
-            )
-        }
+        val languages =
+            SupportLanguages.entries.map {
+                Language(
+                    it.languageId,
+                    it.languageName,
+                    it.languageVersion,
+                )
+            }
 
         db.runQuery {
-            QueryDsl.drop(languageMeta)
+            QueryDsl
+                .drop(languageMeta)
                 .andThen(
-                    QueryDsl.create(languageMeta)
-                )
-                .andThen(
-                    QueryDsl.insert(languageMeta).multiple(languages)
+                    QueryDsl.create(languageMeta),
+                ).andThen(
+                    QueryDsl.insert(languageMeta).multiple(languages),
                 )
         }
     }

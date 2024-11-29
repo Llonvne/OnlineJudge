@@ -19,13 +19,22 @@ private const val SECURE_TOKEN_LENGTH = 32
 private const val GO_JUDGE_IP = "JUDGE_IP"
 private const val GO_JUDGE_PORT = "JUDGE_PORT"
 
-internal data class EnvConfig(val rawEnv: Dotenv, val judgeSpec: Option<GoJudgeEnvSpec>)
-internal class TokenIsTooWeak(value: String) : Exception(value)
+internal data class EnvConfig(
+    val rawEnv: Dotenv,
+    val judgeSpec: Option<GoJudgeEnvSpec>,
+)
+
+internal class TokenIsTooWeak(
+    value: String,
+) : Exception(value)
 
 @JvmInline
-value class Token(val token: String)
+value class Token(
+    val token: String,
+)
 
 private val log = KotlinLogging.logger {}
+
 private fun generateSecureKey(length: Int): String {
     val secureRandom = SecureRandom()
     val randomBytes = ByteArray(length)
@@ -34,7 +43,6 @@ private fun generateSecureKey(length: Int): String {
 }
 
 internal fun loadConfigFromEnv(): EnvConfig {
-
     log.info { "loading envs from system ..." }
 
     val env = Dotenv.load()
@@ -45,7 +53,6 @@ internal fun loadConfigFromEnv(): EnvConfig {
 }
 
 private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
-
     var spec = GoJudgeEnvSpec()
 
     ifNull(this.get(ENABLE_JUDGE_KEY, "false").toBooleanStrictOrNull()) {
@@ -65,34 +72,35 @@ private fun Dotenv.loadJudgeConfig(): Option<GoJudgeEnvSpec> {
         require(port != null && isValidPort(port)) {
             "$portStr is not valid port"
         }
-        spec = GoJudgeEnvSpec.httpAddr.port.modify(spec) {
-            port
-        }
+        spec =
+            GoJudgeEnvSpec.httpAddr.port.modify(spec) {
+                port
+            }
     }
 
     return Some(spec)
 }
 
-private fun Dotenv.isEnableJudgeAuthToken(): Boolean {
-    return this.get(ENABLE_JUDGE_TOKEN_AUTH, "false").toBooleanStrictOrNull() ?: false
-}
+private fun Dotenv.isEnableJudgeAuthToken(): Boolean = this.get(ENABLE_JUDGE_TOKEN_AUTH, "false").toBooleanStrictOrNull() ?: false
 
-private fun Dotenv.getToken() = either {
-    val token = this@getToken.get(JUDGE_TOKEN, generateSecureKey(SECURE_TOKEN_LENGTH * 2))
-    if (token.length < SECURE_TOKEN_LENGTH) {
-        log.error { "token is too weak" }
-        raise("token is too weak")
+private fun Dotenv.getToken() =
+    either {
+        val token = this@getToken.get(JUDGE_TOKEN, generateSecureKey(SECURE_TOKEN_LENGTH * 2))
+        if (token.length < SECURE_TOKEN_LENGTH) {
+            log.error { "token is too weak" }
+            raise("token is too weak")
+        }
+        Token(token)
     }
-    Token(token)
-}
 
 private fun Dotenv.setToken(spec: GoJudgeEnvSpec) {
     val enableToken = isEnableJudgeAuthToken()
     if (enableToken) {
-        val token = when (val token = getToken()) {
-            is Either.Left -> throw TokenIsTooWeak(token.value)
-            is Either.Right -> token.value
-        }
+        val token =
+            when (val token = getToken()) {
+                is Either.Left -> throw TokenIsTooWeak(token.value)
+                is Either.Right -> token.value
+            }
 
         log.info { "judge token is ${token.token}" }
         GoJudgeEnvSpec.authToken.modify(spec) {
@@ -101,17 +109,21 @@ private fun Dotenv.setToken(spec: GoJudgeEnvSpec) {
     }
 }
 
-private fun isValidIP(ip: String): Boolean {
-    return InetAddressUtils.isIPv4Address(ip) || InetAddressUtils.isIPv4Address(ip)
-}
+private fun isValidIP(ip: String): Boolean = InetAddressUtils.isIPv4Address(ip) || InetAddressUtils.isIPv4Address(ip)
 
-private inline fun <reified T> ifNotNull(value: T?, then: (T) -> Unit) {
+private inline fun <reified T> ifNotNull(
+    value: T?,
+    then: (T) -> Unit,
+) {
     if (value != null) {
         then(value)
     }
 }
 
-private inline fun <reified T> ifNull(value: T?, then: () -> Unit) {
+private inline fun <reified T> ifNull(
+    value: T?,
+    then: () -> Unit,
+) {
     if (value == null) {
         then()
     }

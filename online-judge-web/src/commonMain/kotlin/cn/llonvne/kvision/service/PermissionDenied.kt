@@ -8,16 +8,36 @@ import cn.llonvne.kvision.service.ISubmissionService.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object PermissionDenied : CreateProblemResp,
-    SaveCodeResp, CommitOnCodeResp, SetCodeVisibilityResp,
-    GetCodeResp, SetCodeCommentTypeResp,
-    SetCodeCommentVisibilityTypeResp, CreateSubmissionResp,
-    PlaygroundOutput, GetLastNPlaygroundSubmissionResp,
-    CreateGroupResp, LoadGroupResp, IGroupService.JoinGroupResp, IGroupService.QuitGroupResp,
-    IGroupService.KickGroupResp, ProblemSubmissionResp, GetLastNProblemSubmissionResp, IAuthenticationService.MineResp,
-    IContestService.AddProblemResp, IContestService.CreateContestResp, IContestService.LoadContestResp,
-    IContestService.ContextSubmissionResp, GetParticipantContestResp, IMineService.DashboardResp
+data object PermissionDenied :
+    CreateProblemResp,
+    SaveCodeResp,
+    CommitOnCodeResp,
+    SetCodeVisibilityResp,
+    GetCodeResp,
+    SetCodeCommentTypeResp,
+    SetCodeCommentVisibilityTypeResp,
+    CreateSubmissionResp,
+    PlaygroundOutput,
+    GetLastNPlaygroundSubmissionResp,
+    CreateGroupResp,
+    LoadGroupResp,
+    IGroupService.JoinGroupResp,
+    IGroupService.QuitGroupResp,
+    IGroupService.KickGroupResp,
+    ProblemSubmissionResp,
+    GetLastNProblemSubmissionResp,
+    IAuthenticationService.MineResp,
+    IContestService.AddProblemResp,
+    IContestService.CreateContestResp,
+    IContestService.LoadContestResp,
+    IContestService.ContextSubmissionResp,
+    GetParticipantContestResp,
+    IMineService.DashboardResp
 
 @Serializable
-data class PermissionDeniedWithMessage(val message: String) : IGroupService.KickGroupResp,
-    IGroupService.UpgradeGroupManagerResp, IGroupService.DowngradeToMemberResp, ProblemSubmissionResp
+data class PermissionDeniedWithMessage(
+    val message: String,
+) : IGroupService.KickGroupResp,
+    IGroupService.UpgradeGroupManagerResp,
+    IGroupService.DowngradeToMemberResp,
+    ProblemSubmissionResp

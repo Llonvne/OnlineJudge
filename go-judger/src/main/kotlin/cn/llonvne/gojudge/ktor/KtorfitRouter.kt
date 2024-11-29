@@ -24,63 +24,66 @@ private class KtorfitRouterConfig {
     var services: List<Any> = listOf<Any>()
 }
 
-private val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
+private val KtorfitRouter =
+    createApplicationPlugin("KtorfitRouter", ::KtorfitRouterConfig) {
 
-    val log = KotlinLogging.logger { }
+        val log = KotlinLogging.logger { }
 
-    application.environment.monitor.subscribe(ApplicationStarted) {
-        pluginConfig.services.forEach { service ->
+        application.environment.monitor.subscribe(ApplicationStarted) {
+            pluginConfig.services.forEach { service ->
 
-            // IMPL CLASS
-            val implCls = service::class
-            // IMPL METHOD
-            val implMethods = implCls.functions.filterUserDefinedMethod()
+                // IMPL CLASS
+                val implCls = service::class
+                // IMPL METHOD
+                val implMethods = implCls.functions.filterUserDefinedMethod()
 
-            log.info { "process on ${implCls.simpleName}" }
+                log.info { "process on ${implCls.simpleName}" }
 
-            // ABSTRACT CLASS METHODS
-            val abstractMethods = getSatisfiedMethodFromAbstract(getAnnotatedInterface(implCls), log)
+                // ABSTRACT CLASS METHODS
+                val abstractMethods = getSatisfiedMethodFromAbstract(getAnnotatedInterface(implCls), log)
 
-            log.info { "find satisfied methods: ${abstractMethods.map { it.name }}" }
+                log.info { "find satisfied methods: ${abstractMethods.map { it.name }}" }
 
-            // HTTP METHOD DESCR
-            val httpMethodDescriptors = abstractMethods.map { method ->
-                // filter Ktorfit Http Annotation
-                val httpMethodUrls = method.annotations.filterKtorfitAnnotations().map { parseAnnotation(it) }
-                HttpMethodDescriptor(method, httpMethodUrls)
-            }
+                // HTTP METHOD DESCR
+                val httpMethodDescriptors =
+                    abstractMethods.map { method ->
+                        // filter Ktorfit Http Annotation
+                        val httpMethodUrls = method.annotations.filterKtorfitAnnotations().map { parseAnnotation(it) }
+                        HttpMethodDescriptor(method, httpMethodUrls)
+                    }
 
-            // ROUTE
-            val routing = it.pluginRegistry[AttributeKey("Routing")] as Routing
+                // ROUTE
+                val routing = it.pluginRegistry[AttributeKey("Routing")] as Routing
 
-            // FOR EACH DESCR
-            httpMethodDescriptors.forEach { descriptor ->
+                // FOR EACH DESCR
+                httpMethodDescriptors.forEach { descriptor ->
 
-                // FOR EACH (PATH,METHOD)
-                descriptor.httpMethodUrls.forEach { (path, method) ->
+                    // FOR EACH (PATH,METHOD)
+                    descriptor.httpMethodUrls.forEach { (path, method) ->
 
-                    // FIND TARGET METHOD
-                    val targetMethod = findMethod(implMethods, descriptor)
-                    // PARSE METHOD PACK
-                    val methodArgTypes = parseMethodArgTypes(targetMethod, service)
-                    // GENERATE A ROUTE FOR PATH
-                    val curRoute = routing.createRouteFromPath(path)
+                        // FIND TARGET METHOD
+                        val targetMethod = findMethod(implMethods, descriptor)
+                        // PARSE METHOD PACK
+                        val methodArgTypes = parseMethodArgTypes(targetMethod, service)
+                        // GENERATE A ROUTE FOR PATH
+                        val curRoute = routing.createRouteFromPath(path)
 
+                        // APPLY METHOD TO ROUTE
+                        curRoute.method(method) {
+                            handle {
+                                launch {
+                                    // CALL
+                                    val args =
+                                        methodArgTypes.map {
+                                            if (it.kotlinType?.isMarkedNullable == true) {
+                                                call.receiveNullable<Any>(it)
+                                            } else {
+                                                call.receive(it)
+                                            }
+                                        }
 
-                    // APPLY METHOD TO ROUTE
-                    curRoute.method(method) {
-                        handle {
-                            launch {
-                                // CALL
-                                val args = methodArgTypes.map {
-                                    if (it.kotlinType?.isMarkedNullable == true) {
-                                        call.receiveNullable<Any>(it)
-                                    } else {
-                                        call.receive(it)
-                                    }
+                                    call.respond(targetMethod.callSuspend(service, *args.toTypedArray()) as Any)
                                 }
-
-                                call.respond(targetMethod.callSuspend(service, *args.toTypedArray()) as Any)
                             }
                         }
                     }
@@ -88,39 +91,52 @@ private val KtorfitRouter = createApplicationPlugin("KtorfitRouter", ::KtorfitRo
             }
         }
     }
-}
 
 private enum class ParameterType {
-    Body, FormData, Header, HeadersMap, Tag, RequestBuilder
+    Body,
+    FormData,
+    Header,
+    HeadersMap,
+    Tag,
+    RequestBuilder,
 }
 
-private data class TypeInfoPack(val typeInfo: TypeInfo)
+private data class TypeInfoPack(
+    val typeInfo: TypeInfo,
+)
 
-private fun parseMethodArgTypes(targetMethod: KFunction<*>, service: Any): List<TypeInfo> {
-    return targetMethod.parameters.map {
-        TypeInfo(it.type.classifier as KClass<*>, it.type.platformType, it.type)
-    }.filter {
-        it.type != service::class
-    }
-}
+private fun parseMethodArgTypes(
+    targetMethod: KFunction<*>,
+    service: Any,
+): List<TypeInfo> =
+    targetMethod.parameters
+        .map {
+            TypeInfo(it.type.classifier as KClass<*>, it.type.platformType, it.type)
+        }.filter {
+            it.type != service::class
+        }
 
 private fun getAnnotatedInterface(implCls: KClass<out Any>): KClass<*> {
-    val abstracts = implCls.superclasses.filter {
-        it.annotations.any { annotation ->
-            annotation.annotationClass.qualifiedName == KtorfitRouterService::class.qualifiedName
-        }
-    }.toList()
+    val abstracts =
+        implCls.superclasses
+            .filter {
+                it.annotations.any { annotation ->
+                    annotation.annotationClass.qualifiedName == KtorfitRouterService::class.qualifiedName
+                }
+            }.toList()
 
-    val abstract = if (abstracts.size != 1) {
-        throw IllegalStateException("it should has only one interface annotated with KtorfitRouterService,now is ${abstracts.size}")
-    } else {
-        abstracts[0]
-    }
+    val abstract =
+        if (abstracts.size != 1) {
+            throw IllegalStateException("it should has only one interface annotated with KtorfitRouterService,now is ${abstracts.size}")
+        } else {
+            abstracts[0]
+        }
     return abstract
 }
 
 private fun getSatisfiedMethodFromAbstract(
-    cls: KClass<*>, log: KLogger
+    cls: KClass<*>,
+    log: KLogger,
 ) = cls.functions
     // excludes equals hashCode toString functions
     .filter {
@@ -141,29 +157,35 @@ private fun getSatisfiedMethodFromAbstract(
                     """${it.name} function is not annotated with any Ktorfit anntotaions and it's not abstract,please check your code
                                         |if you have install Ktorfit correct,you might not to see this error,becase Ktorfit will prevent you to compile
                                         |this code,please check your Ktorfit installation,or maybe any functions in this interface are not annotated with Ktorfit annotations
-                                    """.trimMargin()
+                    """.trimMargin()
                 }
             }
         }
     }.toList()
 
 private val ktorfitAnnotationsFqNameSet by lazy {
-    listOf(GET::class, POST::class, PUT::class, DELETE::class, HEAD::class, OPTIONS::class, PATCH::class).mapNotNull {
-        it.qualifiedName
-    }.toSet()
+    listOf(GET::class, POST::class, PUT::class, DELETE::class, HEAD::class, OPTIONS::class, PATCH::class)
+        .mapNotNull {
+            it.qualifiedName
+        }.toSet()
 }
 
 private fun isAnnotatedByKtorfit(kFunction: KFunction<*>) = kFunction.annotations.filterKtorfitAnnotations().any()
 
-private fun Collection<Annotation>.filterKtorfitAnnotations() =
-    filter { it.annotationClass.qualifiedName in ktorfitAnnotationsFqNameSet }
+private fun Collection<Annotation>.filterKtorfitAnnotations() = filter { it.annotationClass.qualifiedName in ktorfitAnnotationsFqNameSet }
 
-private data class HttpMethodUrl(val url: String, val method: HttpMethod)
+private data class HttpMethodUrl(
+    val url: String,
+    val method: HttpMethod,
+)
 
-private data class HttpMethodDescriptor(val method: KFunction<*>, val httpMethodUrls: List<HttpMethodUrl>)
+private data class HttpMethodDescriptor(
+    val method: KFunction<*>,
+    val httpMethodUrls: List<HttpMethodUrl>,
+)
 
-private fun parseAnnotation(annotation: Annotation): HttpMethodUrl {
-    return when (annotation) {
+private fun parseAnnotation(annotation: Annotation): HttpMethodUrl =
+    when (annotation) {
         is GET -> HttpMethodUrl(annotation.value, HttpMethod.Get)
         is POST -> HttpMethodUrl(annotation.value, HttpMethod.Post)
         is PUT -> HttpMethodUrl(annotation.value, HttpMethod.Put)
@@ -173,16 +195,13 @@ private fun parseAnnotation(annotation: Annotation): HttpMethodUrl {
         is PATCH -> HttpMethodUrl(annotation.value, HttpMethod.Patch)
         else -> shouldNotHappen()
     }
-}
 
-private fun Collection<KFunction<*>>.filterUserDefinedMethod() = filter {
-    it.name !in setOf("equals", "hashCode", "toString")
-}
+private fun Collection<KFunction<*>>.filterUserDefinedMethod() =
+    filter {
+        it.name !in setOf("equals", "hashCode", "toString")
+    }
 
 private fun findMethod(
-    implMethods: List<KFunction<*>>, httpMethodDescriptor: HttpMethodDescriptor
+    implMethods: List<KFunction<*>>,
+    httpMethodDescriptor: HttpMethodDescriptor,
 ) = checkNotNull(implMethods.find { it.name == httpMethodDescriptor.method.name })
-
-
-
-

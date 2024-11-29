@@ -16,7 +16,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.*
 
-//"criyle/go-judge"
+// "criyle/go-judge"
 internal const val GO_JUDGE_DOCKER_NAME = "judger"
 
 /**
@@ -30,7 +30,9 @@ private val isLinux by lazy {
 /**
  * Docker Container 的协程包装器
  */
-class CoroutineContainer(private val container: GenericContainer<*>) {
+class CoroutineContainer(
+    private val container: GenericContainer<*>,
+) {
     companion object {
         /**
          * 建立独立的线程为Docker协程服务
@@ -56,18 +58,17 @@ class CoroutineContainer(private val container: GenericContainer<*>) {
         }
     }
 
-
     suspend fun close() {
         on { container.close() }
     }
 
-    suspend fun exec(command: String): Container.ExecResult {
-        return withContext(dockerCoroutinesContext) {
-            val result = ExecInContainerPattern
-                .execInContainer(dockerClient, container.containerInfo, "/bin/sh", "-c", command)
+    suspend fun exec(command: String): Container.ExecResult =
+        withContext(dockerCoroutinesContext) {
+            val result =
+                ExecInContainerPattern
+                    .execInContainer(dockerClient, container.containerInfo, "/bin/sh", "-c", command)
             result
         }
-    }
 }
 
 private val log = KotlinLogging.logger {}
@@ -77,19 +78,19 @@ fun configureGoJudgeContainer(
     isPrivilegedMode: Boolean = true,
     reuseContainer: Boolean = false,
     envs: MutableMap<String, String> = mutableMapOf(),
-    spec: GoJudgeEnvSpec = GoJudgeEnvSpec()
+    spec: GoJudgeEnvSpec = GoJudgeEnvSpec(),
 ): Resource<CoroutineContainer> {
-
     log.info { "building new docker client" }
 
     envs["DEBIAN_FRONTEND"] = "noninteractive"
 
-    val container = GenericContainer(DockerImageName.parse(GO_JUDGE_DOCKER_NAME))
-        .withSharedMemorySize((256 * 1024 * 1024).toLong()) // 256 MB
-        .withPrivilegedMode(isPrivilegedMode)
-        .withReuse(reuseContainer)
-        .withCreateContainerCmdModifier { it.withName(name) }
-        .withEnv(envs)
+    val container =
+        GenericContainer(DockerImageName.parse(GO_JUDGE_DOCKER_NAME))
+            .withSharedMemorySize((256 * 1024 * 1024).toLong()) // 256 MB
+            .withPrivilegedMode(isPrivilegedMode)
+            .withReuse(reuseContainer)
+            .withCreateContainerCmdModifier { it.withName(name) }
+            .withEnv(envs)
 
     applySpec(spec, container)
     return resource({
@@ -101,11 +102,12 @@ fun configureGoJudgeContainer(
     }
 }
 
-fun shouldNotHappen(): Nothing =
-    throw IllegalStateException("it shouldn't be info please report me on Github:Llonvne/OnlineJudge")
+fun shouldNotHappen(): Nothing = throw IllegalStateException("it shouldn't be info please report me on Github:Llonvne/OnlineJudge")
 
-fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
-
+fun applySpec(
+    spec: GoJudgeEnvSpec,
+    container: GenericContainer<*>,
+) {
     val portBindings = mutableListOf<String>()
     val commands = mutableListOf<String>()
 
@@ -125,7 +127,6 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
     }
 
     if (spec.grpcAddr != GoJudgeEnvSpec.DEFAULT_GRPC_ADDR) {
-
         if (spec.enableGrpc) {
             logger.error("you disable grpc service,and set a address,please check your setting")
         }
@@ -160,7 +161,9 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
     if (spec.goDebugAndPrometheusMetricsAddr != GoJudgeEnvSpec.DEFAULT_MONITOR_ADDR) {
         withCommand("-monitor-addr=${spec.goDebugAndPrometheusMetricsAddr}")
 
-        logger.info("go-judge monitor endpoint on ${spec.goDebugAndPrometheusMetricsAddr},port ${spec.goDebugAndPrometheusMetricsAddr.port} is exposed")
+        logger.info(
+            "go-judge monitor endpoint on ${spec.goDebugAndPrometheusMetricsAddr},port ${spec.goDebugAndPrometheusMetricsAddr.port} is exposed",
+        )
 
         if (!spec.prometheusMetrics && !spec.goDebugEndPoint) {
             logger.error("go-judge: go debug and prometheus metrics is all disabled,but set a addr for it,please check you setting")
@@ -224,12 +227,18 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
             val linuxSpec = spec.linuxOnlySpec as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec
 
             when (linuxSpec.cpuSets) {
-                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.CpuSetting.Customized -> withCommand("-cpuset=${(linuxSpec.cpuSets as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.CpuSetting.Customized).settings}")
+                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.CpuSetting.Customized ->
+                    withCommand(
+                        "-cpuset=${(linuxSpec.cpuSets as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.CpuSetting.Customized).settings}",
+                    )
                 GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.CpuSetting.Default -> Unit
             }
 
             when (linuxSpec.containerCredStart) {
-                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.ContainerCredStartSetting.Customized -> withCommand("-container-cred-start=${linuxSpec.containerCredStart.start}")
+                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.ContainerCredStartSetting.Customized ->
+                    withCommand(
+                        "-container-cred-start=${linuxSpec.containerCredStart.start}",
+                    )
                 GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.ContainerCredStartSetting.Default -> Unit
             }
 
@@ -239,17 +248,26 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
             }
 
             when (linuxSpec.seccompConf) {
-                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.SeccompConfSetting.Customized -> withCommand("-seccomp-conf=${(linuxSpec.seccompConf as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.SeccompConfSetting.Customized).settings}")
+                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.SeccompConfSetting.Customized ->
+                    withCommand(
+                        "-seccomp-conf=${(linuxSpec.seccompConf as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.SeccompConfSetting.Customized).settings}",
+                    )
                 GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.SeccompConfSetting.Disable -> Unit
             }
 
             when (linuxSpec.tmpFsParam) {
-                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.TmsFsParamSetting.Customized -> withCommand("-tmp-fs-param=${(linuxSpec.tmpFsParam as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.TmsFsParamSetting.Customized).command}")
+                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.TmsFsParamSetting.Customized ->
+                    withCommand(
+                        "-tmp-fs-param=${(linuxSpec.tmpFsParam as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.TmsFsParamSetting.Customized).command}",
+                    )
                 GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.TmsFsParamSetting.Default -> Unit
             }
 
             when (linuxSpec.mountConf) {
-                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.MountConfSetting.Customized -> withCommand("-mount-conf=${(linuxSpec.mountConf as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.MountConfSetting.Customized).settings}")
+                is GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.MountConfSetting.Customized ->
+                    withCommand(
+                        "-mount-conf=${(linuxSpec.mountConf as GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.MountConfSetting.Customized).settings}",
+                    )
                 GoJudgeEnvSpec.LinuxOnlySpec.LinuxPlatformSpec.MountConfSetting.Default -> Unit
             }
         }
@@ -260,13 +278,19 @@ fun applySpec(spec: GoJudgeEnvSpec, container: GenericContainer<*>) {
     }
 
     when (spec.preFork) {
-        is GoJudgeEnvSpec.PreForkSetting.Customized -> withCommand("-pre-fork=${(spec.preFork as GoJudgeEnvSpec.PreForkSetting.Customized).instance}")
+        is GoJudgeEnvSpec.PreForkSetting.Customized ->
+            withCommand(
+                "-pre-fork=${(spec.preFork as GoJudgeEnvSpec.PreForkSetting.Customized).instance}",
+            )
         GoJudgeEnvSpec.PreForkSetting.Default -> Unit
     }
 
     when (spec.fileTimeout) {
         GoJudgeEnvSpec.FileTimeoutSetting.Disabled -> Unit
-        is GoJudgeEnvSpec.FileTimeoutSetting.Timeout -> withCommand("-file-timeout=${(spec.fileTimeout as GoJudgeEnvSpec.FileTimeoutSetting.Timeout).seconds}")
+        is GoJudgeEnvSpec.FileTimeoutSetting.Timeout ->
+            withCommand(
+                "-file-timeout=${(spec.fileTimeout as GoJudgeEnvSpec.FileTimeoutSetting.Timeout).seconds}",
+            )
     }
 
     container.withCommand(*commands.toTypedArray())

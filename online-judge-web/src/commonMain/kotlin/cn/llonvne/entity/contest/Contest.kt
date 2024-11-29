@@ -2,7 +2,6 @@ package cn.llonvne.entity.contest
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 val contestContextJson = Json { encodeDefaults = true }
@@ -22,9 +21,8 @@ data class Contest(
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
     val contextStr: String = ContestContext(listOf()).json(),
-    val hashLink: String
+    val hashLink: String,
 ) {
-
     val context: ContestContext = Json.decodeFromString(contextStr)
 
     /**
@@ -32,12 +30,16 @@ data class Contest(
      */
     @Serializable
     enum class ContestScoreType {
-        ACM, IOI, IO
+        ACM,
+        IOI,
+        IO,
     }
 
     @Serializable
     enum class ContestStatus {
-        NotBegin, Running, Ended
+        NotBegin,
+        Running,
+        Ended,
     }
 
     @Serializable
@@ -46,16 +48,17 @@ data class Contest(
         OpenForParticipant,
         OpenForManger,
         OpenForOwner,
-        Closed;
+        Closed,
+        ;
 
         val chinese
-            get() = when (this) {
-                OpenForEveryOne -> "对所有人开放"
-                OpenForParticipant -> "仅对参与者开放"
-                OpenForManger -> "仅对比赛管理员开放"
-                OpenForOwner -> "仅对所有者开放"
-                Closed -> "不开放"
-            }
+            get() =
+                when (this) {
+                    OpenForEveryOne -> "对所有人开放"
+                    OpenForParticipant -> "仅对参与者开放"
+                    OpenForManger -> "仅对比赛管理员开放"
+                    OpenForOwner -> "仅对所有者开放"
+                    Closed -> "不开放"
+                }
     }
-
 }

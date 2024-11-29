@@ -19,9 +19,11 @@ fun Application.installKtorOfficialPlugins() {
     install(AutoHeadResponse)
     install(RequestValidation)
     install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-        })
+        json(
+            Json {
+                prettyPrint = true
+            },
+        )
     }
     install(DoubleReceive)
     install(CallLogging) {

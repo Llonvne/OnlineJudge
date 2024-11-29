@@ -5,7 +5,5 @@ import java.util.*
 
 @Service
 class GroupHashService {
-    fun hash(): String {
-        return UUID.randomUUID().toString()
-    }
+    fun hash(): String = UUID.randomUUID().toString()
 }

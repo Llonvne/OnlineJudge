@@ -11,19 +11,20 @@ interface Validatable {
     companion object {
         @Serializable
         sealed interface ValidateResult {
-            fun toBoolean(): Boolean {
-                return when (this) {
+            fun toBoolean(): Boolean =
+                when (this) {
                     Ok -> true
                     is Failed -> false
                 }
-            }
         }
 
         @Serializable
         data object Ok : ValidateResult
 
         @Serializable
-        data class Failed(val message: String) : ValidateResult
+        data class Failed(
+            val message: String,
+        ) : ValidateResult
 
         fun interface Validator {
             fun validate(): ValidateResult
@@ -36,7 +37,7 @@ interface Validatable {
         inline fun <reified T> ValidatorDsl.on(
             value: T,
             failMessage: String,
-            crossinline predicate: T.() -> Boolean
+            crossinline predicate: T.() -> Boolean,
         ) {
             add {
                 return@add if (predicate.invoke(value)) {
@@ -47,9 +48,9 @@ interface Validatable {
             }
         }
 
-        private data class ValidatorDslImpl
-            (private val validators: MutableList<Validator> = mutableListOf()) :
-            ValidatorDsl {
+        private data class ValidatorDslImpl(
+            private val validators: MutableList<Validator> = mutableListOf(),
+        ) : ValidatorDsl {
             override fun add(validator: Validator) {
                 validators.add(validator)
             }

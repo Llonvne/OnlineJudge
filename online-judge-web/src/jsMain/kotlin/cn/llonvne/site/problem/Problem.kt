@@ -31,11 +31,10 @@ import kotlinx.serialization.serializer
 
 @Serializable
 data class ProblemSearch(
-    val input: String? = null
+    val input: String? = null,
 )
 
 internal fun Container.problems(routing: Routing) {
-
     alert(AlertType.Light) {
         h1 {
             +"题目集合"
@@ -47,7 +46,6 @@ internal fun Container.problems(routing: Routing) {
     }
 
     observableOf(ProblemListConfigure()) {
-
         setUpdater { ProblemListConfigure() }
 
         syncNotNull(div { }) { config ->
@@ -62,30 +60,38 @@ internal fun Container.problems(routing: Routing) {
                         buttonGroup {
                             button("所有") {
                                 onClick {
-                                    setObv(ProblemListConfigure {
-                                        showType = ProblemListShowType.All
-                                    })
+                                    setObv(
+                                        ProblemListConfigure {
+                                            showType = ProblemListShowType.All
+                                        },
+                                    )
                                 }
                             }
                             button("已通过", style = ButtonStyle.SUCCESS) {
                                 onClick {
-                                    setObv(ProblemListConfigure {
-                                        showType = ProblemListShowType.Accepted
-                                    })
+                                    setObv(
+                                        ProblemListConfigure {
+                                            showType = ProblemListShowType.Accepted
+                                        },
+                                    )
                                 }
                             }
                             button("已尝试", style = ButtonStyle.WARNING) {
                                 onClick {
-                                    setObv(ProblemListConfigure {
-                                        showType = ProblemListShowType.Attempted
-                                    })
+                                    setObv(
+                                        ProblemListConfigure {
+                                            showType = ProblemListShowType.Attempted
+                                        },
+                                    )
                                 }
                             }
                             button("星标", style = ButtonStyle.INFO) {
                                 onClick {
-                                    setObv(ProblemListConfigure {
-                                        showType = ProblemListShowType.Favorite
-                                    })
+                                    setObv(
+                                        ProblemListConfigure {
+                                            showType = ProblemListShowType.Favorite
+                                        },
+                                    )
                                 }
                             }
                         }
@@ -95,8 +101,6 @@ internal fun Container.problems(routing: Routing) {
         }
     }
 }
-
-
 
 private class ProblemListConfigure {
     var showType: ProblemListShowType = ProblemListShowType.All
@@ -110,9 +114,8 @@ private fun ProblemListConfigure(configure: ProblemListConfigure.() -> Unit): Pr
 
 private fun Container.problemsList(
     routing: Routing,
-    configure: ProblemListConfigure = ProblemListConfigure()
+    configure: ProblemListConfigure = ProblemListConfigure(),
 ) {
-
     val loader: suspend () -> List<ProblemForList> = {
         ProblemModel.listProblem(configure.showType)
     }
@@ -130,16 +133,20 @@ private fun Container.problemsList(
 
             var searchText by Storage.remember("", "problemSearchText")
 
-            add(ProblemSearch::input, Text(value = searchText) {
-                placeholder = "查找"
-                addCssClass("col-auto")
-                removeCssClass("kv-mb-3")
+            add(
+                ProblemSearch::input,
+                Text(value = searchText) {
+                    placeholder = "查找"
+                    addCssClass("col-auto")
+                    removeCssClass("kv-mb-3")
 
-                onInput {
-                    searchText = this.value ?: ""
-                }
-
-            }, required = true, requiredMessage = "查找内容不可为空")
+                    onInput {
+                        searchText = this.value ?: ""
+                    }
+                },
+                required = true,
+                requiredMessage = "查找内容不可为空",
+            )
             button("搜索", style = ButtonStyle.OUTLINESECONDARY) {
                 addCssClass("col-auto")
                 onClick {
@@ -174,47 +181,54 @@ private fun Container.problemsList(
 
         div(className = "py-2").bind(this) {
             tabulator(
-                it, options = TabulatorOptions(
-                    layout = Layout.FITCOLUMNS, columns = listOf(
-                        ColumnDefinition("题目ID", "problem.problemId"),
-                        ColumnDefinition("题目名称", "problem.problemName", cellClick = { _, cell ->
-                            val id = cell.getData.invoke().asDynamic().problem.problemId as Int?
-                            routing.navigate("/problems/${id}")
-                        }),
-                        ColumnDefinition("状态", "status", formatterComponentFunction = { _, _, e: ProblemForList ->
-                            span {
-                                problemStatus(e.status)
-                            }
-                        }),
-                        ColumnDefinition("题目标签", formatterComponentFunction = { _, _, e: ProblemForList ->
-                            span {
-                                badgeGroup(e.tags) { tag ->
-                                    +tag.tag
-                                }
-                            }
-                        }),
-                        ColumnDefinition("作者", formatterComponentFunction = { _, _, e: ProblemForList ->
-                            span {
-                                +e.author.authorName
-                            }
-                        }),
-                        ColumnDefinition("更新时间", formatterComponentFunction = { _, _, e: ProblemForList ->
-                            span {
-                                val updateAt = e.problem.updatedAt
-                                if (updateAt != null) {
-                                    +"${updateAt.year}年${updateAt.monthNumber}月${updateAt.dayOfMonth}日"
-                                } else {
-                                    +"未找到更新时间"
-                                }
-                            }
-                        })
-                    )
-                ), serializer = serializer()
+                it,
+                options =
+                    TabulatorOptions(
+                        layout = Layout.FITCOLUMNS,
+                        columns =
+                            listOf(
+                                ColumnDefinition("题目ID", "problem.problemId"),
+                                ColumnDefinition("题目名称", "problem.problemName", cellClick = { _, cell ->
+                                    val id =
+                                        cell.getData
+                                            .invoke()
+                                            .asDynamic()
+                                            .problem.problemId as Int?
+                                    routing.navigate("/problems/$id")
+                                }),
+                                ColumnDefinition("状态", "status", formatterComponentFunction = { _, _, e: ProblemForList ->
+                                    span {
+                                        problemStatus(e.status)
+                                    }
+                                }),
+                                ColumnDefinition("题目标签", formatterComponentFunction = { _, _, e: ProblemForList ->
+                                    span {
+                                        badgeGroup(e.tags) { tag ->
+                                            +tag.tag
+                                        }
+                                    }
+                                }),
+                                ColumnDefinition("作者", formatterComponentFunction = { _, _, e: ProblemForList ->
+                                    span {
+                                        +e.author.authorName
+                                    }
+                                }),
+                                ColumnDefinition("更新时间", formatterComponentFunction = { _, _, e: ProblemForList ->
+                                    span {
+                                        val updateAt = e.problem.updatedAt
+                                        if (updateAt != null) {
+                                            +"${updateAt.year}年${updateAt.monthNumber}月${updateAt.dayOfMonth}日"
+                                        } else {
+                                            +"未找到更新时间"
+                                        }
+                                    }
+                                }),
+                            ),
+                    ),
+                serializer = serializer(),
             ) {
                 height = 400.px
             }
         }
     }
-
-
 }

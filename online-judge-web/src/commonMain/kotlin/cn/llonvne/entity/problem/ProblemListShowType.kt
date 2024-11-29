@@ -7,5 +7,5 @@ enum class ProblemListShowType {
     All,
     Accepted,
     Attempted,
-    Favorite
+    Favorite,
 }

@@ -22,34 +22,35 @@ import io.kvision.html.button
 import io.kvision.html.div
 import cn.llonvne.site.contest.Display as ContestDisplay
 
-
 sealed interface ContestDetail {
     fun show(root: Container)
 
     companion object {
-
         private data object ContestNotFound : ContestDetail {
             override fun show(root: Container) {
-                root.notFound(object : NotFoundAble {
-                    override val header: String
-                        get() = "比赛未找到"
-                    override val notice: String
-                        get() = "请确认比赛ID正确，如果确认比赛ID正确，请联系我们 ^_^"
-                    override val errorCode: String = "ContestNotFound"
-                })
+                root.notFound(
+                    object : NotFoundAble {
+                        override val header: String
+                            get() = "比赛未找到"
+                        override val notice: String
+                            get() = "请确认比赛ID正确，如果确认比赛ID正确，请联系我们 ^_^"
+                        override val errorCode: String = "ContestNotFound"
+                    },
+                )
             }
         }
 
         fun from(id: String): ContestDetail {
             val intId = id.toIntOrNull()
 
-            val contestId: ContestId = if (intId != null) {
-                IntId(intId)
-            } else if (id.length == 36) {
-                HashId(id)
-            } else {
-                return ContestNotFound
-            }
+            val contestId: ContestId =
+                if (intId != null) {
+                    IntId(intId)
+                } else if (id.length == 36) {
+                    HashId(id)
+                } else {
+                    return ContestNotFound
+                }
 
             return BaseContestDetail(contestId)
         }
@@ -57,17 +58,19 @@ sealed interface ContestDetail {
 }
 
 sealed interface Display {
-    data class ProblemIndex(val id: Int) : ContestDisplay
+    data class ProblemIndex(
+        val id: Int,
+    ) : ContestDisplay
 
     data object Status : ContestDisplay
 
     data object None : ContestDisplay
 }
 
-private class BaseContestDetail(private val contestId: ContestId) : ContestDetail {
-
+private class BaseContestDetail(
+    private val contestId: ContestId,
+) : ContestDetail {
     override fun show(root: Container) {
-
         observableOf<IContestService.LoadContestResp>(null) {
             setUpdater {
                 ContestModel.load(contestId)
@@ -78,30 +81,34 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
                     loading()
                 } else {
                     when (resp) {
-                        ContestNotFound -> notFound(
-                            "比赛未找到",
-                            "请检查比赛ID是否正确，如果确认比赛ID正确，请联系我们.",
-                            "ContestNotFound-$contestId"
-                        )
+                        ContestNotFound ->
+                            notFound(
+                                "比赛未找到",
+                                "请检查比赛ID是否正确，如果确认比赛ID正确，请联系我们.",
+                                "ContestNotFound-$contestId",
+                            )
 
                         is LoadOk -> {
                             onOk(this, resp)
                         }
 
                         PermissionDenied -> notFound("你还为登入", "请登入后查看该页面", "NotLogin")
-                        ContestOwnerNotFound -> notFound(
-                            "所有者账号处于异常状态，该比赛已经不可查看",
-                            "如有问题请联系管理",
-                            "OwnerIdNotFound"
-                        )
+                        ContestOwnerNotFound ->
+                            notFound(
+                                "所有者账号处于异常状态，该比赛已经不可查看",
+                                "如有问题请联系管理",
+                                "OwnerIdNotFound",
+                            )
                     }
                 }
             }
         }
     }
 
-    fun onOk(container: Container, loadOk: LoadOk) {
-
+    fun onOk(
+        container: Container,
+        loadOk: LoadOk,
+    ) {
         val contestDetailHeader = ContestDetailHeader.form(loadOk = loadOk)
 
         val problemChooser = ProblemChooser.from(loadOk)
@@ -111,15 +118,19 @@ private class BaseContestDetail(private val contestId: ContestId) : ContestDetai
         val problemDisplay = ContestProblemDisplay.from(contestId, statusResolver)
 
         container.div {
-
             contestDetailHeader.show(div { })
 
             observableOf<ContestDisplay>(None) {
-                setUpdater { ProblemIndex(loadOk.contest.context.problems.first().problemId) }
+                setUpdater {
+                    ProblemIndex(
+                        loadOk.contest.context.problems
+                            .first()
+                            .problemId,
+                    )
+                }
                 sync(div { }) { index ->
                     div(className = "row") {
                         div(className = "col-3") {
-
                             problemChooser.show(div { }, this@observableOf)
 
                             alert(AlertType.Light) {

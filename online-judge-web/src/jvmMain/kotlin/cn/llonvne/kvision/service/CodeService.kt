@@ -1,8 +1,8 @@
 package cn.llonvne.kvision.service
 
-import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.database.repository.CodeRepository
 import cn.llonvne.database.repository.LanguageRepository
+import cn.llonvne.database.repository.UserRepository
 import cn.llonvne.dtos.CodeDto
 import cn.llonvne.dtos.CreateCommentReq
 import cn.llonvne.entity.AuthenticationUser
@@ -40,11 +40,12 @@ actual class CodeService(
 ) : ICodeService {
     override suspend fun save(
         token: Token?,
-        saveCodeReq: SaveCodeReq
+        saveCodeReq: SaveCodeReq,
     ): SaveCodeResp {
-        val user = authentication.validate(token) {
-            requireLogin()
-        } ?: return PermissionDenied
+        val user =
+            authentication.validate(token) {
+                requireLogin()
+            } ?: return PermissionDenied
         if (saveCodeReq.languageId != null) {
             if (!languageRepository.isIdExist(saveCodeReq.languageId)) {
                 return LanguageNotFound
@@ -54,26 +55,26 @@ actual class CodeService(
     }
 
     enum class GetCodeId {
-        HashLink, Id
+        HashLink,
+        Id,
     }
 
     private suspend fun getCodeSafetyCheck(
         getCodeId: GetCodeId,
         code: Code,
-        value: Token?
+        value: Token?,
     ): GetCodeResp {
         when (code.visibilityType) {
             Public -> {
-
             }
 
             Private -> {
-
                 val user = authentication.getAuthenticationUser(value)
 
                 if (user == null) {
                     return PermissionDenied
-                } else if (user.id != codeRepository
+                } else if (user.id !=
+                    codeRepository
                         .getCodeOwnerId(code.codeId ?: return CodeNotFound)
                 ) {
                     return PermissionDenied
@@ -90,7 +91,6 @@ actual class CodeService(
                     }
 
                     user.id == codeRepository.getCodeOwnerId(code.codeId ?: return CodeNotFound) -> {
-
                     }
                 }
             }
@@ -102,28 +102,37 @@ actual class CodeService(
                 rawCode = code.code,
                 language = languageRepository.getByIdOrNull(code.languageId),
                 shareUserId = code.authenticationUserId,
-                shareUsername = userRepository.getByIdOrNull(code.authenticationUserId)?.username
-                    ?: "未知",
+                shareUsername =
+                    userRepository.getByIdOrNull(code.authenticationUserId)?.username
+                        ?: "未知",
                 visibilityType = code.visibilityType,
                 commentType = code.commentType,
                 hashLink = code.hashLink,
-                codeType = code.codeType
-            )
+                codeType = code.codeType,
+            ),
         )
     }
 
-    override suspend fun getCode(value: Token?, shareId: Int): GetCodeResp {
+    override suspend fun getCode(
+        value: Token?,
+        shareId: Int,
+    ): GetCodeResp {
         val code = codeRepository.get(shareId) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.Id, code, value)
     }
 
-    override suspend fun getCodeByHash(value: Token?, hash: String): GetCodeResp {
+    override suspend fun getCodeByHash(
+        value: Token?,
+        hash: String,
+    ): GetCodeResp {
         val code = codeRepository.getCodeByHash(hash) ?: return CodeNotFound
         return getCodeSafetyCheck(GetCodeId.HashLink, code, value)
     }
 
     override suspend fun setCodeCommentType(
-        token: Token?, shareId: Int, type: CodeCommentType
+        token: Token?,
+        shareId: Int,
+        type: CodeCommentType,
     ): SetCodeCommentTypeResp {
         if (!codeRepository.isIdExist(shareId)) {
             return CodeNotFound
@@ -139,7 +148,10 @@ actual class CodeService(
     }
 
     override suspend fun setCodeCommentVisibilityType(
-        token: Token?, shareId: Int, commentId: Int, type: ShareCodeCommentType
+        token: Token?,
+        shareId: Int,
+        commentId: Int,
+        type: ShareCodeCommentType,
     ): SetCodeCommentVisibilityTypeResp {
         val user = authentication.getAuthenticationUser(token)
         if (user == null) {
@@ -156,31 +168,30 @@ actual class CodeService(
         return SuccessSetCodeCommentVisibilityType
     }
 
-    private suspend fun SaveCodeReq.toCode(user: AuthenticationUser): Code {
-        return Code(
+    private suspend fun SaveCodeReq.toCode(user: AuthenticationUser): Code =
+        Code(
             authenticationUserId = user.id,
             code = code,
             languageId = languageId,
-            codeType = Code.CodeType.Share
+            codeType = Code.CodeType.Share,
         )
-    }
 
     override suspend fun commit(commitOnCodeReq: CommitOnCodeReq): CommitOnCodeResp {
-
         if (commitOnCodeReq.token == null) {
             return PermissionDenied
         }
 
         val user = authentication.getAuthenticationUser(commitOnCodeReq.token) ?: return PermissionDenied
 
-        val result = codeRepository.comment(
-            ShareCodeComment(
-                committerAuthenticationUserId = user.id,
-                content = commitOnCodeReq.content,
-                shareCodeId = commitOnCodeReq.codeId,
-                type = commitOnCodeReq.type
+        val result =
+            codeRepository.comment(
+                ShareCodeComment(
+                    committerAuthenticationUserId = user.id,
+                    content = commitOnCodeReq.content,
+                    shareCodeId = commitOnCodeReq.codeId,
+                    type = commitOnCodeReq.type,
+                ),
             )
-        )
 
         if (result.commentId == null) {
             return InternalError("CommitId 在插入后仍不存在...")
@@ -197,55 +208,59 @@ actual class CodeService(
                 commitOnCodeReq.codeId,
                 commitOnCodeReq.content,
                 createdAt = result.createdAt,
-                visibilityType = result.type
-            )
+                visibilityType = result.type,
+            ),
         )
     }
 
     override suspend fun getComments(
-        token: Token?, sharCodeId: Int
+        token: Token?,
+        sharCodeId: Int,
     ): GetCommitsOnCodeResp {
         if (!codeRepository.isIdExist(sharCodeId)) {
             return CodeNotFound
         } else {
-            return codeRepository.getComments(sharCodeId).mapNotNull {
+            return codeRepository
+                .getComments(sharCodeId)
+                .mapNotNull {
+                    val committerUsername =
+                        userRepository.getByIdOrNull(it.committerAuthenticationUserId)
+                            ?: return@mapNotNull null
 
-                val committerUsername = userRepository.getByIdOrNull(it.committerAuthenticationUserId)
-                    ?: return@mapNotNull null
+                    val sharCodeOwnerId = codeRepository.getCodeOwnerId(sharCodeId)
 
-                val sharCodeOwnerId = codeRepository.getCodeOwnerId(sharCodeId)
+                    val user =
+                        authentication.getAuthenticationUser(token) ?: return@mapNotNull null
 
-                val user =
-                    authentication.getAuthenticationUser(token) ?: return@mapNotNull null
-
-                if (it.type == ShareCodeCommentType.Private) {
-                    if (token == null) {
-                        return@mapNotNull null
-                    } else if (!(it.committerAuthenticationUserId == user.id || user.id == sharCodeOwnerId)) {
-                        return@mapNotNull null
+                    if (it.type == ShareCodeCommentType.Private) {
+                        if (token == null) {
+                            return@mapNotNull null
+                        } else if (!(it.committerAuthenticationUserId == user.id || user.id == sharCodeOwnerId)) {
+                            return@mapNotNull null
+                        }
                     }
-                }
 
-                CreateCommentReq(
-                    it.commentId ?: return@mapNotNull null,
-                    committerUsername.username,
-                    sharCodeId,
-                    it.content,
-                    createdAt = it.createdAt ?: return@mapNotNull null,
-                    visibilityType = it.type
-                )
-            }.let { SuccessfulGetCommits(it) }
+                    CreateCommentReq(
+                        it.commentId ?: return@mapNotNull null,
+                        committerUsername.username,
+                        sharCodeId,
+                        it.content,
+                        createdAt = it.createdAt ?: return@mapNotNull null,
+                        visibilityType = it.type,
+                    )
+                }.let { SuccessfulGetCommits(it) }
         }
     }
 
-    override suspend fun deleteComments(commentIds: List<Int>): List<Int> {
-        return codeRepository.deleteComment(commentIds).mapNotNull {
+    override suspend fun deleteComments(commentIds: List<Int>): List<Int> =
+        codeRepository.deleteComment(commentIds).mapNotNull {
             it.commentId
         }
-    }
 
     override suspend fun setCodeVisibility(
-        token: Token?, shareId: Int, result: CodeVisibilityType
+        token: Token?,
+        shareId: Int,
+        result: CodeVisibilityType,
     ): SetCodeVisibilityResp {
         val user = authentication.getAuthenticationUser(token) ?: return PermissionDenied
 

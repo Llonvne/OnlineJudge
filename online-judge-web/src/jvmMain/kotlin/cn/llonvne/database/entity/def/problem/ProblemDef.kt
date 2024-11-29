@@ -7,14 +7,12 @@ import org.komapper.annotation.*
 
 @KomapperEntityDef(Problem::class)
 private data class ProblemDef(
-
     // 题目 ID
     @KomapperId @KomapperAutoIncrement
     val problemId: Nothing,
     // 作者 ID
     val authorId: Nothing,
     val ownerId: Int,
-
     // 题目名字
     val problemName: Nothing,
     // 题目描述
@@ -26,8 +24,7 @@ private data class ProblemDef(
     val visibility: ProblemVisibility,
     val type: ProblemType,
     val contextJson: String,
-
-    //--- 数据库信息区 ---//
+    // --- 数据库信息区 ---//
     @KomapperVersion
     val version: Nothing,
     @KomapperCreatedAt

@@ -12,4 +12,3 @@ sealed interface Role {
      */
     fun check(provide: Role): Boolean
 }
-

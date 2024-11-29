@@ -17,12 +17,14 @@ internal class KotlinCompileTask : AbstractTask<CodeInput>() {
     override val compiledFileExtension: Option<String>
         get() = "class".some()
 
-    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
-        return filenames.copy(source = Filename("Main", "kt".some()), compiled = Filename("MainKt", "class".some()))
-    }
+    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames =
+        filenames.copy(source = Filename("Main", "kt".some()), compiled = Filename("MainKt", "class".some()))
 
-    override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
-        return cmd {
+    override fun getCompileCmd(
+        input: CodeInput,
+        filenames: Filenames,
+    ): Cmd =
+        cmd {
             args = useKotlincArgs(filenames)
             env = useUsrBinEnv
             files = useStdOutErrForFiles()
@@ -31,21 +33,25 @@ internal class KotlinCompileTask : AbstractTask<CodeInput>() {
             copyOutCached =
                 listOf(filenames.source.asString(), filenames.compiled.asString())
         }
-    }
 
-    override fun transformCompileStatus(compileStatus: Status, compileResult: Result): Status {
-        return if (compileResult.exitStatus == 0) {
+    override fun transformCompileStatus(
+        compileStatus: Status,
+        compileResult: Result,
+    ): Status =
+        if (compileResult.exitStatus == 0) {
             Status.Accepted
         } else {
             compileStatus
         }
-    }
 
-    override fun transformRunFilename(filename: Filename): Filename {
-        return Filename("MainKt", "class".some())
-    }
+    override fun transformRunFilename(filename: Filename): Filename = Filename("MainKt", "class".some())
 
-    override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String) = cmd {
+    override fun getRunCmd(
+        input: CodeInput,
+        compileResult: Result,
+        runFilename: Filename,
+        runFileId: String,
+    ) = cmd {
         args = listOf("kotlin", runFilename.name)
         env = useUsrBinEnv
         files = useStdOutErrForFiles(input.stdin)
@@ -53,5 +59,4 @@ internal class KotlinCompileTask : AbstractTask<CodeInput>() {
     }
 }
 
-internal fun useKotlincArgs(filenames: AbstractTask.Filenames) =
-    listOf("kotlinc", filenames.source.asString())
+internal fun useKotlincArgs(filenames: AbstractTask.Filenames) = listOf("kotlinc", filenames.source.asString())

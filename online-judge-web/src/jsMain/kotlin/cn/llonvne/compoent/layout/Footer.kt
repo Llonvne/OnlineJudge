@@ -11,10 +11,9 @@ import io.kvision.theme.ThemeManager
 fun Container.footer() {
     navbar(type = NavbarType.FIXEDBOTTOM) {
         nav {
-            navLink("Llonvne/OnlineJudge","https://github.com/Llonvne/OnlineJudge")
+            navLink("Llonvne/OnlineJudge", "https://github.com/Llonvne/OnlineJudge")
         }
         nav(rightAlign = true) {
-
             navLink("浅色") {
                 onClick {
                     ThemeManager.theme = Theme.LIGHT

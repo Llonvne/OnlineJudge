@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service
  */
 @Service
 class GroupIdResolver(
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
 ) {
-
     suspend fun resolve(groupId: GroupId): Int? {
-        val intId = when (groupId) {
-            is GroupId.HashGroupId -> fromHashGroupId(groupId.id)
-            is GroupId.IntGroupId -> groupId.id
-            is GroupId.ShortGroupName -> fromShortName(groupId.shortName)
-        }
+        val intId =
+            when (groupId) {
+                is GroupId.HashGroupId -> fromHashGroupId(groupId.id)
+                is GroupId.IntGroupId -> groupId.id
+                is GroupId.ShortGroupName -> fromShortName(groupId.shortName)
+            }
         return validateGroupId(intId)
     }
 
@@ -32,11 +32,7 @@ class GroupIdResolver(
         }
     }
 
-    private suspend fun fromHashGroupId(hash: String): Int? {
-        return groupRepository.fromHashToId(hash)
-    }
+    private suspend fun fromHashGroupId(hash: String): Int? = groupRepository.fromHashToId(hash)
 
-    private suspend fun fromShortName(shortname: String): Int? {
-        return groupRepository.fromShortname(shortname)
-    }
+    private suspend fun fromShortName(shortname: String): Int? = groupRepository.fromShortname(shortname)
 }

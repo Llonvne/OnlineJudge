@@ -10,16 +10,17 @@ enum class BadgeColor {
     Grey,
     Golden,
     White,
-    Dark
+    Dark,
 }
 
 val BadgeColor.cssClass: String
-    get() = when (this) {
-        BadgeColor.Green -> "bg-success"
-        BadgeColor.Red -> "bg-danger"
-        BadgeColor.Blue -> "bg-primary"
-        BadgeColor.Grey -> "text-bg-secondary"
-        BadgeColor.Golden -> "text-bg-warning"
-        BadgeColor.White -> "text-bg-light"
-        BadgeColor.Dark -> "dark"
-    }
+    get() =
+        when (this) {
+            BadgeColor.Green -> "bg-success"
+            BadgeColor.Red -> "bg-danger"
+            BadgeColor.Blue -> "bg-primary"
+            BadgeColor.Grey -> "text-bg-secondary"
+            BadgeColor.Golden -> "text-bg-warning"
+            BadgeColor.White -> "text-bg-light"
+            BadgeColor.Dark -> "dark"
+        }

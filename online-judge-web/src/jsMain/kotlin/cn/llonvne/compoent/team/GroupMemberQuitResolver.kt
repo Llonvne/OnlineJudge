@@ -11,7 +11,7 @@ import io.kvision.core.onClickLaunch
 import io.kvision.html.button
 
 class GroupMemberQuitResolver(
-    private val groupId: GroupId
+    private val groupId: GroupId,
 ) {
     fun load(root: Container) {
         root.button("退出小组") {

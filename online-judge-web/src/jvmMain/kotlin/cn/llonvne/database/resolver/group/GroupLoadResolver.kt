@@ -16,15 +16,13 @@ class GroupLoadResolver(
     private val groupRepository: GroupRepository,
     private val groupRoleResolver: GroupRoleResolver,
     private val guestPasser: GroupGuestPassResolver,
-    private val groupInfoAwareProvider: GroupInfoAwareProvider
+    private val groupInfoAwareProvider: GroupInfoAwareProvider,
 ) {
-
     suspend fun resolve(
         originGroupId: GroupId,
         groupId: Int,
-        authenticationUser: AuthenticationUser?
+        authenticationUser: AuthenticationUser?,
     ): LoadGroupResp {
-
         val group = groupRepository.fromId(groupId) ?: return GroupIdNotFound(originGroupId)
 
         return groupInfoAwareProvider.awareOf(originGroupId, groupId, group) {
@@ -32,8 +30,9 @@ class GroupLoadResolver(
                 return@awareOf loadAsGuestOrReject()
             }
 
-            val teamRole = groupRoleResolver.resolve(groupId, authenticationUser)
-                ?: return@awareOf loadAsGuestOrReject()
+            val teamRole =
+                groupRoleResolver.resolve(groupId, authenticationUser)
+                    ?: return@awareOf loadAsGuestOrReject()
 
             return@awareOf when (teamRole) {
                 is DeleteTeam.DeleteTeamImpl -> loadAsGuestOrReject()
@@ -60,14 +59,14 @@ class GroupLoadResolver(
                 ownerName = ownerName(),
                 members = membersOfGuest(),
                 description = group.description,
-                createAt = group.createdAt!!
+                createAt = group.createdAt!!,
             )
         }
     }
 
     context(GroupInfoAware)
-    suspend fun loadAsGroupManager(): LoadGroupResp {
-        return ManagerLoadGroup(
+    suspend fun loadAsGroupManager(): LoadGroupResp =
+        ManagerLoadGroup(
             groupId = groupId,
             groupName = group.groupName,
             groupShortName = group.groupShortName,
@@ -76,13 +75,12 @@ class GroupLoadResolver(
             ownerName = ownerName(),
             members = memberOfManager(),
             description = group.description,
-            createAt = group.createdAt!!
+            createAt = group.createdAt!!,
         )
-    }
 
     context(GroupInfoAware)
-    suspend fun loadAsMember(): LoadGroupResp {
-        return MemberLoadGroup(
+    suspend fun loadAsMember(): LoadGroupResp =
+        MemberLoadGroup(
             groupId = groupId,
             groupName = group.groupName,
             groupShortName = group.groupShortName,
@@ -91,9 +89,8 @@ class GroupLoadResolver(
             ownerName = ownerName(),
             members = membersOfMember(),
             description = group.description,
-            createAt = group.createdAt!!
+            createAt = group.createdAt!!,
         )
-    }
 
     context(GroupInfoAware)
     suspend fun loadAsSuperManager(): LoadGroupResp {
@@ -101,8 +98,8 @@ class GroupLoadResolver(
     }
 
     context(GroupInfoAware)
-    suspend fun loadAsOwner(): LoadGroupResp {
-        return OwnerLoadGroup(
+    suspend fun loadAsOwner(): LoadGroupResp =
+        OwnerLoadGroup(
             groupId = groupId,
             groupName = group.groupName,
             groupShortName = group.groupShortName,
@@ -111,7 +108,6 @@ class GroupLoadResolver(
             ownerName = ownerName(),
             members = membersOfOwner(),
             description = group.description,
-            createAt = group.createdAt!!
+            createAt = group.createdAt!!,
         )
-    }
 }

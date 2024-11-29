@@ -12,29 +12,34 @@ import org.springframework.stereotype.Service
 
 @Service
 class UserSubmissionRangeResolver(
-    private val submissionRepository: SubmissionRepository
+    private val submissionRepository: SubmissionRepository,
 ) {
     suspend fun resolve(
         authenticationUser: AuthenticationUser,
         from: LocalDateTime,
-        to: LocalDateTime = LocalDateTime.now()
-    ): List<Submission> {
-        return submissionRepository.getByAuthenticationUserID(
-            authenticationUser.id,
-            codeType = Code.CodeType.Problem
-        )
-            .filter {
+        to: LocalDateTime = LocalDateTime.now(),
+    ): List<Submission> =
+        submissionRepository
+            .getByAuthenticationUserID(
+                authenticationUser.id,
+                codeType = Code.CodeType.Problem,
+            ).filter {
                 it.createdAt != null && it.createdAt in from..to
             }
-    }
 
-    suspend fun acceptedIn(user: AuthenticationUser, days: Long): Int {
-        return resolve(
-            user, java.time.LocalDateTime.now().minusDays(days).toKotlinLocalDateTime()
+    suspend fun acceptedIn(
+        user: AuthenticationUser,
+        days: Long,
+    ): Int =
+        resolve(
+            user,
+            java.time.LocalDateTime
+                .now()
+                .minusDays(days)
+                .toKotlinLocalDateTime(),
         ).filter {
             it.result is ProblemJudgeResult
         }.count {
             (it.result as ProblemJudgeResult).passerResult.pass
         }
-    }
 }

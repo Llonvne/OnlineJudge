@@ -7,7 +7,6 @@ import cn.llonvne.entity.problem.Submission
 import cn.llonvne.security.Token
 import io.kvision.annotations.KVService
 import kotlinx.datetime.LocalDateTime
-
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
@@ -16,10 +15,16 @@ interface IContestService {
     @Serializable
     sealed interface AddProblemResp {
         @Serializable
-        data class AddOkResp(val problemId: Int, val problemName: String) : AddProblemResp
+        data class AddOkResp(
+            val problemId: Int,
+            val problemName: String,
+        ) : AddProblemResp
     }
 
-    suspend fun addProblem(value: Token?, problemId: String): AddProblemResp
+    suspend fun addProblem(
+        value: Token?,
+        problemId: String,
+    ): AddProblemResp
 
     @Serializable
     data class CreateContestReq(
@@ -29,31 +34,46 @@ interface IContestService {
         @Contextual val endAt: LocalDateTime,
         val contestScoreType: Contest.ContestScoreType,
         val rankType: Contest.ContestRankType,
-        val problems: List<ContestContext.ContestProblem>
+        val problems: List<ContestContext.ContestProblem>,
     )
 
     @Serializable
     sealed interface CreateContestResp {
         @Serializable
-        data class CreateOk(val contest: Contest) : CreateContestResp
+        data class CreateOk(
+            val contest: Contest,
+        ) : CreateContestResp
     }
 
-    suspend fun create(token: Token?, createContestReq: CreateContestReq): CreateContestResp
+    suspend fun create(
+        token: Token?,
+        createContestReq: CreateContestReq,
+    ): CreateContestResp
 
     @Serializable
     sealed interface LoadContestResp {
         @Serializable
-        data class LoadOk(val contest: Contest, val ownerName: String) : LoadContestResp
+        data class LoadOk(
+            val contest: Contest,
+            val ownerName: String,
+        ) : LoadContestResp
     }
 
-    suspend fun load(value: Token?, contestId: ContestId): LoadContestResp
-
+    suspend fun load(
+        value: Token?,
+        contestId: ContestId,
+    ): LoadContestResp
 
     @Serializable
     sealed interface ContextSubmissionResp {
         @Serializable
-        data class ContextSubmissionOk(val submissions: List<Submission>) : ContextSubmissionResp
+        data class ContextSubmissionOk(
+            val submissions: List<Submission>,
+        ) : ContextSubmissionResp
     }
 
-    suspend fun contextSubmission(value: Token?, contestId: ContestId): ContextSubmissionResp
+    suspend fun contextSubmission(
+        value: Token?,
+        contestId: ContestId,
+    ): ContextSubmissionResp
 }

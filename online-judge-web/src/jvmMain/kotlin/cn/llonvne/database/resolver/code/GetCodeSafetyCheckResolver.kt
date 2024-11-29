@@ -7,20 +7,21 @@ import kotlinx.serialization.Serializable
 import org.springframework.stereotype.Service
 
 @Service
-class GetCodeSafetyCheckResolver(
-) {
+class GetCodeSafetyCheckResolver {
     @Serializable
     sealed interface GetCodeSafetyCheckResult<out R> {
         data object PermissionDenied : GetCodeSafetyCheckResult<Nothing>
 
-        data class GetCodeSafetyCheckPassed<R>(val result: R) : GetCodeSafetyCheckResult<R>
+        data class GetCodeSafetyCheckPassed<R>(
+            val result: R,
+        ) : GetCodeSafetyCheckResult<R>
     }
 
     suspend fun <R> resolve(
         getCodeId: CodeService.GetCodeId,
         code: Code,
         value: Token?,
-        onPass: () -> R
+        onPass: () -> R,
     ): GetCodeSafetyCheckResult<R> {
         TODO()
     }

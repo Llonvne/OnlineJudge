@@ -24,14 +24,13 @@ class UserLoginLogoutTokenValidator(
     private val passwordEncoder: PasswordEncoder,
     env: Environment,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    private val redisKeyPrefix: String = env.getProperty("oj.redis.user.prefix") ?: "user-id"
-) : TokenValidator, LoginLogoutResolver {
-
+    private val redisKeyPrefix: String = env.getProperty("oj.redis.user.prefix") ?: "user-id",
+) : TokenValidator,
+    LoginLogoutResolver {
     val log: Logger = getLogger()
     private val AuthenticationUser.asRedisKey get() = "$redisKeyPrefix-$id-" + UUID.randomUUID()
 
     override suspend fun login(user: AuthenticationUser): Token {
-
         val token = user.asRedisKey
 
         redis.set(token, user)
@@ -44,9 +43,8 @@ class UserLoginLogoutTokenValidator(
         return !user.check(Banned.BannedImpl)
     }
 
-    suspend fun getAuthenticationUser(id: Int): AuthenticationUser? {
-        return redis.keys("$redisKeyPrefix-$id-*").firstOrNull()?.let { redis.get(it) }
-    }
+    suspend fun getAuthenticationUser(id: Int): AuthenticationUser? =
+        redis.keys("$redisKeyPrefix-$id-*").firstOrNull()?.let { redis.get(it) }
 
     suspend fun getAuthenticationUser(token: Token?): AuthenticationUser? {
         if (token == null) {
@@ -67,9 +65,8 @@ class UserLoginLogoutTokenValidator(
     }
 
     inner class UserValidatorDsl(
-        val token: Token?
+        val token: Token?,
     ) {
-
         private val validators = mutableListOf<Validator>()
 
         /**
@@ -91,7 +88,6 @@ class UserLoginLogoutTokenValidator(
          */
         suspend inline fun <reified R : Role> check(required: R) {
             addValidator {
-
                 val user = getAuthenticationUser(token) ?: return@addValidator false
 
                 log.info("[$validateId] require $required for user ${user.id} provides ${user.userRole}")
@@ -108,15 +104,13 @@ class UserLoginLogoutTokenValidator(
             validators.add(validator)
         }
 
-        internal suspend fun result(): Boolean {
-            return validators.all { it.validate() }
-        }
+        internal suspend fun result(): Boolean = validators.all { it.validate() }
     }
 
     override suspend fun validate(
-        token: Token?, action: suspend UserValidatorDsl.() -> Unit
+        token: Token?,
+        action: suspend UserValidatorDsl.() -> Unit,
     ): AuthenticationUser? {
-
         val userValidatorDsl = UserValidatorDsl(token)
 
         log.info("[${userValidatorDsl.validateId}] validate for $token")
@@ -131,7 +125,9 @@ class UserLoginLogoutTokenValidator(
     }
 
     suspend fun update(user: AuthenticationUser) {
-        redis.keys("$redisKeyPrefix-${user.id}-*").singleOrNull()
+        redis
+            .keys("$redisKeyPrefix-${user.id}-*")
+            .singleOrNull()
             ?.let {
                 redis.set(it, user)
             }

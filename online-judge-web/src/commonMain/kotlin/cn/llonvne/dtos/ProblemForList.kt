@@ -12,6 +12,5 @@ data class ProblemForList(
     val problemId: Int,
     val author: Author,
     val status: ProblemStatus,
-    val tags: List<ProblemTag>
+    val tags: List<ProblemTag>,
 )
-

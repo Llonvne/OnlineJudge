@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service
 class GroupRoleResolver(
     private val roleService: RoleService,
 ) {
-
     private val highest: (TeamIdRole) -> Int = {
         when (it) {
             is DeleteTeamImpl -> 0
@@ -29,10 +28,15 @@ class GroupRoleResolver(
         }
     }
 
-    suspend fun resolve(groupId: Int, authenticationUser: AuthenticationUser): TeamIdRole? {
+    suspend fun resolve(
+        groupId: Int,
+        authenticationUser: AuthenticationUser,
+    ): TeamIdRole? {
         val role = roleService.get(authenticationUser.id)?.roles ?: return null
-        return role.filterIsInstance<TeamIdRole>()
+        return role
+            .filterIsInstance<TeamIdRole>()
             .filter { it.teamId == groupId || it is TeamSuperManager }
-            .sortedByDescending(highest).firstOrNull()
+            .sortedByDescending(highest)
+            .firstOrNull()
     }
 }

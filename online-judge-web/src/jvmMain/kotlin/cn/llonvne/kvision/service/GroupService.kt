@@ -38,17 +38,18 @@ actual class GroupService(
     private val joinGroupResolver: JoinGroupResolver,
     private val groupKickResolver: GroupKickResolver,
     private val memberUpgradeResolver: GroupMemberUpgradeResolver,
-    private val groupMangerDowngradeResolver: GroupMangerDowngradeResolver
+    private val groupMangerDowngradeResolver: GroupMangerDowngradeResolver,
 ) : IGroupService {
-
     private val logger = getLogger()
 
     override suspend fun createTeam(
-        token: Token, createGroupReq: CreateGroupReq
+        token: Token,
+        createGroupReq: CreateGroupReq,
     ): CreateGroupResp {
-        val user = authentication.validate(token) {
-            check(CreateGroup.require(createGroupReq.groupType))
-        } ?: return PermissionDenied
+        val user =
+            authentication.validate(token) {
+                check(CreateGroup.require(createGroupReq.groupType))
+            } ?: return PermissionDenied
 
         if (!groupRepository.shortNameAvailable(createGroupReq.groupShortName)) {
             return GroupShortNameUnavailable(createGroupReq.groupShortName)
@@ -60,9 +61,10 @@ actual class GroupService(
             info("$token created ${createGroupReq.groupName},id is ${group.groupId}")
 
             roleService.addRole(
-                user.id, GroupOwner.GroupOwnerImpl(
-                    group.groupId ?: return@track InternalError("创建小组后仍然 id 为空")
-                )
+                user.id,
+                GroupOwner.GroupOwnerImpl(
+                    group.groupId ?: return@track InternalError("创建小组后仍然 id 为空"),
+                ),
             )
 
             return@track CreateGroupOk(group)
@@ -70,16 +72,21 @@ actual class GroupService(
     }
 
     override suspend fun load(
-        token: Token?, groupId: GroupId
-    ): LoadGroupResp = logger.track(token, groupId) {
-        val id = groupIdResolver.resolve(groupId) ?: return@track GroupIdNotFound(groupId)
+        token: Token?,
+        groupId: GroupId,
+    ): LoadGroupResp =
+        logger.track(token, groupId) {
+            val id = groupIdResolver.resolve(groupId) ?: return@track GroupIdNotFound(groupId)
 
-        val user = authentication.getAuthenticationUser(token)
+            val user = authentication.getAuthenticationUser(token)
 
-        return@track groupLoadResolver.resolve(groupId, id, user)
-    }
+            return@track groupLoadResolver.resolve(groupId, id, user)
+        }
 
-    override suspend fun join(groupId: GroupId, token: Token): JoinGroupResp {
+    override suspend fun join(
+        groupId: GroupId,
+        token: Token,
+    ): JoinGroupResp {
         val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
 
         val user = authentication.validate(token) { requireLogin() }
@@ -91,7 +98,10 @@ actual class GroupService(
         return joinGroupResolver.resolve(groupId, id, user)
     }
 
-    override suspend fun quit(groupId: GroupId, value: Token?): QuitGroupResp {
+    override suspend fun quit(
+        groupId: GroupId,
+        value: Token?,
+    ): QuitGroupResp {
         val user = authentication.validate(value) { requireLogin() } ?: return PermissionDenied
 
         val id = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
@@ -101,12 +111,17 @@ actual class GroupService(
         return QuitOk
     }
 
-    override suspend fun kick(token: Token?, groupId: GroupId, kickMemberId: Int): KickGroupResp {
+    override suspend fun kick(
+        token: Token?,
+        groupId: GroupId,
+        kickMemberId: Int,
+    ): KickGroupResp {
         val groupIntId = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
 
-        val kicker = authentication.validate(token) {
-            check(KickMember.KickMemberImpl(groupIntId))
-        } ?: return PermissionDeniedWithMessage("你没有权限踢人哦")
+        val kicker =
+            authentication.validate(token) {
+                check(KickMember.KickMemberImpl(groupIntId))
+            } ?: return PermissionDeniedWithMessage("你没有权限踢人哦")
 
         return groupKickResolver.resolve(groupId, groupIntId, kicker, kickMemberId)
     }
@@ -114,12 +129,13 @@ actual class GroupService(
     override suspend fun upgradeGroupManager(
         token: Token?,
         groupId: GroupId,
-        updatee: Int
+        updatee: Int,
     ): UpgradeGroupManagerResp {
         val groupIntId = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
-        val owner = authentication.validate(token) {
-            check(GroupOwner.GroupOwnerImpl(groupIntId))
-        } ?: return PermissionDeniedWithMessage("你没有权限升级管理员哦")
+        val owner =
+            authentication.validate(token) {
+                check(GroupOwner.GroupOwnerImpl(groupIntId))
+            } ?: return PermissionDeniedWithMessage("你没有权限升级管理员哦")
         val result =
             memberUpgradeResolver.resolve(groupId, groupIntId, owner, updatee, GroupManager.GroupMangerImpl(groupIntId))
         return when (result) {
@@ -133,19 +149,22 @@ actual class GroupService(
     override suspend fun downgradeToMember(
         token: Token?,
         groupId: GroupId,
-        userId: Int
+        userId: Int,
     ): DowngradeToMemberResp {
         val groupIntid = groupIdResolver.resolve(groupId) ?: return GroupIdNotFound(groupId)
-        val owner = authentication.validate(token) {
-            check(GroupOwner.GroupOwnerImpl(groupIntid))
-        } ?: return PermissionDeniedWithMessage("你没有权限降级管理员哦")
+        val owner =
+            authentication.validate(token) {
+                check(GroupOwner.GroupOwnerImpl(groupIntid))
+            } ?: return PermissionDeniedWithMessage("你没有权限降级管理员哦")
 
-        return when (groupMangerDowngradeResolver.resolve(
-            groupId,
-            groupIntid,
-            owner,
-            userId,
-        )) {
+        return when (
+            groupMangerDowngradeResolver.resolve(
+                groupId,
+                groupIntid,
+                owner,
+                userId,
+            )
+        ) {
             DowngradeToIdNotMatchToGroupId -> IGroupService.UserAlreadyHasThisRole(userId)
             BeDowngradeUserNotFound -> BeUpOrDowngradedUserNotfound(userId)
             GroupManagerDowngradeResult.Success -> DowngradeToMemberResp.DowngradeToMemberOk(userId)

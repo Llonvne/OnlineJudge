@@ -5,13 +5,13 @@ import kotlinx.serialization.encodeToString
 
 @Serializable
 data class ContestContext(
-    val problems: List<ContestProblem>
+    val problems: List<ContestProblem>,
 ) {
     @Serializable
     data class ContestProblem(
         val problemId: Int,
         val weight: Int,
-        val alias: String
+        val alias: String,
     )
 
     fun json() = contestContextJson.encodeToString(this)

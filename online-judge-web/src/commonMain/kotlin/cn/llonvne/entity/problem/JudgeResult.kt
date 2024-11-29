@@ -16,7 +16,7 @@ sealed interface JudgeResult {
 
 @Serializable
 data class PlaygroundJudgeResult(
-    val submissionTestCases: SubmissionTestCases
+    val submissionTestCases: SubmissionTestCases,
 ) : JudgeResult {
     val output = submissionTestCases.testCases.first().originOutput
 }
@@ -25,5 +25,5 @@ data class PlaygroundJudgeResult(
 data class ProblemJudgeResult(
     val problemTestCases: ProblemTestCases,
     val submissionTestCases: SubmissionTestCases,
-    val passerResult: PasserResult
+    val passerResult: PasserResult,
 ) : JudgeResult

@@ -23,10 +23,8 @@ interface CodeEditorShower {
         fun from(
             problemId: Int,
             getProblemByIdOk: GetProblemByIdOk,
-            codeEditorConfigurer: CodeEditorConfigurer
-        ): CodeEditorShower {
-            return AbstractCodeEditorShower(problemId, getProblemByIdOk, codeEditorConfigurer)
-        }
+            codeEditorConfigurer: CodeEditorConfigurer,
+        ): CodeEditorShower = AbstractCodeEditorShower(problemId, getProblemByIdOk, codeEditorConfigurer)
 
         class CodeEditorConfigurer {
             /**
@@ -52,9 +50,8 @@ interface CodeEditorShower {
 private class AbstractCodeEditorShower(
     private val problemId: Int,
     getProblemByIdOk: GetProblemByIdOk,
-    private val codeEditorConfigurer: CodeEditorConfigurer
+    private val codeEditorConfigurer: CodeEditorConfigurer,
 ) : CodeEditorShower {
-
     val problem = getProblemByIdOk
 
     override fun show(root: Container) {
@@ -75,43 +72,61 @@ private class AbstractCodeEditorShower(
 
     private fun doShow(root: Container) {
         root.alert(AlertType.Secondary) {
-
             h4 {
                 +"你的代码"
             }
 
-            val panel = formPanel<PlaygroudSubmission> {
-                add(PlaygroudSubmission::languageId, TomSelect(options = problem.supportLanguages.map {
-                    it.languageId.toString() to it.toString()
-                }) {
-                    label = "提交语言"
-                })
-                add(PlaygroudSubmission::code, TextArea {
-                    label = "解决方案"
-                    rows = 10
-                })
+            val panel =
+                formPanel<PlaygroudSubmission> {
+                    add(
+                        PlaygroudSubmission::languageId,
+                        TomSelect(
+                            options =
+                                problem.supportLanguages.map {
+                                    it.languageId.toString() to it.toString()
+                                },
+                        ) {
+                            label = "提交语言"
+                        },
+                    )
+                    add(
+                        PlaygroudSubmission::code,
+                        TextArea {
+                            label = "解决方案"
+                            rows = 10
+                        },
+                    )
 
-                if (
-                    codeEditorConfigurer.forceVisibility == null
-                ) {
-                    add(PlaygroudSubmission::visibilityTypeStr, TomSelect(options = SubmissionVisibilityType.entries.map {
-                        it.ordinal.toString() to it.chinese
-                    }, label = "提交可见性"))
+                    if (
+                        codeEditorConfigurer.forceVisibility == null
+                    ) {
+                        add(
+                            PlaygroudSubmission::visibilityTypeStr,
+                            TomSelect(
+                                options =
+                                    SubmissionVisibilityType.entries.map {
+                                        it.ordinal.toString() to it.chinese
+                                    },
+                                label = "提交可见性",
+                            ),
+                        )
+                    }
                 }
-            }
 
             button("提交") {
                 onClickLaunch {
-                    codeEditorConfigurer.submitProblemResolver.resolve(problemId, panel.getData().let {
-                        if (codeEditorConfigurer.forceVisibility != null) {
-                            it.copy(visibilityTypeStr = codeEditorConfigurer.forceVisibility?.ordinal.toString())
-                        } else {
-                            it
-                        }
-                    })
+                    codeEditorConfigurer.submitProblemResolver.resolve(
+                        problemId,
+                        panel.getData().let {
+                            if (codeEditorConfigurer.forceVisibility != null) {
+                                it.copy(visibilityTypeStr = codeEditorConfigurer.forceVisibility?.ordinal.toString())
+                            } else {
+                                it
+                            }
+                        },
+                    )
                 }
             }
         }
     }
 }
-

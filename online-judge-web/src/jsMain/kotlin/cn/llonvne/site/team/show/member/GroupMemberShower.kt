@@ -33,31 +33,33 @@ interface GroupMemberShower {
 
     companion object {
         fun from(resp: LoadGroupResp): GroupMemberShower {
-            val memberShower = when (resp) {
-                is GroupIdNotFound -> emptyMemberShower
-                is GuestLoadGroup -> GuestMemberShower(resp)
-                PermissionDenied -> emptyMemberShower
-                is ManagerLoadGroup -> ManagerMemberShower(resp)
-                is MemberLoadGroup -> MemberMemberShower(resp)
-                is OwnerLoadGroup -> OwnerMemberShower(resp)
-            }
+            val memberShower =
+                when (resp) {
+                    is GroupIdNotFound -> emptyMemberShower
+                    is GuestLoadGroup -> GuestMemberShower(resp)
+                    PermissionDenied -> emptyMemberShower
+                    is ManagerLoadGroup -> ManagerMemberShower(resp)
+                    is MemberLoadGroup -> MemberMemberShower(resp)
+                    is OwnerLoadGroup -> OwnerMemberShower(resp)
+                }
             return memberShower
         }
 
-        private val emptyMemberShower = object : GroupMemberShower {
-            override fun show(target: Container) {}
-        }
+        private val emptyMemberShower =
+            object : GroupMemberShower {
+                override fun show(target: Container) {}
+            }
     }
 }
 
 /**
  * 读取小组成功后[LoadGroupSuccessResp]用于显示的基类
  */
-private abstract class AbstractMemberShower(private val resp: LoadGroupSuccessResp) : GroupMemberShower {
-
+private abstract class AbstractMemberShower(
+    private val resp: LoadGroupSuccessResp,
+) : GroupMemberShower {
     override fun show(target: Container) {
         target.alert(AlertType.Light) {
-
             div {
                 loadButtons()
             }
@@ -68,9 +70,11 @@ private abstract class AbstractMemberShower(private val resp: LoadGroupSuccessRe
 
             tabulator(
                 resp.members,
-                options = TabulatorOptions(
-                    layout = Layout.FITDATASTRETCH, columns = defaultColumns() + addColumnDefinition()
-                )
+                options =
+                    TabulatorOptions(
+                        layout = Layout.FITDATASTRETCH,
+                        columns = defaultColumns() + addColumnDefinition(),
+                    ),
             )
 
             slot()
@@ -84,36 +88,43 @@ private abstract class AbstractMemberShower(private val resp: LoadGroupSuccessRe
             }),
             ColumnDefinition("身份", formatterComponentFunction = { _, _, e ->
                 displayRole(e)
-            })
+            }),
         )
 
-    protected open fun Div.displayRole(e: GroupMemberDto) = span {
-        when (e.role) {
-            is DeleteTeam.DeleteTeamImpl -> {}
-            is GroupMangerImpl -> badge(BadgeColor.Red) { +"管理员" }
-            is GroupOwner.GroupOwnerImpl -> badge(BadgeColor.Red) { +"所有者" }
-            is InviteMemberImpl -> {}
-            is KickMemberImpl -> {}
-            is TeamMemberImpl -> {
-                badge(BadgeColor.Grey) { +"成员" }
-            }
+    protected open fun Div.displayRole(e: GroupMemberDto) =
+        span {
+            when (e.role) {
+                is DeleteTeam.DeleteTeamImpl -> {}
+                is GroupMangerImpl -> badge(BadgeColor.Red) { +"管理员" }
+                is GroupOwner.GroupOwnerImpl -> badge(BadgeColor.Red) { +"所有者" }
+                is InviteMemberImpl -> {}
+                is KickMemberImpl -> {}
+                is TeamMemberImpl -> {
+                    badge(BadgeColor.Grey) { +"成员" }
+                }
 
-            is TeamSuperManagerImpl -> badge(BadgeColor.Dark) {
-                +"队伍超级管理员"
+                is TeamSuperManagerImpl ->
+                    badge(BadgeColor.Dark) {
+                        +"队伍超级管理员"
+                    }
             }
         }
-    }
 
-    protected open fun Div.displayUsername(e: GroupMemberDto) = span {
-        +e.username
-    }
+    protected open fun Div.displayUsername(e: GroupMemberDto) =
+        span {
+            +e.username
+        }
 
     protected open fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> = listOf()
+
     open fun Container.loadButtons() {}
+
     protected open fun Div.slot() {}
 }
 
-private class GuestMemberShower(private val resp: GuestLoadGroup) : AbstractMemberShower(resp) {
+private class GuestMemberShower(
+    private val resp: GuestLoadGroup,
+) : AbstractMemberShower(resp) {
     override fun Container.loadButtons() {
         button("现在加入") {
             onClick {
@@ -126,23 +137,24 @@ private class GuestMemberShower(private val resp: GuestLoadGroup) : AbstractMemb
     }
 }
 
-private class ManagerMemberShower(private val resp: ManagerLoadGroup) : AbstractMemberShower(resp) {
-
+private class ManagerMemberShower(
+    private val resp: ManagerLoadGroup,
+) : AbstractMemberShower(resp) {
     private val kickMemberResolver = KickMemberResolver(groupId = resp.groupId)
 
-    override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> = listOf(
-        defineColumn("操作") { user ->
-            span {
-                KickOp.from(resp).load(this, user, kickMemberResolver)
-            }
-        }
-    )
+    override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> =
+        listOf(
+            defineColumn("操作") { user ->
+                span {
+                    KickOp.from(resp).load(this, user, kickMemberResolver)
+                }
+            },
+        )
 }
-
 
 private fun Span.upgradeToGroupMangerOp(
     user: GroupMemberDto,
-    upgradeToGroupManagerResolver: UpgradeToGroupManagerResolver
+    upgradeToGroupManagerResolver: UpgradeToGroupManagerResolver,
 ) = onNotSelf(user) {
     onNotManager(user) {
         badge(BadgeColor.Red) {
@@ -154,10 +166,9 @@ private fun Span.upgradeToGroupMangerOp(
     }
 }
 
-
 private fun Span.downgradeToGroupMemberOp(
     user: GroupMemberDto,
-    downgradeToGroupMemberResolver: DowngradeToGroupMemberResolver
+    downgradeToGroupMemberResolver: DowngradeToGroupMemberResolver,
 ) = onNotSelf(user) {
     onManager(user) {
         badge(BadgeColor.Red) {
@@ -169,20 +180,24 @@ private fun Span.downgradeToGroupMemberOp(
     }
 }
 
-
-private class OwnerMemberShower(private val resp: OwnerLoadGroup) : AbstractMemberShower(resp) {
-    override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> = listOf(
-        defineColumn("操作") { user ->
-            span {
-                KickOp.from(resp).load(this, user, KickMemberResolver(groupId = resp.groupId))
-                upgradeToGroupMangerOp(user, UpgradeToGroupManagerResolver(groupId = resp.groupId))
-                downgradeToGroupMemberOp(user, DowngradeToGroupMemberResolver(resp.groupId))
-            }
-        }
-    )
+private class OwnerMemberShower(
+    private val resp: OwnerLoadGroup,
+) : AbstractMemberShower(resp) {
+    override fun Div.addColumnDefinition(): List<ColumnDefinition<GroupMemberDto>> =
+        listOf(
+            defineColumn("操作") { user ->
+                span {
+                    KickOp.from(resp).load(this, user, KickMemberResolver(groupId = resp.groupId))
+                    upgradeToGroupMangerOp(user, UpgradeToGroupManagerResolver(groupId = resp.groupId))
+                    downgradeToGroupMemberOp(user, DowngradeToGroupMemberResolver(resp.groupId))
+                }
+            },
+        )
 }
 
-private class MemberMemberShower(private val resp: MemberLoadGroup) : AbstractMemberShower(resp) {
+private class MemberMemberShower(
+    private val resp: MemberLoadGroup,
+) : AbstractMemberShower(resp) {
     override fun Container.loadButtons() {
         GroupMemberQuitResolver(resp.groupId).load(this)
     }

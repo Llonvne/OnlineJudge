@@ -8,9 +8,7 @@ import cn.llonvne.gojudge.api.spec.runtime.default
 class CmdListBuilder {
     private val commands = mutableListOf<Cmd>()
 
-    internal fun build(): List<Cmd> {
-        return commands
-    }
+    internal fun build(): List<Cmd> = commands
 
     fun add(cmd: Cmd) {
         this.commands.add(cmd)
@@ -20,9 +18,8 @@ class CmdListBuilder {
 fun request(
     requestId: String? = null,
     pipeMap: List<PipeMap>? = null,
-    cmdListBuilder: CmdListBuilder.() -> Unit
+    cmdListBuilder: CmdListBuilder.() -> Unit,
 ): RequestType.Request {
-
     val cmd = CmdListBuilder()
 
     cmd.cmdListBuilder()
@@ -36,4 +33,3 @@ fun cmd(build: Cmd.() -> Unit): Cmd {
     cmd.build()
     return cmd
 }
-

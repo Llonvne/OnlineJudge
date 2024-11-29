@@ -16,30 +16,42 @@ class JoinGroupResolver(
     private val groupRepository: GroupRepository,
     private val visibilityCheckResolver: JoinGroupVisibilityCheckResolver,
     private val roleService: RoleService,
-    private val groupMembersResolver: GroupMembersResolver
+    private val groupMembersResolver: GroupMembersResolver,
 ) {
-    suspend fun resolve(groupId: GroupId, id: Int, authenticationUser: AuthenticationUser): JoinGroupResp {
+    suspend fun resolve(
+        groupId: GroupId,
+        id: Int,
+        authenticationUser: AuthenticationUser,
+    ): JoinGroupResp {
         val group = groupRepository.fromId(id) ?: return GroupIdNotFound(groupId)
 
-        return when (visibilityCheckResolver.resolve(
-            group.visibility, groupId
-        )) {
+        return when (
+            visibilityCheckResolver.resolve(
+                group.visibility,
+                groupId,
+            )
+        ) {
             Accepted -> accept(authenticationUser, id, groupId)
             Waiting -> waiting(id, groupId)
             Rejected -> reject(groupId)
         }
     }
 
-    private suspend fun reject(groupId: GroupId): JoinGroupResp {
-        return JoinGroupResp.Reject(groupId)
-    }
+    private suspend fun reject(groupId: GroupId): JoinGroupResp = JoinGroupResp.Reject(groupId)
 
-    private suspend fun accept(authenticationUser: AuthenticationUser, id: Int, groupId: GroupId): JoinGroupResp {
+    private suspend fun accept(
+        authenticationUser: AuthenticationUser,
+        id: Int,
+        groupId: GroupId,
+    ): JoinGroupResp {
         roleService.addRole(authenticationUser.id, TeamMember.TeamMemberImpl(id))
         return JoinGroupResp.Joined(groupId)
     }
 
-    private suspend fun waiting(id: Int, groupId: GroupId): JoinGroupResp {
+    private suspend fun waiting(
+        id: Int,
+        groupId: GroupId,
+    ): JoinGroupResp {
         // 找到组管理员
         val managers = groupMembersResolver.fromRoles(TeamIdRole.getManagerRoles(id))
 

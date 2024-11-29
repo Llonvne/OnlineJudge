@@ -16,13 +16,13 @@ import org.springframework.stereotype.Service
 @Service
 class GroupKickResolver(
     private val userRepository: UserRepository,
-    private val roleService: RoleService
+    private val roleService: RoleService,
 ) {
     suspend fun resolve(
         groupId: GroupId,
         groupIntId: Int,
         kicker: AuthenticationUser,
-        kickedId: Int
+        kickedId: Int,
     ): KickGroupResp {
         val kicked = userRepository.getByIdOrNull(kickedId) ?: return KickMemberNotFound(kickedId)
         val kickedRole =
@@ -41,7 +41,7 @@ class GroupKickResolver(
 
     private suspend fun doKick(
         kicked: AuthenticationUser,
-        kickedRole: List<TeamIdRole>
+        kickedRole: List<TeamIdRole>,
     ): Kicked {
         roleService.removeRole(kicked, kickedRole)
         return Kicked

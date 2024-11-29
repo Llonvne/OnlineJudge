@@ -16,24 +16,25 @@ class JoinGroupVisibilityCheckResolver {
      * [Rejected] 拒绝加入
      */
     enum class JoinGroupVisibilityCheckResult {
-        Accepted, Waiting, Rejected
+        Accepted,
+        Waiting,
+        Rejected,
     }
 
     fun resolve(
-        visibility: GroupVisibility, groupId: GroupId
-    ): JoinGroupVisibilityCheckResult {
-        return when (visibility) {
+        visibility: GroupVisibility,
+        groupId: GroupId,
+    ): JoinGroupVisibilityCheckResult =
+        when (visibility) {
             GroupVisibility.Public -> Accepted
             GroupVisibility.Private -> Rejected
             GroupVisibility.Restrict -> onRestrict(groupId)
         }
-    }
 
-    private fun onRestrict(groupId: GroupId): JoinGroupVisibilityCheckResult {
-        return when (groupId) {
+    private fun onRestrict(groupId: GroupId): JoinGroupVisibilityCheckResult =
+        when (groupId) {
             is GroupId.HashGroupId -> Accepted
             is GroupId.IntGroupId -> Waiting
             is GroupId.ShortGroupName -> Waiting
         }
-    }
 }

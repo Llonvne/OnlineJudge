@@ -33,50 +33,58 @@ actual class ProblemService(
     private val problemRepository: ProblemRepository,
     private val submissionRepository: SubmissionRepository,
     private val languageRepository: LanguageRepository,
-    private val authentication: UserLoginLogoutTokenValidator
+    private val authentication: UserLoginLogoutTokenValidator,
 ) : IProblemService {
-
     override suspend fun list(
         token: Token?,
-        showType: ProblemListShowType
+        showType: ProblemListShowType,
     ): List<ProblemForList> {
-        return problemRepository.list()
+        return problemRepository
+            .list()
             .filter { problem ->
                 when (showType) {
                     All -> true
                     Accepted -> {
-                        val user = authentication.validate(token) {
-                            requireLogin()
-                        } ?: return listOf()
-                        val submission = submissionRepository.getByAuthenticationUserID(
-                            user.id,
-                            codeType = Code.CodeType.Problem
-                        )
-                        val set = submission.filter {
-                            when (it.result) {
-                                is PlaygroundJudgeResult -> false
-                                is ProblemJudgeResult -> (it.result as ProblemJudgeResult).passerResult.pass
-                            }
-                        }
-                            .mapNotNull { it.problemId }.toSet()
+                        val user =
+                            authentication.validate(token) {
+                                requireLogin()
+                            } ?: return listOf()
+                        val submission =
+                            submissionRepository.getByAuthenticationUserID(
+                                user.id,
+                                codeType = Code.CodeType.Problem,
+                            )
+                        val set =
+                            submission
+                                .filter {
+                                    when (it.result) {
+                                        is PlaygroundJudgeResult -> false
+                                        is ProblemJudgeResult -> (it.result as ProblemJudgeResult).passerResult.pass
+                                    }
+                                }.mapNotNull { it.problemId }
+                                .toSet()
                         problem.problemId in set
                     }
 
                     Attempted -> {
-                        val user = authentication.validate(token) {
-                            requireLogin()
-                        } ?: return listOf()
-                        val submission = submissionRepository.getByAuthenticationUserID(
-                            user.id,
-                            codeType = Code.CodeType.Problem
-                        )
-                        val set = submission.filter {
-                            when (it.result) {
-                                is PlaygroundJudgeResult -> false
-                                is ProblemJudgeResult -> true
-                            }
-                        }
-                            .mapNotNull { it.problemId }.toSet()
+                        val user =
+                            authentication.validate(token) {
+                                requireLogin()
+                            } ?: return listOf()
+                        val submission =
+                            submissionRepository.getByAuthenticationUserID(
+                                user.id,
+                                codeType = Code.CodeType.Problem,
+                            )
+                        val set =
+                            submission
+                                .filter {
+                                    when (it.result) {
+                                        is PlaygroundJudgeResult -> false
+                                        is ProblemJudgeResult -> true
+                                    }
+                                }.mapNotNull { it.problemId }
+                                .toSet()
                         problem.problemId in set
                     }
 
@@ -84,14 +92,13 @@ actual class ProblemService(
                         TODO()
                     }
                 }
-            }
-            .mapNotNull { it.listDto(token) }
+            }.mapNotNull { it.listDto(token) }
     }
 
     override suspend fun create(
-        token: Token?, createProblemReq: IProblemService.CreateProblemReq
+        token: Token?,
+        createProblemReq: IProblemService.CreateProblemReq,
     ): IProblemService.CreateProblemResp {
-
         if (token == null) {
             return PermissionDenied
         }
@@ -100,19 +107,22 @@ actual class ProblemService(
             return AuthorIdNotExist(createProblemReq.authorId)
         }
 
-        val problem = problemRepository.create(
-            Problem.fromCreateReq(
-                createProblemReq,
-                ownerId = token.id
+        val problem =
+            problemRepository.create(
+                Problem.fromCreateReq(
+                    createProblemReq,
+                    ownerId = token.id,
+                ),
             )
-        )
 
         if (problem.problemId == null) {
             throw ProblemIdDoNotExistAfterCreation()
         }
 
-        languageRepository.setSupportLanguages(problem.problemId,
-            createProblemReq.supportLanguages.map { it.languageId })
+        languageRepository.setSupportLanguages(
+            problem.problemId,
+            createProblemReq.supportLanguages.map { it.languageId },
+        )
 
         return IProblemService.CreateProblemResp.Ok(problem.problemId)
     }
@@ -126,21 +136,22 @@ actual class ProblemService(
         }
     }
 
-    override suspend fun search(token: Token?, text: String): List<ProblemForList> {
-        return problemRepository.search(text).mapNotNull {
+    override suspend fun search(
+        token: Token?,
+        text: String,
+    ): List<ProblemForList> =
+        problemRepository.search(text).mapNotNull {
             it.listDto(token)
         }
-    }
 
-    private suspend fun Problem.listDto(token: Token?): ProblemForList? {
-        return onIdNotNull(null) { id, problem ->
+    private suspend fun Problem.listDto(token: Token?): ProblemForList? =
+        onIdNotNull(null) { id, problem ->
             ProblemForList(
                 problem,
                 id,
                 authorRepository.getByIdOrThrow(authorId),
                 submissionRepository.getUserProblemStatus(token, id),
-                problemRepository.getProblemTags(id)
+                problemRepository.getProblemTags(id),
             )
         }
-    }
 }

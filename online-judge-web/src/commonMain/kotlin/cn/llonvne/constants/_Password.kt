@@ -8,7 +8,6 @@ object _Password {
     private const val VALIDATOR_MESSAGE = "密码长度必须在${MIN_LENGTH}-${MAX_LENGTH}"
 
     fun check(password: String?): PasswordCheckResult {
-
         if (password == null) {
             return PasswordCheckResult.PasswordIsNull
         }
@@ -20,9 +19,7 @@ object _Password {
         return PasswordCheckResult.Ok
     }
 
-    fun reason(password: String?): String {
-        return "$VALIDATOR_MESSAGE:${check(password)}"
-    }
+    fun reason(password: String?): String = "$VALIDATOR_MESSAGE:${check(password)}"
 
     @Serializable
     sealed interface PasswordCheckResult {
@@ -33,16 +30,12 @@ object _Password {
 
         @Serializable
         data object PasswordIsTooLongOrTooShort : PasswordCheckResult {
-            override fun toString(): String {
-                return "密码太长或者太短"
-            }
+            override fun toString(): String = "密码太长或者太短"
         }
 
         @Serializable
         data object PasswordIsNull : PasswordCheckResult {
-            override fun toString(): String {
-                return "密码不能为空"
-            }
+            override fun toString(): String = "密码不能为空"
         }
     }
 }

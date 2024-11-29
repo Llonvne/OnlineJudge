@@ -27,20 +27,16 @@ interface ProblemSubmissionShower {
     fun show(div: Container)
 
     companion object {
-        fun from(resp: GetProblemByIdOk): ProblemSubmissionShower {
-            return BaseProblemSubmissionShower(resp)
-        }
+        fun from(resp: GetProblemByIdOk): ProblemSubmissionShower = BaseProblemSubmissionShower(resp)
     }
 }
 
 private class BaseProblemSubmissionShower(
-    private val resp: GetProblemByIdOk
+    private val resp: GetProblemByIdOk,
 ) : ProblemSubmissionShower {
-
     private val errorHandler = JudgeResultDisplayErrorHandler.getHandler()
 
     override fun show(div: Container) {
-
         if (resp.problem.problemId == null) {
             return Messager.toastInfo("ProblemId 为空")
         }
@@ -61,7 +57,7 @@ private class BaseProblemSubmissionShower(
 
     private fun onShow(
         root: Container,
-        resp: ISubmissionService.GetLastNProblemSubmissionResp
+        resp: ISubmissionService.GetLastNProblemSubmissionResp,
     ) {
         when (resp) {
             is GetLastNProblemSubmissionRespImpl -> onSuccess(root, resp)
@@ -73,43 +69,44 @@ private class BaseProblemSubmissionShower(
 
     private fun onSuccess(
         root: Container,
-        resp: GetLastNProblemSubmissionRespImpl
+        resp: GetLastNProblemSubmissionRespImpl,
     ) {
-
         console.log(resp.submissions)
 
         root.alert(AlertType.Light) {
-
             h4 {
                 +"提交记录"
             }
 
             tabulator(
-                resp.submissions, options = TabulatorOptions(
-                    layout = Layout.FITCOLUMNS,
-                    columns = listOf(
-                        defineColumn("提交时间") {
-                            Span {
-                                +it.submitTime.ll()
-                            }
-                        },
-                        defineColumn("提交语言") {
-                            Span {
-                                +(it.language.languageName + ":" + it.language.languageVersion)
-                            }
-                        },
-                        defineColumn("结果") {
-                            when (it.passerResult) {
-                                is PasserResult.BooleanResult -> {
+                resp.submissions,
+                options =
+                    TabulatorOptions(
+                        layout = Layout.FITCOLUMNS,
+                        columns =
+                            listOf(
+                                defineColumn("提交时间") {
                                     Span {
-                                        BooleanPasserResultDisplay(it.passerResult, codeId = it.codeId, small = true)
-                                            .load(this)
+                                        +it.submitTime.ll()
                                     }
-                                }
-                            }
-                        }
-                    )
-                )
+                                },
+                                defineColumn("提交语言") {
+                                    Span {
+                                        +(it.language.languageName + ":" + it.language.languageVersion)
+                                    }
+                                },
+                                defineColumn("结果") {
+                                    when (it.passerResult) {
+                                        is PasserResult.BooleanResult -> {
+                                            Span {
+                                                BooleanPasserResultDisplay(it.passerResult, codeId = it.codeId, small = true)
+                                                    .load(this)
+                                            }
+                                        }
+                                    }
+                                },
+                            ),
+                    ),
             )
         }
     }

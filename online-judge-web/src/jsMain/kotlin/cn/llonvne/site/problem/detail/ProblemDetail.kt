@@ -12,8 +12,11 @@ import io.kvision.html.div
 import io.kvision.html.h4
 import io.kvision.html.p
 
-fun detail(root: Container, problemId: Int, configurer: ProblemDetailConfigurer.() -> Unit = {}) {
-
+fun detail(
+    root: Container,
+    problemId: Int,
+    configurer: ProblemDetailConfigurer.() -> Unit = {},
+) {
     val configure = ProblemDetailConfigurer()
     configure.configurer()
 
@@ -49,45 +52,51 @@ private fun interface ProblemDetailShower {
     fun show(root: Container)
 
     companion object {
+        private fun problemNotFoundDetailShower(problemId: Int) =
+            ProblemDetailShower { root ->
+                root.notFound(
+                    object : NotFoundAble {
+                        override val header: String
+                            get() = "题目未找到"
+                        override val notice: String
+                            get() = "请确认题目ID正确，如果确认题目ID正确，请联系我们 ^_^"
+                        override val errorCode: String = "ProblemNotFound-$problemId"
+                    },
+                )
+            }
 
-        private fun problemNotFoundDetailShower(problemId: Int) = ProblemDetailShower { root ->
-            root.notFound(object : NotFoundAble {
-                override val header: String
-                    get() = "题目未找到"
-                override val notice: String
-                    get() = "请确认题目ID正确，如果确认题目ID正确，请联系我们 ^_^"
-                override val errorCode: String = "ProblemNotFound-$problemId"
-            })
-        }
-
-        fun from(problemId: Int, resp: ProblemGetByIdResult, configure: ProblemDetailConfigurer): ProblemDetailShower {
-            return when (resp) {
+        fun from(
+            problemId: Int,
+            resp: ProblemGetByIdResult,
+            configure: ProblemDetailConfigurer,
+        ): ProblemDetailShower =
+            when (resp) {
                 is GetProblemByIdOk -> AbstractProblemDetailShower(problemId, resp, configure)
                 ProblemNotFound -> problemNotFoundDetailShower(problemId = problemId)
             }
-        }
     }
 }
 
 private open class AbstractProblemDetailShower(
     private val problemId: Int,
     resp: GetProblemByIdOk,
-    private val configure: ProblemDetailConfigurer
-) :
-    ProblemDetailShower {
-
+    private val configure: ProblemDetailConfigurer,
+) : ProblemDetailShower {
     private val headerShower = DetailHeaderShower.from(resp)
 
     private val contextShower = ProblemContextShower.from(resp)
 
-    private val codeEditorShower = CodeEditorShower.from(
-        problemId, resp,
-        configure.codeEditorConfigurer
-    )
+    private val codeEditorShower =
+        CodeEditorShower.from(
+            problemId,
+            resp,
+            configure.codeEditorConfigurer,
+        )
 
-    private val testCasesShower = TestCasesShower.from(resp, filter = {
-        it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)
-    })
+    private val testCasesShower =
+        TestCasesShower.from(resp, filter = {
+            it.visibility in setOf(TestCaseType.ViewAndJudge, TestCaseType.OnlyForView)
+        })
 
     private val submissionsShower = ProblemSubmissionShower.from(resp)
 
@@ -112,6 +121,3 @@ private open class AbstractProblemDetailShower(
         }
     }
 }
-
-
-

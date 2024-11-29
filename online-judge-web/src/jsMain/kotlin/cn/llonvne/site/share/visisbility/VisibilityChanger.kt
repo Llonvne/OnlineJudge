@@ -14,7 +14,6 @@ import io.kvision.toolbar.buttonGroup
 import kotlinx.coroutines.launch
 
 interface VisibilityChanger {
-
     val codeDto: CodeDto
 
     fun isCodeOwner(): Boolean {
@@ -32,35 +31,35 @@ interface VisibilityChanger {
         return true
     }
 
-
     fun <T : DescriptionGetter> change(
         dialogTitle: String,
         choice: List<T>,
         onEach: Container.(T) -> Unit = {},
         slot: Container.() -> Unit = {},
-        selectionCallback: suspend (T) -> Unit
+        selectionCallback: suspend (T) -> Unit,
     ) {
-        val dialog = Dialog(dialogTitle) {
-            choice.forEach {
-                p {
-                    +"${it.reprName}:${it.decr}"
+        val dialog =
+            Dialog(dialogTitle) {
+                choice.forEach {
+                    p {
+                        +"${it.reprName}:${it.decr}"
+                    }
+
+                    onEach(it)
                 }
 
-                onEach(it)
-            }
+                slot()
 
-            slot()
-
-            buttonGroup {
-                choice.forEach { c ->
-                    button(c.reprName, style = ButtonStyle.OUTLINESECONDARY) {
-                        onClick {
-                            setResult(c)
+                buttonGroup {
+                    choice.forEach { c ->
+                        button(c.reprName, style = ButtonStyle.OUTLINESECONDARY) {
+                            onClick {
+                                setResult(c)
+                            }
                         }
                     }
                 }
             }
-        }
 
         AppScope.launch {
             val result = dialog.getResult()

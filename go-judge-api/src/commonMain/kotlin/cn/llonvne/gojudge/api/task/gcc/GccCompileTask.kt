@@ -13,11 +13,19 @@ internal class GccCompileTask : AbstractTask<CodeInput>() {
     override val compiledFileExtension: Option<String>
         get() = "out".some()
 
-    override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
+    override fun getCompileCmd(
+        input: CodeInput,
+        filenames: Filenames,
+    ): Cmd {
         TODO("Not yet implemented")
     }
 
-    override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
+    override fun getRunCmd(
+        input: CodeInput,
+        compileResult: Result,
+        runFilename: Filename,
+        runFileId: String,
+    ): Cmd {
         TODO("Not yet implemented")
     }
 }

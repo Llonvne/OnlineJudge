@@ -6,7 +6,9 @@ import io.kvision.html.div
 import io.kvision.html.h1
 import io.kvision.html.p
 
-enum class AlertType(val id: String) {
+enum class AlertType(
+    val id: String,
+) {
     Primary("primary"),
     Secondary("secondary"),
     Success("success"),
@@ -14,10 +16,13 @@ enum class AlertType(val id: String) {
     Warning("warning"),
     Info("info"),
     Light("light"),
-    Dark("dark")
+    Dark("dark"),
 }
 
-fun Container.alert(type: AlertType, init: Div.() -> Unit) {
+fun Container.alert(
+    type: AlertType,
+    init: Div.() -> Unit,
+) {
     div(className = "p-2") {
         div(className = "alert alert-${type.id}") {
             setAttribute("role", "alert")

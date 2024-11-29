@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class ProblemAwareProvider(
-    private val problemRepository: ProblemRepository
+    private val problemRepository: ProblemRepository,
 ) {
-
     suspend fun <R> awareOf(
         problem: Problem,
-        action: suspend context(ProblemAwarer) () -> R
+        action: suspend context(ProblemAwarer)
+        () -> R,
     ): R {
         val problemAwarer = ProblemAwarer(problem = problem)
 
@@ -19,6 +19,6 @@ class ProblemAwareProvider(
     }
 
     inner class ProblemAwarer(
-        val problem: Problem
+        val problem: Problem,
     )
 }

@@ -10,23 +10,26 @@ import io.ktor.client.plugins.resources.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-
 internal val judgeClient by lazy {
-    GoJudgeClient(HttpClient(OkHttp) {
-        engine {
-        }
-        install(Logging) {
-        }
-        install(Resources) {}
-        install(ContentNegotiation) {
-            json(Json {
-                isLenient = true
-                prettyPrint = true
-            })
-        }
-        defaultRequest {
-            port = 5050
-            host = "localhost"
-        }
-    })
+    GoJudgeClient(
+        HttpClient(OkHttp) {
+            engine {
+            }
+            install(Logging) {
+            }
+            install(Resources) {}
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        isLenient = true
+                        prettyPrint = true
+                    },
+                )
+            }
+            defaultRequest {
+                port = 5050
+                host = "localhost"
+            }
+        },
+    )
 }

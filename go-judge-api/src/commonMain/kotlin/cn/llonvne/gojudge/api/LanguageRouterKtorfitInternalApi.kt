@@ -9,7 +9,7 @@ internal interface LanguageRouterKtorfitInternalApi {
     @Headers("Content-Type:Application/Json")
     @GET("{language}/version")
     suspend fun version(
-        @Path language: String
+        @Path language: String,
     ): String
 
     @Headers("Content-Type:Application/Json")
@@ -24,8 +24,10 @@ internal interface LanguageRouterKtorfitInternalApi {
 
 interface LanguageRouterKtorfitApi {
     suspend fun version(): String
+
     suspend fun judge(
-        code: String, stdin: String,
+        code: String,
+        stdin: String,
     ): Output
 }
 
@@ -33,35 +35,38 @@ interface LanguageFactory {
     fun getLanguageApi(language: SupportLanguages): LanguageRouterKtorfitApi
 
     companion object {
-        fun get(baseUrl: String, httpClient: HttpClient): LanguageFactory {
-            return object : LanguageFactory {
+        fun get(
+            baseUrl: String,
+            httpClient: HttpClient,
+        ): LanguageFactory =
+            object : LanguageFactory {
+                private val ktorfit =
+                    Ktorfit
+                        .Builder()
+                        .baseUrl(baseUrl)
+                        .httpClient(httpClient)
+                        .build()
 
-                private val ktorfit = Ktorfit.Builder()
-                    .baseUrl(baseUrl)
-                    .httpClient(httpClient)
-                    .build()
-
-                override fun getLanguageApi(language: SupportLanguages): LanguageRouterKtorfitApi {
-                    return object : LanguageRouterKtorfitApi {
-
+                override fun getLanguageApi(language: SupportLanguages): LanguageRouterKtorfitApi =
+                    object : LanguageRouterKtorfitApi {
                         private val service = ktorfit.create<LanguageRouterKtorfitInternalApi>()
 
-                        override suspend fun version(): String {
-                            return service.version(language.path)
-                        }
+                        override suspend fun version(): String = service.version(language.path)
 
-                        override suspend fun judge(code: String, stdin: String): Output {
-                            return service.judge(language.path, code, stdin)
-                        }
+                        override suspend fun judge(
+                            code: String,
+                            stdin: String,
+                        ): Output = service.judge(language.path, code, stdin)
                     }
-                }
             }
-        }
     }
 }
 
 interface LanguageDispatcher {
-    suspend fun <R> dispatch(language: SupportLanguages, on: suspend LanguageRouterKtorfitApi.() -> R): R
+    suspend fun <R> dispatch(
+        language: SupportLanguages,
+        on: suspend LanguageRouterKtorfitApi.() -> R,
+    ): R
 
     companion object {
         fun get(languageFactory: LanguageFactory): LanguageDispatcher = LanguageDispatcherImpl(languageFactory)
@@ -69,14 +74,17 @@ interface LanguageDispatcher {
 }
 
 private class LanguageDispatcherImpl(
-    private val languageFactory: LanguageFactory
+    private val languageFactory: LanguageFactory,
 ) : LanguageDispatcher {
     private val languageApiSet: Map<SupportLanguages, LanguageRouterKtorfitApi> =
         SupportLanguages.entries.associateWith { language ->
             languageFactory.getLanguageApi(language)
         }
 
-    override suspend fun <R> dispatch(language: SupportLanguages, on: suspend LanguageRouterKtorfitApi.() -> R): R {
+    override suspend fun <R> dispatch(
+        language: SupportLanguages,
+        on: suspend LanguageRouterKtorfitApi.() -> R,
+    ): R {
         val api = languageApiSet[language]
 
         if (api == null) {

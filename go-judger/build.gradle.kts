@@ -19,6 +19,7 @@ val ktorfitVersion = "1.10.2"
 val ktorVersion = "2.3.7"
 
 fun ktor(name: String) = ("io.ktor:$name")
+
 fun ktorServer(name: String) = ktor("ktor-server-$name")
 
 dependencies {

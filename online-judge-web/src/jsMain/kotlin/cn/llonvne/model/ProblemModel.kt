@@ -22,12 +22,13 @@ import io.kvision.remote.getService
 object ProblemModel {
     private val problemService = getService<IProblemService>()
 
-    suspend fun listProblem(
-        showType: ProblemListShowType = ProblemListShowType.All
-    ) = problemService.list(AuthenticationModel.userToken.value,showType)
+    suspend fun listProblem(showType: ProblemListShowType = ProblemListShowType.All) =
+        problemService.list(AuthenticationModel.userToken.value, showType)
 
-    suspend fun create(problemForm: CreateProblemForm, testCases: ProblemTestCases): CreateProblemResp {
-
+    suspend fun create(
+        problemForm: CreateProblemForm,
+        testCases: ProblemTestCases,
+    ): CreateProblemResp {
         if (AuthenticationModel.userToken.value == null) {
             Messager.send(ToastMessage(MessageLevel.Warning, "必须要登入才能发送消息哦"))
             return PermissionDenied
@@ -43,34 +44,37 @@ object ProblemModel {
                     outputDescription = problemForm.outputDescr,
                     hint = problemForm.hint,
                     testCases = testCases,
-                    overall = problemForm.overall
+                    overall = problemForm.overall,
                 ),
                 authorId = problemForm.authorId,
                 memoryLimit = problemForm.memoryLimit,
                 timeLimit = problemForm.timeLimit,
-                visibility = problemForm.problemVisibilityInt.let {
-                    ProblemVisibility.entries[it.toInt()]
-                },
-                type = problemForm.problemTypeInt.let {
-                    ProblemType.entries[it.toInt()]
-                },
-                supportLanguages = problemForm.problemSupportLanguages.split(",")
-                    .map { it.toInt() }.mapNotNull {
-                        SupportLanguages.fromId(it)
-                    }.map {
-                        Language(
-                            languageId = it.languageId,
-                            languageName = it.languageName,
-                            languageVersion = it.languageVersion
-                        )
-                    }
-            )
+                visibility =
+                    problemForm.problemVisibilityInt.let {
+                        ProblemVisibility.entries[it.toInt()]
+                    },
+                type =
+                    problemForm.problemTypeInt.let {
+                        ProblemType.entries[it.toInt()]
+                    },
+                supportLanguages =
+                    problemForm.problemSupportLanguages
+                        .split(",")
+                        .map { it.toInt() }
+                        .mapNotNull {
+                            SupportLanguages.fromId(it)
+                        }.map {
+                            Language(
+                                languageId = it.languageId,
+                                languageName = it.languageName,
+                                languageVersion = it.languageVersion,
+                            )
+                        },
+            ),
         )
     }
 
     suspend fun getById(id: Int) = problemService.getById(id)
 
-    suspend fun search(text: String): List<ProblemForList> {
-        return problemService.search(AuthenticationModel.userToken.value, text)
-    }
+    suspend fun search(text: String): List<ProblemForList> = problemService.search(AuthenticationModel.userToken.value, text)
 }

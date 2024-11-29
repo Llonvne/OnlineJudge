@@ -11,7 +11,11 @@ interface NotFoundAble {
     val errorCode: String
 }
 
-fun Container.notFound(header: String, notice: String, errorCode: String) {
+fun Container.notFound(
+    header: String,
+    notice: String,
+    errorCode: String,
+) {
     div(className = "p-2") {
         div(className = "alert alert-danger") {
             setAttribute("role", "alert")
@@ -24,7 +28,7 @@ fun Container.notFound(header: String, notice: String, errorCode: String) {
             }
 
             div {
-                +"ErrorCode:${errorCode}"
+                +"ErrorCode:$errorCode"
             }
         }
     }
@@ -48,4 +52,3 @@ fun <T : NotFoundAble> Container.notFound(notFoundAble: T) {
         }
     }
 }
-

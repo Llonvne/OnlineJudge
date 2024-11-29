@@ -19,12 +19,14 @@ import io.kvision.html.h4
 import io.kvision.html.p
 
 interface ShareCodeHighlighter {
-
     val idPlaceHolder: ShareID
     val title: Div
     val shareName: String
 
-    fun load(root: Container, codeDto: CodeDto) {
+    fun load(
+        root: Container,
+        codeDto: CodeDto,
+    ) {
         root.onSuccess(codeDto)
     }
 
@@ -33,21 +35,19 @@ interface ShareCodeHighlighter {
     private fun onNotFound() {
         title.alert(AlertType.Info) {
             h4 {
-                +"未找到 ${this@ShareCodeHighlighter.idPlaceHolder} 的${shareName}"
+                +"未找到 ${this@ShareCodeHighlighter.idPlaceHolder} 的$shareName"
             }
             p {
-                +"可能是对方设置了权限，也可能是不存在该${shareName}"
+                +"可能是对方设置了权限，也可能是不存在该$shareName"
             }
         }
-        Messager.toastError("未找到对应${shareName}，可能是ID错误，或者是对方设置了查看权限")
+        Messager.toastError("未找到对应$shareName，可能是ID错误，或者是对方设置了查看权限")
     }
 
-    private fun Container.onSuccess(
-        codeDto: CodeDto,
-    ) {
+    private fun Container.onSuccess(codeDto: CodeDto) {
         title.alert(AlertType.Light) {
             h3 {
-                +"${codeDto.shareUsername} 的${shareName}"
+                +"${codeDto.shareUsername} 的$shareName"
             }
 
             slotOnTitle()
@@ -60,7 +60,7 @@ interface ShareCodeHighlighter {
                 }
             }
             badge(BadgeColor.Blue) {
-                +"语言 ${codeDto.language.toString()}"
+                +"语言 ${codeDto.language}"
             }
             badge(BadgeColor.Red) {
                 +codeDto.commentType.decr
@@ -83,13 +83,21 @@ interface ShareCodeHighlighter {
     }
 
     companion object {
-        private fun highlighterJsImpl(shareId: ShareID, alert: Div): ShareCodeHighlighter =
-            HighlighterJs(shareId, alert)
+        private fun highlighterJsImpl(
+            shareId: ShareID,
+            alert: Div,
+        ): ShareCodeHighlighter = HighlighterJs(shareId, alert)
 
-        private fun playgroundHighlighterJsImpl(share: ShareID, alert: Div): ShareCodeHighlighter =
-            PlaygroundHighlighterJs(share, alert)
+        private fun playgroundHighlighterJsImpl(
+            share: ShareID,
+            alert: Div,
+        ): ShareCodeHighlighter = PlaygroundHighlighterJs(share, alert)
 
-        fun loadHighlighter(codeDto: CodeDto, shareId: ShareID, alert: Div): ShareCodeHighlighter =
+        fun loadHighlighter(
+            codeDto: CodeDto,
+            shareId: ShareID,
+            alert: Div,
+        ): ShareCodeHighlighter =
             when (codeDto.codeType) {
                 Share -> highlighterJsImpl(shareId = shareId, alert = alert)
                 Playground -> playgroundHighlighterJsImpl(shareId, alert)
@@ -99,11 +107,15 @@ interface ShareCodeHighlighter {
 }
 
 private class HighlighterJs(
-    override val idPlaceHolder: ShareID, override val title: Div, override val shareName: String = "分享",
+    override val idPlaceHolder: ShareID,
+    override val title: Div,
+    override val shareName: String = "分享",
 ) : ShareCodeHighlighter
 
 private class PlaygroundHighlighterJs(
-    override val idPlaceHolder: ShareID, override val title: Div, override val shareName: String = "训练场"
+    override val idPlaceHolder: ShareID,
+    override val title: Div,
+    override val shareName: String = "训练场",
 ) : ShareCodeHighlighter {
     override fun Container.slotOnTitle() {
         p {
@@ -113,5 +125,7 @@ private class PlaygroundHighlighterJs(
 }
 
 private class ProblemHighlighterJs(
-    override val idPlaceHolder: ShareID, override val title: Div, override val shareName: String = "题解",
+    override val idPlaceHolder: ShareID,
+    override val title: Div,
+    override val shareName: String = "题解",
 ) : ShareCodeHighlighter

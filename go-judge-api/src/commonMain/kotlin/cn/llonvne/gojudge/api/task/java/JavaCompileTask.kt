@@ -17,7 +17,10 @@ private class JavaCompileTask : AbstractTask<CodeInput>() {
     override val compiledFileExtension: Option<String>
         get() = "class".some()
 
-    override fun getCompileCmd(input: CodeInput, filenames: Filenames) = cmd {
+    override fun getCompileCmd(
+        input: CodeInput,
+        filenames: Filenames,
+    ) = cmd {
         args = useJavacArgs(filenames)
         env = useUsrBinEnv
         files = useStdOutErrForFiles()
@@ -26,18 +29,20 @@ private class JavaCompileTask : AbstractTask<CodeInput>() {
         copyOutCached = listOf(filenames.source.asString(), filenames.compiled.asString())
     }
 
-    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
-        return filenames.copy(
+    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames =
+        filenames.copy(
             source = filenames.source.copy(name = "Main"),
-            compiled = filenames.compiled.copy(name = "Main")
+            compiled = filenames.compiled.copy(name = "Main"),
         )
-    }
 
-    override fun transformRunFilename(filename: Filename): Filename {
-        return filename.copy(name = "Main", extension = "class".some())
-    }
+    override fun transformRunFilename(filename: Filename): Filename = filename.copy(name = "Main", extension = "class".some())
 
-    override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String) = cmd {
+    override fun getRunCmd(
+        input: CodeInput,
+        compileResult: Result,
+        runFilename: Filename,
+        runFileId: String,
+    ) = cmd {
         args = listOf("java", runFilename.name)
         env = useUsrBinEnv
         files = useStdOutErrForFiles(input.stdin)

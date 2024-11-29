@@ -30,12 +30,13 @@ fun installAllGpp() {
     SupportLanguages.entries
         .filter {
             it.name.startsWith("Cpp")
-        }
-        .forEach { supportLanguage ->
+        }.forEach { supportLanguage ->
             with(supportLanguage) {
                 installLanguageRouter(
-                    languageName + languageVersion, "/$path", decr = "",
-                    gpp(CppVersion.valueOf("Cpp$languageVersion"))
+                    languageName + languageVersion,
+                    "/$path",
+                    decr = "",
+                    gpp(CppVersion.valueOf("Cpp$languageVersion")),
                 )
             }
         }
@@ -46,11 +47,13 @@ private val runtime = Runtime.getRuntime()
 /**
  * @param judgeContext 评测机运行时
  */
-fun Application.judging(judgeContext: JudgeContext, port: Int) {
+fun Application.judging(
+    judgeContext: JudgeContext,
+    port: Int,
+) {
     installKtorOfficialPlugins()
 
     routing {
-
         get("/info") {
             call.respond(
                 JudgeServerInfo(
@@ -60,8 +63,8 @@ fun Application.judging(judgeContext: JudgeContext, port: Int) {
                     host = InetAddress.getLocalHost().hostAddress,
                     port = port.toString(),
                     isOnline = true,
-                    memoryUsage = runtime.totalMemory().toInt() - runtime.freeMemory().toInt()
-                )
+                    memoryUsage = runtime.totalMemory().toInt() - runtime.freeMemory().toInt(),
+                ),
             )
         }
 

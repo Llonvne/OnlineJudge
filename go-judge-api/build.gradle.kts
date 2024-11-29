@@ -41,18 +41,14 @@ kotlin {
         }
         jvmMain {
             dependencies {
-
             }
         }
         jsMain {
             dependencies {
-
             }
         }
     }
 }
-
-
 
 dependencies {
     add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:$ktorfitVersion")
@@ -72,4 +68,3 @@ tasks.withType<Wrapper> {
     gradleVersion = "8.1.1"
     distributionType = Wrapper.DistributionType.BIN
 }
-

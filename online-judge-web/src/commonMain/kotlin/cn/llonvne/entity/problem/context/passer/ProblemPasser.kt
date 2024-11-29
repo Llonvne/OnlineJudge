@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface ProblemPasser<out R : PasserResult> {
-
     val description: String
 
     /**
@@ -17,24 +16,28 @@ sealed interface ProblemPasser<out R : PasserResult> {
      */
     fun pass(submissionTestCases: SubmissionTestCases): R
 
-
     /**
      * 通过所有测试
      */
     @Serializable
-    data class PassAllCases(override val description: String = "必须要通过所有测试") : ProblemPasser<BooleanResult> {
-        override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult {
-            return submissionTestCases.testCases.map { testcase ->
-                testcase.outputStr?.trimIndent() == testcase.expect
-            }.all { it }.let { BooleanResult(it) }
-        }
+    data class PassAllCases(
+        override val description: String = "必须要通过所有测试",
+    ) : ProblemPasser<BooleanResult> {
+        override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult =
+            submissionTestCases.testCases
+                .map { testcase ->
+                    testcase.outputStr?.trimIndent() == testcase.expect
+                }.all { it }
+                .let { BooleanResult(it) }
     }
 
     /**
      * 通过一定程度
      */
     @Serializable
-    data class OfPassRate(val rate: Double) : ProblemPasser<BooleanResult> {
+    data class OfPassRate(
+        val rate: Double,
+    ) : ProblemPasser<BooleanResult> {
         override fun pass(submissionTestCases: SubmissionTestCases): BooleanResult {
             TODO()
         }

@@ -24,25 +24,33 @@ import io.kvision.core.Container
 import io.kvision.html.*
 
 interface JudgeResultDisplay {
-
     fun load(root: Container)
 
     companion object {
-        fun empty() = object : JudgeResultDisplay {
-            override fun load(root: Container) {}
-        }
+        fun empty() =
+            object : JudgeResultDisplay {
+                override fun load(root: Container) {}
+            }
 
-        fun playground(codeId: Int, root: Container): JudgeResultDisplay = PlaygroundJudgeResultDisplay(codeId)
-            .also { it.load(root) }
+        fun playground(
+            codeId: Int,
+            root: Container,
+        ): JudgeResultDisplay =
+            PlaygroundJudgeResultDisplay(codeId)
+                .also { it.load(root) }
 
-        fun problem(codeId: Int, div: Div): JudgeResultDisplay = ProblemJudgeResultDisplay(codeId)
-            .also { it.load(root = div) }
+        fun problem(
+            codeId: Int,
+            div: Div,
+        ): JudgeResultDisplay =
+            ProblemJudgeResultDisplay(codeId)
+                .also { it.load(root = div) }
     }
 }
 
 private class ProblemJudgeResultDisplay(
     private val codeId: Int,
-    private val errorHandler: ErrorHandler<Int> = JudgeResultDisplayErrorHandler.getHandler()
+    private val errorHandler: ErrorHandler<Int> = JudgeResultDisplayErrorHandler.getHandler(),
 ) : JudgeResultDisplay {
     override fun load(root: Container) {
         observableOf<GetJudgeResultByCodeIdResp>(null) {
@@ -62,10 +70,11 @@ private class ProblemJudgeResultDisplay(
         }
     }
 
-    private fun display(root: Container, judgeResult: ProblemJudgeResult) {
-
+    private fun display(
+        root: Container,
+        judgeResult: ProblemJudgeResult,
+    ) {
         root.alert(AlertType.Dark) {
-
             PasserResultDisplay.from(judgeResult.passerResult).load(root)
 
             h4 {
@@ -121,12 +130,10 @@ private class ProblemJudgeResultDisplay(
     }
 }
 
-
 private class PlaygroundJudgeResultDisplay(
     private val codeId: Int,
     private val errorHandler: ErrorHandler<Int> = JudgeResultDisplayErrorHandler.getHandler(),
 ) : JudgeResultDisplay {
-
     override fun load(root: Container) {
         observableOf<GetJudgeResultByCodeIdResp>(null) {
             setUpdater { SubmissionModel.getJudgeResultByCodeID(codeId) }
@@ -145,7 +152,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun onCompilerError(root: Container, compileError: CompileError) {
+    fun onCompilerError(
+        root: Container,
+        compileError: CompileError,
+    ) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"编译错误"
@@ -157,7 +167,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun onCompileResultNotFound(root: Container, compileResultNotFound: CompileResultNotFound) {
+    fun onCompileResultNotFound(
+        root: Container,
+        compileResultNotFound: CompileResultNotFound,
+    ) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到编译结果"
@@ -169,7 +182,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun onRunResultIsNull(root: Container, runResultIsNull: RunResultIsNull) {
+    fun onRunResultIsNull(
+        root: Container,
+        runResultIsNull: RunResultIsNull,
+    ) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到运行结果"
@@ -181,7 +197,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun onTargetResultNotFound(root: Container, targetFileNotExist: TargetResultNotFound) {
+    fun onTargetResultNotFound(
+        root: Container,
+        targetFileNotExist: TargetResultNotFound,
+    ) {
         root.alert(AlertType.Danger) {
             h3 {
                 +"未找到运行目标"
@@ -193,7 +212,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun onSuccess(root: Container, successOutput: SuccessOutput) {
+    fun onSuccess(
+        root: Container,
+        successOutput: SuccessOutput,
+    ) {
         root.alert(AlertType.Success) {
             h4 {
                 +"运行成功"
@@ -225,7 +247,10 @@ private class PlaygroundJudgeResultDisplay(
         }
     }
 
-    fun display(root: Container, outputDto: OutputDto) {
+    fun display(
+        root: Container,
+        outputDto: OutputDto,
+    ) {
         when (outputDto) {
             is OutputDto.FailureOutput -> {
                 when (val reason = outputDto.reason) {

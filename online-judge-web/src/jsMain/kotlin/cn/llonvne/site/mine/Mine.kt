@@ -28,35 +28,32 @@ fun Container.mine() {
 }
 
 private interface Mine {
-
     fun load(root: Container)
 
     companion object {
+        private val notLogin =
+            object : Mine {
+                override fun load(root: Container) {
+                    root.alert(AlertType.Danger) {
+                        h4 {
+                            +"您还未登入"
+                        }
 
-        private val notLogin = object : Mine {
-            override fun load(root: Container) {
-                root.alert(AlertType.Danger) {
-                    h4 {
-                        +"您还未登入"
-                    }
-
-                    p {
-                        +"请先登入账户后刷新页面"
+                        p {
+                            +"请先登入账户后刷新页面"
+                        }
                     }
                 }
             }
-        }
 
-        fun from(mineResp: MineResp): Mine {
-            return when (mineResp) {
+        fun from(mineResp: MineResp): Mine =
+            when (mineResp) {
                 is MineResp.Administrator -> AdministratorMine()
                 is MineResp.NormalUser -> NormalUserMine(mineResp)
                 PermissionDenied -> notLogin
             }
-        }
     }
 }
-
 
 class AdministratorMine : Mine {
     override fun load(root: Container) {
@@ -82,12 +79,13 @@ class AdministratorMine : Mine {
                     choice.show(this)
                 }
             }
-
         }
     }
 }
 
-private class NormalUserMine(private val mineResp: MineResp.NormalUser) : Mine {
+private class NormalUserMine(
+    private val mineResp: MineResp.NormalUser,
+) : Mine {
     override fun load(root: Container) {
         root.div {
             alert(AlertType.Light) {
@@ -98,4 +96,3 @@ private class NormalUserMine(private val mineResp: MineResp.NormalUser) : Mine {
         }
     }
 }
-

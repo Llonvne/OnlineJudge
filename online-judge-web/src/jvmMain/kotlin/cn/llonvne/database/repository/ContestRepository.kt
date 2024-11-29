@@ -10,51 +10,53 @@ import org.komapper.core.dsl.query.map
 import org.komapper.core.dsl.query.singleOrNull
 import org.komapper.r2dbc.R2dbcDatabase
 import org.springframework.stereotype.Repository
-import kotlin.time.Duration
 
 @Repository
 class ContestRepository(
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val db: R2dbcDatabase,
 ) {
-
     private val contestMeta = Meta.contest
 
-    suspend fun create(contest: Contest): Contest {
-        return db.runQuery {
+    suspend fun create(contest: Contest): Contest =
+        db.runQuery {
             QueryDsl.insert(contestMeta).single(contest).returning()
         }
-    }
 
-    suspend fun getById(id: Int): Contest? {
-        return db.runQuery {
-            QueryDsl.from(contestMeta).where {
-                contestMeta.contestId eq id
-            }.singleOrNull()
+    suspend fun getById(id: Int): Contest? =
+        db.runQuery {
+            QueryDsl
+                .from(contestMeta)
+                .where {
+                    contestMeta.contestId eq id
+                }.singleOrNull()
         }
-    }
 
-    suspend fun getByHash(hash: String): Contest? {
-        return db.runQuery {
-            QueryDsl.from(contestMeta).where {
-                contestMeta.hashLink eq hash
-            }.singleOrNull()
+    suspend fun getByHash(hash: String): Contest? =
+        db.runQuery {
+            QueryDsl
+                .from(contestMeta)
+                .where {
+                    contestMeta.hashLink eq hash
+                }.singleOrNull()
         }
-    }
 
     suspend fun lastTwoWeekCount(): Int {
-
         val today = Clock.System.now()
 
-        val last = today.minus(14, DateTimeUnit.DAY, TimeZone.currentSystemDefault()).toLocalDateTime(
-            TimeZone.currentSystemDefault()
-        )
+        val last =
+            today.minus(14, DateTimeUnit.DAY, TimeZone.currentSystemDefault()).toLocalDateTime(
+                TimeZone.currentSystemDefault(),
+            )
 
         return db.runQuery {
-            QueryDsl.from(contestMeta).where {
-                contestMeta.createdAt greaterEq last
-            }.select(count()).map {
-                it?.toInt() ?: 0
-            }
+            QueryDsl
+                .from(contestMeta)
+                .where {
+                    contestMeta.createdAt greaterEq last
+                }.select(count())
+                .map {
+                    it?.toInt() ?: 0
+                }
         }
     }
 }

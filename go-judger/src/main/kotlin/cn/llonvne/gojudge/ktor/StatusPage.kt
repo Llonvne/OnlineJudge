@@ -70,7 +70,7 @@ val ApplicationCall.userJudgePermission: UserJudgePermission
     get() {
         return try {
             cn.llonvne.gojudge.api.UserJudgePermission.valueOf(
-                this.request.queryParameters[KEY_IN_QUERY] ?: FALL_BACK_PERMISSION.name
+                this.request.queryParameters[KEY_IN_QUERY] ?: FALL_BACK_PERMISSION.name,
             )
         } catch (e: IllegalArgumentException) {
             FALL_BACK_PERMISSION

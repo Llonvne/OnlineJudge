@@ -22,16 +22,22 @@ interface ICodeService {
     @Serializable
     sealed interface SaveCodeResp {
         @Serializable
-        data class SuccessfulSaveCode(val code: Code) : SaveCodeResp
-
+        data class SuccessfulSaveCode(
+            val code: Code,
+        ) : SaveCodeResp
     }
 
-    suspend fun save(token: Token?, saveCodeReq: SaveCodeReq): SaveCodeResp
+    suspend fun save(
+        token: Token?,
+        saveCodeReq: SaveCodeReq,
+    ): SaveCodeResp
 
     @Serializable
     sealed interface GetCodeResp {
         @Serializable
-        data class SuccessfulGetCode(val codeDto: CodeDto) : GetCodeResp
+        data class SuccessfulGetCode(
+            val codeDto: CodeDto,
+        ) : GetCodeResp
 
         fun onSuccess(block: (SuccessfulGetCode) -> Unit): GetCodeResp {
             if (this is SuccessfulGetCode) {
@@ -48,20 +54,25 @@ interface ICodeService {
         }
     }
 
-    suspend fun getCode(value: Token?, shareId: Int): GetCodeResp
+    suspend fun getCode(
+        value: Token?,
+        shareId: Int,
+    ): GetCodeResp
 
     @Serializable
     data class CommitOnCodeReq(
         val token: Token?,
         val content: String,
         val codeId: Int,
-        val type: ShareCodeCommentType
+        val type: ShareCodeCommentType,
     )
 
     @Serializable
     sealed interface CommitOnCodeResp {
         @Serializable
-        data class SuccessfulCommit(val shareCodeCommitDto: CreateCommentReq) : CommitOnCodeResp
+        data class SuccessfulCommit(
+            val shareCodeCommitDto: CreateCommentReq,
+        ) : CommitOnCodeResp
     }
 
     suspend fun commit(commitOnCodeReq: CommitOnCodeReq): CommitOnCodeResp
@@ -69,11 +80,15 @@ interface ICodeService {
     @Serializable
     sealed interface GetCommitsOnCodeResp {
         @Serializable
-        data class SuccessfulGetCommits(val commits: List<CreateCommentReq>) : GetCommitsOnCodeResp
+        data class SuccessfulGetCommits(
+            val commits: List<CreateCommentReq>,
+        ) : GetCommitsOnCodeResp
     }
 
-
-    suspend fun getComments(token: Token?, sharCodeId: Int): GetCommitsOnCodeResp
+    suspend fun getComments(
+        token: Token?,
+        sharCodeId: Int,
+    ): GetCommitsOnCodeResp
 
     suspend fun deleteComments(commentIds: List<Int>): List<Int>
 
@@ -83,16 +98,21 @@ interface ICodeService {
         data object SuccessToPublicOrPrivate : SetCodeVisibilityResp
 
         @Serializable
-        data class SuccessToRestrict(val link: String) : SetCodeVisibilityResp
+        data class SuccessToRestrict(
+            val link: String,
+        ) : SetCodeVisibilityResp
     }
 
     suspend fun setCodeVisibility(
         token: Token?,
         shareId: Int,
-        result: CodeVisibilityType
+        result: CodeVisibilityType,
     ): SetCodeVisibilityResp
 
-    suspend fun getCodeByHash(value: Token?, hash: String): GetCodeResp
+    suspend fun getCodeByHash(
+        value: Token?,
+        hash: String,
+    ): GetCodeResp
 
     @Serializable
     sealed interface SetCodeCommentTypeResp {
@@ -103,7 +123,7 @@ interface ICodeService {
     suspend fun setCodeCommentType(
         token: Token?,
         shareId: Int,
-        type: CodeCommentType
+        type: CodeCommentType,
     ): SetCodeCommentTypeResp
 
     @Serializable
@@ -116,12 +136,6 @@ interface ICodeService {
         token: Token?,
         shareId: Int,
         commentId: Int,
-        type: ShareCodeCommentType
+        type: ShareCodeCommentType,
     ): SetCodeCommentVisibilityTypeResp
 }
-
-
-
-
-
-

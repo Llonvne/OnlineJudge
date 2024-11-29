@@ -9,6 +9,5 @@ data class ProblemSupportLanguage(
     @KomapperId @KomapperAutoIncrement
     val problemSupportId: Int? = null,
     val problemId: Int,
-    val languageId: Int
+    val languageId: Int,
 )
-

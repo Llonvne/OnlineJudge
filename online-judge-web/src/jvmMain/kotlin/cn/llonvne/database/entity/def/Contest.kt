@@ -23,5 +23,5 @@ private data class ContestDef(
     @KomapperCreatedAt
     val createdAt: LocalDateTime? = null,
     @KomapperUpdatedAt
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 )

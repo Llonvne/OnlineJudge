@@ -10,5 +10,5 @@ private data class LanguageDef(
     @KomapperId @KomapperAutoIncrement
     val languageId: Int,
     val languageName: String,
-    val languageVersion: String
+    val languageVersion: String,
 )

@@ -11,19 +11,13 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.benchmark.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Threads
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.timerTask
-import kotlin.math.cos
-import kotlin.math.sqrt
 import kotlin.system.measureTimeMillis
-import kotlin.time.Duration
 
 @State(Scope.Benchmark)
 @Fork(1)
@@ -31,19 +25,20 @@ import kotlin.time.Duration
 @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 class JudgerBenchmark {
     private lateinit var languageDispatcher: LanguageDispatcher
-    private val httpClient: HttpClient = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(Json)
+    private val httpClient: HttpClient =
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(Json)
+            }
         }
-    }
 
-    private fun default(judgeUrl: String): LanguageDispatcher {
-        return LanguageDispatcher.get(
+    private fun default(judgeUrl: String): LanguageDispatcher =
+        LanguageDispatcher.get(
             LanguageFactory.get(
-                judgeUrl, httpClient = httpClient
-            )
+                judgeUrl,
+                httpClient = httpClient,
+            ),
         )
-    }
 
     @Setup
     fun setUp() {
@@ -52,44 +47,48 @@ class JudgerBenchmark {
 
     @Benchmark
     @Threads(20)
-    fun cppHelloWorld() = runBlocking {
-        languageDispatcher.dispatch(SupportLanguages.Cpp11) {
-            judge(
-                """
-                #include <iostream>
+    fun cppHelloWorld() =
+        runBlocking {
+            languageDispatcher.dispatch(SupportLanguages.Cpp11) {
+                judge(
+                    """
+                    #include <iostream>
 
-                int main() {
-                    std::cout << "Hello, World!" << std::endl;
-                    return 0;
-                }
-            """.trimIndent(), ""
-            )
+                    int main() {
+                        std::cout << "Hello, World!" << std::endl;
+                        return 0;
+                    }
+                    """.trimIndent(),
+                    "",
+                )
+            }
         }
-    }
 
     @Benchmark
     @Threads(20)
-    fun kotlinHelloWorld() = runBlocking {
-        languageDispatcher.dispatch(SupportLanguages.Kotlin) {
-            judge("""println(""Hello, World!")""", "")
+    fun kotlinHelloWorld() =
+        runBlocking {
+            languageDispatcher.dispatch(SupportLanguages.Kotlin) {
+                judge("""println(""Hello, World!")""", "")
+            }
         }
-    }
 }
 
 private lateinit var languageDispatcher: LanguageDispatcher
-private val httpClient: HttpClient = HttpClient(OkHttp) {
-    install(ContentNegotiation) {
-        json(Json)
+private val httpClient: HttpClient =
+    HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            json(Json)
+        }
     }
-}
 
-private fun default(judgeUrl: String): LanguageDispatcher {
-    return LanguageDispatcher.get(
+private fun default(judgeUrl: String): LanguageDispatcher =
+    LanguageDispatcher.get(
         LanguageFactory.get(
-            judgeUrl, httpClient = httpClient
-        )
+            judgeUrl,
+            httpClient = httpClient,
+        ),
     )
-}
 
 suspend fun main() {
     languageDispatcher = default("http://localhost:8081/")
@@ -97,27 +96,27 @@ suspend fun main() {
     listOf(10, 20, 50, 100, 200, 500, 1000).forEach { times ->
         measureTimeMillis {
             withContext(Dispatchers.IO) {
-                (1..times).map {
-                    async {
-                        languageDispatcher.dispatch(SupportLanguages.Cpp11) {
-                            judge(
-                                """
-                #include <iostream>
+                (1..times)
+                    .map {
+                        async {
+                            languageDispatcher.dispatch(SupportLanguages.Cpp11) {
+                                judge(
+                                    """
+                                    #include <iostream>
 
-                int main() {
-                    std::cout << "Hello, World!" << std::endl;
-                    return 0;
-                }
-            """.trimIndent(), ""
-                            )
+                                    int main() {
+                                        std::cout << "Hello, World!" << std::endl;
+                                        return 0;
+                                    }
+                                    """.trimIndent(),
+                                    "",
+                                )
+                            }
                         }
-                    }
-                }.awaitAll()
+                    }.awaitAll()
             }
         }.also {
             println("$times $it")
         }
     }
-
-
 }

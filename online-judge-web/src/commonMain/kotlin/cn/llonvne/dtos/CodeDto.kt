@@ -16,5 +16,5 @@ data class CodeDto(
     val visibilityType: CodeVisibilityType,
     val commentType: CodeCommentType,
     val hashLink: String?,
-    val codeType: Code.CodeType
+    val codeType: Code.CodeType,
 )

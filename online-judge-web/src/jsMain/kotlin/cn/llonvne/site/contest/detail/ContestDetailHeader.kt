@@ -13,14 +13,15 @@ interface ContestDetailHeader {
     fun show(container: Container)
 
     companion object {
-        fun form(loadOk: IContestService.LoadContestResp.LoadOk): ContestDetailHeader =
-            BaseContestDetailHeader(loadOk)
+        fun form(loadOk: IContestService.LoadContestResp.LoadOk): ContestDetailHeader = BaseContestDetailHeader(loadOk)
     }
 }
 
-private class BaseContestDetailHeader(private val loadOk: IContestService.LoadContestResp.LoadOk) :
-    ContestDetailHeader {
+private class BaseContestDetailHeader(
+    private val loadOk: IContestService.LoadContestResp.LoadOk,
+) : ContestDetailHeader {
     private val contestStatusResolver = ContestStatusResolver(loadOk.contest.startAt, loadOk.contest.endAt)
+
     override fun show(container: Container) {
         container.div {
             alert(contestStatusResolver.statusColor()) {

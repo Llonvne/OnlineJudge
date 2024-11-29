@@ -46,6 +46,3 @@ object Frontend {
         override val name: String = "训练场"
     }
 }
-
-
-

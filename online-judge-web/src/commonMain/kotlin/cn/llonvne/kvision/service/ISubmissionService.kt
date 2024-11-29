@@ -2,9 +2,9 @@
 
 package cn.llonvne.kvision.service
 
-import cn.llonvne.dtos.Username
-import cn.llonvne.dtos.SubmissionListDto
 import cn.llonvne.dtos.CodeForView
+import cn.llonvne.dtos.SubmissionListDto
+import cn.llonvne.dtos.Username
 import cn.llonvne.entity.contest.Contest
 import cn.llonvne.entity.contest.ContestId
 import cn.llonvne.entity.problem.Language
@@ -22,10 +22,8 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
 
-
 @KVService
 interface ISubmissionService {
-
     @Serializable
     data class ListSubmissionReq(
         val token: Token? = null,
@@ -36,7 +34,9 @@ interface ISubmissionService {
     @Serializable
     sealed interface SubmissionGetByIdResp {
         @Serializable
-        data class SuccessfulGetById(val submissionListDto: SubmissionListDto) : SubmissionGetByIdResp
+        data class SuccessfulGetById(
+            val submissionListDto: SubmissionListDto,
+        ) : SubmissionGetByIdResp
     }
 
     suspend fun getById(id: Int): SubmissionGetByIdResp
@@ -44,28 +44,37 @@ interface ISubmissionService {
     @Serializable
     sealed interface ViewCodeGetByIdResp {
         @Serializable
-        data class SuccessfulGetById(val codeForView: CodeForView) : ViewCodeGetByIdResp
+        data class SuccessfulGetById(
+            val codeForView: CodeForView,
+        ) : ViewCodeGetByIdResp
     }
-
 
     suspend fun getViewCode(id: Int): ViewCodeGetByIdResp
 
     @Serializable
     sealed interface GetSupportLanguageByProblemIdResp {
         @Serializable
-        data class SuccessfulGetSupportLanguage(val languages: List<Language>) : GetSupportLanguageByProblemIdResp
+        data class SuccessfulGetSupportLanguage(
+            val languages: List<Language>,
+        ) : GetSupportLanguageByProblemIdResp
     }
 
     suspend fun getSupportLanguageId(
-        token: Token?, problemId: Int
+        token: Token?,
+        problemId: Int,
     ): GetSupportLanguageByProblemIdResp
 
     @Serializable
     data object SubmissionNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, PlaygroundOutput
 
     @Serializable
-    data object ProblemNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp, GetSupportLanguageByProblemIdResp,
-        ProblemSubmissionResp, GetLastNProblemSubmissionResp, IContestService.AddProblemResp
+    data object ProblemNotFound :
+        SubmissionGetByIdResp,
+        ViewCodeGetByIdResp,
+        GetSupportLanguageByProblemIdResp,
+        ProblemSubmissionResp,
+        GetLastNProblemSubmissionResp,
+        IContestService.AddProblemResp
 
     @Serializable
     data object UserNotFound : SubmissionGetByIdResp, ViewCodeGetByIdResp
@@ -81,19 +90,22 @@ interface ISubmissionService {
             val stdin: String,
             override val rawCode: String,
             override val languageId: Int,
-            override val codeType: Code.CodeType
+            override val codeType: Code.CodeType,
         ) : CreateSubmissionReq
     }
 
     @Serializable
     sealed interface CreateSubmissionResp {
-
         @Serializable
-        data class SuccessfulCreateSubmissionResp(val submissionId: Int, val codeId: Int) : CreateSubmissionResp
+        data class SuccessfulCreateSubmissionResp(
+            val submissionId: Int,
+            val codeId: Int,
+        ) : CreateSubmissionResp
     }
 
     suspend fun create(
-        token: Token?, createSubmissionReq: CreateSubmissionReq
+        token: Token?,
+        createSubmissionReq: CreateSubmissionReq,
     ): CreateSubmissionResp
 
     @Serializable
@@ -103,7 +115,7 @@ interface ISubmissionService {
     sealed interface ProblemOutput : GetJudgeResultByCodeIdResp {
         @Serializable
         data class SuccessProblemOutput(
-            val problem: ProblemJudgeResult
+            val problem: ProblemJudgeResult,
         ) : PlaygroundOutput
     }
 
@@ -111,7 +123,7 @@ interface ISubmissionService {
     sealed interface PlaygroundOutput : GetJudgeResultByCodeIdResp {
         @Serializable
         data class SuccessPlaygroundOutput(
-            val outputDto: OutputDto
+            val outputDto: OutputDto,
         ) : PlaygroundOutput
 
         @Serializable
@@ -131,7 +143,9 @@ interface ISubmissionService {
                 data object CompileResultNotFound : FailureReason
 
                 @Serializable
-                data class CompileError(val compileErrMessage: String) : FailureReason
+                data class CompileError(
+                    val compileErrMessage: String,
+                ) : FailureReason
 
                 @Serializable
                 data object RunResultIsNull : FailureReason
@@ -143,13 +157,14 @@ interface ISubmissionService {
             @Serializable
             data class FailureOutput(
                 val reason: FailureReason,
-                override val language: SupportLanguages
+                override val language: SupportLanguages,
             ) : OutputDto
         }
     }
 
     suspend fun getOutputByCodeId(
-        token: Token?, codeId: Int
+        token: Token?,
+        codeId: Int,
     ): GetJudgeResultByCodeIdResp
 
     @Serializable
@@ -161,17 +176,18 @@ interface ISubmissionService {
             val submissionId: Int,
             val status: SubmissionStatus,
             val submitTime: LocalDateTime,
-            val codeId: Int
+            val codeId: Int,
         )
 
         @Serializable
         data class SuccessGetLastNPlaygroundSubmission(
-            val subs: List<PlaygroundSubmissionDto>
+            val subs: List<PlaygroundSubmissionDto>,
         ) : GetLastNPlaygroundSubmissionResp
     }
 
     suspend fun getLastNPlaygroundSubmission(
-        token: Token?, last: Int = 5
+        token: Token?,
+        last: Int = 5,
     ): GetLastNPlaygroundSubmissionResp
 
     @Serializable
@@ -180,7 +196,7 @@ interface ISubmissionService {
         val problemId: Int,
         val languageId: Int,
         val visibilityType: SubmissionVisibilityType,
-        val contestId: ContestId? = null
+        val contestId: ContestId? = null,
     )
 
     @Serializable
@@ -201,14 +217,14 @@ interface ISubmissionService {
 
     suspend fun submit(
         value: Token?,
-        submissionSubmit: ProblemSubmissionReq
+        submissionSubmit: ProblemSubmissionReq,
     ): ProblemSubmissionResp
 
     @Serializable
     sealed interface GetLastNProblemSubmissionResp {
         @Serializable
         data class GetLastNProblemSubmissionRespImpl(
-            val submissions: List<ProblemSubmissionListDto>
+            val submissions: List<ProblemSubmissionListDto>,
         ) : GetLastNProblemSubmissionResp
 
         @Serializable
@@ -223,14 +239,15 @@ interface ISubmissionService {
     suspend fun getLastNProblemSubmission(
         value: Token?,
         problemId: Int,
-        lastN: Int
+        lastN: Int,
     ): GetLastNProblemSubmissionResp
 
     @Serializable
     sealed interface GetParticipantContestResp {
         @Serializable
-        data class GetParticipantContestOk(val contests: List<Contest>) :
-            GetParticipantContestResp
+        data class GetParticipantContestOk(
+            val contests: List<Contest>,
+        ) : GetParticipantContestResp
     }
 
     suspend fun getParticipantContest(value: Token?): GetParticipantContestResp

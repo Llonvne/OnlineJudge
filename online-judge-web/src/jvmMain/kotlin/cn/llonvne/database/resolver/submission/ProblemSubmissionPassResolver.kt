@@ -14,12 +14,12 @@ class ProblemSubmissionPassResolver(
     private val problemRepository: ProblemRepository,
     private val groupProblemPassResolver: GroupProblemPassResolver,
     private val individualProblemPassResolver: IndividualProblemPassResolver,
-    private val problemAwareProvider: ProblemAwareProvider
+    private val problemAwareProvider: ProblemAwareProvider,
 ) {
     suspend fun resolve(
         authenticationUser: AuthenticationUser,
         problemSubmissionReq: ProblemSubmissionReq,
-        onPass: suspend (Problem) -> ProblemSubmissionResp
+        onPass: suspend (Problem) -> ProblemSubmissionResp,
     ): ProblemSubmissionResp {
         val problem = problemRepository.getById(problemSubmissionReq.problemId) ?: return ProblemNotFound
 
@@ -31,13 +31,19 @@ class ProblemSubmissionPassResolver(
         // 否则检查权限
         return problemAwareProvider.awareOf(problem) {
             when (problem.type) {
-                Individual -> individualProblemPassResolver.resolve(
-                    authenticationUser, problemSubmissionReq, onPass
-                )
+                Individual ->
+                    individualProblemPassResolver.resolve(
+                        authenticationUser,
+                        problemSubmissionReq,
+                        onPass,
+                    )
 
-                Group -> groupProblemPassResolver.resolve(
-                    authenticationUser, problemSubmissionReq, onPass
-                )
+                Group ->
+                    groupProblemPassResolver.resolve(
+                        authenticationUser,
+                        problemSubmissionReq,
+                        onPass,
+                    )
             }
         }
     }

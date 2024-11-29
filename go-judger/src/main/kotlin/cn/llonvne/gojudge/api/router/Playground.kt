@@ -2,7 +2,10 @@ package cn.llonvne.gojudge.api.router
 
 import kotlinx.html.*
 
-internal fun BODY.playground(languageName: String, judgePath: String = languageName) {
+internal fun BODY.playground(
+    languageName: String,
+    judgePath: String = languageName,
+) {
     h1 {
         +"$languageName Playground"
     }

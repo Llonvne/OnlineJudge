@@ -30,16 +30,25 @@ interface IProblemService {
     @Serializable
     sealed interface CreateProblemResp {
         @Serializable
-        data class Ok(val problemId: Int) : CreateProblemResp
+        data class Ok(
+            val problemId: Int,
+        ) : CreateProblemResp
 
         @Serializable
-        data class AuthorIdNotExist(val authorId: Int) : CreateProblemResp
+        data class AuthorIdNotExist(
+            val authorId: Int,
+        ) : CreateProblemResp
     }
 
+    suspend fun create(
+        token: Token?,
+        createProblemReq: CreateProblemReq,
+    ): CreateProblemResp
 
-    suspend fun create(token: Token?, createProblemReq: CreateProblemReq): CreateProblemResp
-
-    suspend fun list(token: Token?, showType: ProblemListShowType): List<ProblemForList>
+    suspend fun list(
+        token: Token?,
+        showType: ProblemListShowType,
+    ): List<ProblemForList>
 
     @Serializable
     sealed interface ProblemGetByIdResult {
@@ -47,7 +56,7 @@ interface IProblemService {
         data class GetProblemByIdOk(
             val problem: Problem,
             val supportLanguages: List<Language>,
-            val tage: List<ProblemTag>
+            val tage: List<ProblemTag>,
         ) : ProblemGetByIdResult
 
         @Serializable
@@ -55,5 +64,9 @@ interface IProblemService {
     }
 
     suspend fun getById(id: Int): ProblemGetByIdResult
-    suspend fun search(token: Token?, text: String): List<ProblemForList>
+
+    suspend fun search(
+        token: Token?,
+        text: String,
+    ): List<ProblemForList>
 }

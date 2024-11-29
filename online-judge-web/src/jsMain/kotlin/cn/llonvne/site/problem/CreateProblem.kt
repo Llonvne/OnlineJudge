@@ -53,7 +53,6 @@ data class ProblemTestCaseForm(
 )
 
 fun Container.createProblem(routing: Routing) {
-
     alert(AlertType.Success) {
         h1 {
             +"创建题目"
@@ -64,50 +63,59 @@ fun Container.createProblem(routing: Routing) {
         }
     }
 
-    val testCases = ProblemTestCases(
-        listOf(), ProblemPasser.PassAllCases()
-    )
+    val testCases =
+        ProblemTestCases(
+            listOf(),
+            ProblemPasser.PassAllCases(),
+        )
 
     observableOf(ProblemTestCases(listOf(), ProblemPasser.PassAllCases())) {
         div(className = "row") {
             div(className = "col") {
                 alert(AlertType.Light) {
-                    val panel = formPanel {
-                        add(CreateProblemForm::problemName, Text(label = "题目名字"))
-                        add(CreateProblemForm::problemDescription, Text(label = "题目描述"))
-                        add(CreateProblemForm::timeLimit, Numeric(min = 0, max = 1_0000_0000, label = "时间限制"))
-                        add(CreateProblemForm::memoryLimit, Numeric(min = 0, max = 1_0000_0000, label = "内存限制"))
-                        add(CreateProblemForm::authorId, Numeric(min = 0, label = "作者ID"))
-                        add(CreateProblemForm::overall, RichText(label = "题目要求"))
-                        add(CreateProblemForm::inputDescr, Text(label = "输入描述"))
-                        add(CreateProblemForm::outputDescr, Text(label = "输出描述"))
-                        add(CreateProblemForm::hint, Text(label = "题目提示"))
-                        add(
-                            CreateProblemForm::problemVisibilityInt, TomSelect(
-                                options = ProblemVisibility.entries.map {
-                                    it.ordinal.toString() to it.chinese
-                                },
-                                label = "题目可见性设置"
+                    val panel =
+                        formPanel {
+                            add(CreateProblemForm::problemName, Text(label = "题目名字"))
+                            add(CreateProblemForm::problemDescription, Text(label = "题目描述"))
+                            add(CreateProblemForm::timeLimit, Numeric(min = 0, max = 1_0000_0000, label = "时间限制"))
+                            add(CreateProblemForm::memoryLimit, Numeric(min = 0, max = 1_0000_0000, label = "内存限制"))
+                            add(CreateProblemForm::authorId, Numeric(min = 0, label = "作者ID"))
+                            add(CreateProblemForm::overall, RichText(label = "题目要求"))
+                            add(CreateProblemForm::inputDescr, Text(label = "输入描述"))
+                            add(CreateProblemForm::outputDescr, Text(label = "输出描述"))
+                            add(CreateProblemForm::hint, Text(label = "题目提示"))
+                            add(
+                                CreateProblemForm::problemVisibilityInt,
+                                TomSelect(
+                                    options =
+                                        ProblemVisibility.entries.map {
+                                            it.ordinal.toString() to it.chinese
+                                        },
+                                    label = "题目可见性设置",
+                                ),
                             )
-                        )
-                        add(
-                            CreateProblemForm::problemTypeInt, TomSelect(
-                                options = ProblemType.entries.map {
-                                    it.ordinal.toString() to it.name
-                                },
-                                label = "题目类型"
+                            add(
+                                CreateProblemForm::problemTypeInt,
+                                TomSelect(
+                                    options =
+                                        ProblemType.entries.map {
+                                            it.ordinal.toString() to it.name
+                                        },
+                                    label = "题目类型",
+                                ),
                             )
-                        )
-                        add(
-                            CreateProblemForm::problemSupportLanguages, TomSelect(
-                                options = SupportLanguages.entries.map {
-                                    it.languageId.toString() to it.toString()
-                                },
-                                multiple = true,
-                                label = "题目支持的语言类型"
+                            add(
+                                CreateProblemForm::problemSupportLanguages,
+                                TomSelect(
+                                    options =
+                                        SupportLanguages.entries.map {
+                                            it.languageId.toString() to it.toString()
+                                        },
+                                    multiple = true,
+                                    label = "题目支持的语言类型",
+                                ),
                             )
-                        )
-                    }
+                        }
 
                     panel.getChildren().forEach {
                         it.addCssClass("small")
@@ -122,10 +130,11 @@ fun Container.createProblem(routing: Routing) {
                             onClickLaunch {
                                 Messager.toastInfo("已经提交请求，请稍等")
                                 Messager.toastInfo(
-                                    ProblemModel.create(
-                                        panel.getData(),
-                                        testCases ?: return@onClickLaunch Messager.toastInfo("内部错误")
-                                    ).toString()
+                                    ProblemModel
+                                        .create(
+                                            panel.getData(),
+                                            testCases ?: return@onClickLaunch Messager.toastInfo("内部错误"),
+                                        ).toString(),
                                 )
                             }
                         }
@@ -140,47 +149,57 @@ fun Container.createProblem(routing: Routing) {
                     sync(div { }) { cases ->
                         console.log(cases)
                         if (cases != null) {
-                            TestCasesShower.from(cases.testCases, withoutTitle = true) { case ->
-                                add {
-                                    +"删除"
+                            TestCasesShower
+                                .from(cases.testCases, withoutTitle = true) { case ->
+                                    add {
+                                        +"删除"
 
-                                    onClick {
-                                        setObv(cases.copy(testCases = cases.testCases - case, passer = cases.passer))
+                                        onClick {
+                                            setObv(cases.copy(testCases = cases.testCases - case, passer = cases.passer))
+                                        }
                                     }
-                                }
-                            }.load(this)
+                                }.load(this)
                         }
 
-                        val testCaseForm = formPanel<ProblemTestCaseForm> {
-                            add(ProblemTestCaseForm::name, Text(label = "测试样例名称"), required = true)
-                            add(ProblemTestCaseForm::input, Text(label = "输入"), required = true)
-                            add(ProblemTestCaseForm::output, Text(label = "输出"), required = true)
-                            add(ProblemTestCaseForm::visibilityStr, TomSelect(
-                                label = "类型",
-                                options = TestCaseType.entries.map {
-                                    it.ordinal.toString() to it.chinese
-                                }
-                            ), required = true)
+                        val testCaseForm =
+                            formPanel<ProblemTestCaseForm> {
+                                add(ProblemTestCaseForm::name, Text(label = "测试样例名称"), required = true)
+                                add(ProblemTestCaseForm::input, Text(label = "输入"), required = true)
+                                add(ProblemTestCaseForm::output, Text(label = "输出"), required = true)
+                                add(
+                                    ProblemTestCaseForm::visibilityStr,
+                                    TomSelect(
+                                        label = "类型",
+                                        options =
+                                            TestCaseType.entries.map {
+                                                it.ordinal.toString() to it.chinese
+                                            },
+                                    ),
+                                    required = true,
+                                )
 
-                            getChildren().forEach { it.addCssClass("small") }
-                        }
+                                getChildren().forEach { it.addCssClass("small") }
+                            }
                         button("增加一个样例") {
                             onClickLaunch {
                                 setObv(
                                     testCases.copy(
                                         (cases?.testCases ?: listOf()) +
-                                                testCaseForm.getData().let { form ->
-                                                    ProblemTestCase(
-                                                        "",
-                                                        form.name,
-                                                        form.input,
-                                                        form.output,
-                                                        form.visibilityStr.let {
-                                                            TestCaseType.entries[it.toIntOrNull()
-                                                                ?: return@onClickLaunch Messager.toastInfo("测试样例类型无效")]
-                                                        })
-                                                }
-                                    )
+                                            testCaseForm.getData().let { form ->
+                                                ProblemTestCase(
+                                                    "",
+                                                    form.name,
+                                                    form.input,
+                                                    form.output,
+                                                    form.visibilityStr.let {
+                                                        TestCaseType.entries[
+                                                            it.toIntOrNull()
+                                                                ?: return@onClickLaunch Messager.toastInfo("测试样例类型无效"),
+                                                        ]
+                                                    },
+                                                )
+                                            },
+                                    ),
                                 )
                             }
                         }

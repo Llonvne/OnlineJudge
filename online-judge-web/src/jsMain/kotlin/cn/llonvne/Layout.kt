@@ -8,7 +8,10 @@ import io.kvision.html.div
 import io.kvision.panel.root
 import io.kvision.routing.Routing
 
-fun Application.layout(routing: Routing, build: Container.() -> Unit) {
+fun Application.layout(
+    routing: Routing,
+    build: Container.() -> Unit,
+) {
     root("kvapp") {
         header(routing)
         div(className = "px-4") {

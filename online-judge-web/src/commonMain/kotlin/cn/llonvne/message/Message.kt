@@ -12,6 +12,8 @@ sealed interface Message {
      * @see [cn.llonvne.message.Messager.toastByLevel]
      */
     @Serializable
-    data class ToastMessage(override val level: MessageLevel, val message: String) :
-        Message
+    data class ToastMessage(
+        override val level: MessageLevel,
+        val message: String,
+    ) : Message
 }

@@ -4,12 +4,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class BannedUsernameCheckResolver {
-
     private val bannedUsernameKeyWords = listOf("admin")
 
     enum class BannedUsernameCheckResult {
         Pass,
-        Failed
+        Failed,
     }
 
     fun resolve(username: String): BannedUsernameCheckResult {

@@ -13,14 +13,13 @@ fun interface DetailHeaderShower {
     fun show(root: Container)
 
     companion object {
-        fun from(resp: GetProblemByIdOk): DetailHeaderShower {
-            return AbstractDetailHeaderShower(resp)
-        }
+        fun from(resp: GetProblemByIdOk): DetailHeaderShower = AbstractDetailHeaderShower(resp)
     }
 }
 
-private class AbstractDetailHeaderShower(result: GetProblemByIdOk) :
-    DetailHeaderShower {
+private class AbstractDetailHeaderShower(
+    result: GetProblemByIdOk,
+) : DetailHeaderShower {
     protected val problem = result.problem
 
     override fun show(root: Container) {

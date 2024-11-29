@@ -15,25 +15,27 @@ import org.springframework.stereotype.Service
 class ProblemJudgeResolver(
     private val judgeService: JudgeService,
 ) {
-
     suspend fun resolve(
         problem: Problem,
         submissionSubmit: ProblemSubmissionReq,
         language: SupportLanguages,
     ): ProblemSubmissionRespNotPersist {
-
-        val results = problem.context.testCases.canJudge().map { testcase ->
-            testcase to judgeService.judge(
-                languages = language,
-                stdin = testcase.input,
-                code = submissionSubmit.code
-            )
-        }.map { (problemTestcase, output) ->
-            SubmissionTestCases.SubmissionTestCase.from(problemTestcase, output)
-        }
+        val results =
+            problem.context.testCases
+                .canJudge()
+                .map { testcase ->
+                    testcase to
+                        judgeService.judge(
+                            languages = language,
+                            stdin = testcase.input,
+                            code = submissionSubmit.code,
+                        )
+                }.map { (problemTestcase, output) ->
+                    SubmissionTestCases.SubmissionTestCase.from(problemTestcase, output)
+                }
         return ProblemSubmissionRespNotPersist(
             problem.context.testCases,
-            SubmissionTestCases(results)
+            SubmissionTestCases(results),
         )
     }
 }

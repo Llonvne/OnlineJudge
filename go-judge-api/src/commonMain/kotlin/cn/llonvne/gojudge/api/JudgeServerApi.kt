@@ -12,21 +12,22 @@ interface JudgeServerApi {
     suspend fun info(): JudgeServerInfo
 
     companion object {
-        fun get(baseUrl: String, httpClient: HttpClient): JudgeServerApi {
-            return object : JudgeServerApi {
-
-                private val ktorfit = Ktorfit.Builder()
-                    .baseUrl(baseUrl)
-                    .httpClient(httpClient)
-                    .build()
+        fun get(
+            baseUrl: String,
+            httpClient: HttpClient,
+        ): JudgeServerApi =
+            object : JudgeServerApi {
+                private val ktorfit =
+                    Ktorfit
+                        .Builder()
+                        .baseUrl(baseUrl)
+                        .httpClient(httpClient)
+                        .build()
 
                 val api = ktorfit.create<JudgeServerApi>()
 
-                override suspend fun info(): JudgeServerInfo {
-                    return api.info()
-                }
+                override suspend fun info(): JudgeServerInfo = api.info()
             }
-        }
     }
 }
 
@@ -38,5 +39,5 @@ data class JudgeServerInfo(
     val cpuCoresCount: Int,
     val cpuUsage: Double,
     val memoryUsage: Int,
-    val isOnline: Boolean
+    val isOnline: Boolean,
 )

@@ -12,7 +12,7 @@ import cn.llonvne.gojudge.internal.cmd
 fun python3CompileTask(): Task<CodeInput, Output> = PythonCompileTask()
 
 private class PythonCompileTask(
-    private val pyCmd: String = "python3"
+    private val pyCmd: String = "python3",
 ) : AbstractTask<CodeInput>() {
     /**
      * 源代码拓展名
@@ -28,12 +28,13 @@ private class PythonCompileTask(
     override val compiledFileExtension: Option<String>
         get() = "py".some()
 
-    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames {
-        return Filenames(filenames.source, filenames.source)
-    }
+    override fun transformSourceOrCompiledFilename(filenames: Filenames): Filenames = Filenames(filenames.source, filenames.source)
 
-    override fun getCompileCmd(input: CodeInput, filenames: Filenames): Cmd {
-        return cmd {
+    override fun getCompileCmd(
+        input: CodeInput,
+        filenames: Filenames,
+    ): Cmd =
+        cmd {
             args = listOf()
             env = useUsrBinEnv
             files = useStdOutErrForFiles()
@@ -41,18 +42,22 @@ private class PythonCompileTask(
             copyOut = useStdOutErrForCopyOut()
             copyOutCached = listOf(filenames.source.asString(), filenames.compiled.asString())
         }
-    }
 
-    override fun transformCompileStatus(compileStatus: Status, compileResult: Result): Status {
-        return Status.Accepted
-    }
+    override fun transformCompileStatus(
+        compileStatus: Status,
+        compileResult: Result,
+    ): Status = Status.Accepted
 
-    override fun getRunCmd(input: CodeInput, compileResult: Result, runFilename: Filename, runFileId: String): Cmd {
-        return cmd {
+    override fun getRunCmd(
+        input: CodeInput,
+        compileResult: Result,
+        runFilename: Filename,
+        runFileId: String,
+    ): Cmd =
+        cmd {
             args = listOf(pyCmd, runFilename.name)
             env = useUsrBinEnv
             files = useStdOutErrForFiles(input.stdin)
             copyIn = useFileIdCopyIn(fileId = runFileId, newName = runFilename.asString())
         }
-    }
 }

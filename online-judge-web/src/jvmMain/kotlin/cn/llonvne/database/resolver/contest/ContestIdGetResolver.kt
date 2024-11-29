@@ -9,12 +9,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class ContestIdGetResolver(
-    private val contestRepository: ContestRepository
+    private val contestRepository: ContestRepository,
 ) {
-    suspend fun resolve(id: ContestId): Contest? {
-        return when (id) {
+    suspend fun resolve(id: ContestId): Contest? =
+        when (id) {
             is HashId -> contestRepository.getByHash(id.hash)
             is IntId -> contestRepository.getById(id.id)
         }
-    }
 }

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ModifyUserForm(
     val userId: String,
     val username: String,
-    val isBanned: Boolean
+    val isBanned: Boolean,
 )

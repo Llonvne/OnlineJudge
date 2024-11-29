@@ -4,4 +4,6 @@ import io.ktor.client.*
 import kotlin.jvm.JvmInline
 
 @JvmInline
-value class GoJudgeClient(internal val httpClient: HttpClient)
+value class GoJudgeClient(
+    internal val httpClient: HttpClient,
+)

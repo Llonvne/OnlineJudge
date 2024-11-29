@@ -11,21 +11,23 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
-
 context(JudgeContext)
-internal fun gpp(cppVersion: CppVersion) = object : LanguageRouter {
+internal fun gpp(cppVersion: CppVersion) =
+    object : LanguageRouter {
+        val gppCompileTask = gppCompileTask(cppVersion)
 
-    val gppCompileTask = gppCompileTask(cppVersion)
+        context(PipelineContext<Unit, ApplicationCall>)
+        override suspend fun version() {
+            val version = exec("g++ -v")
+            call.respondText(version.stderr, contentType = ContentType.Application.Json)
+        }
 
-    context(PipelineContext<Unit, ApplicationCall>)
-    override suspend fun version() {
-        val version = exec("g++ -v")
-        call.respondText(version.stderr, contentType = ContentType.Application.Json)
+        context(PipelineContext<Unit, ApplicationCall>)
+        override suspend fun judge(
+            code: String,
+            stdin: String,
+        ) {
+            val result = gppCompileTask.run(CodeInput(code, stdin), judgeClient)
+            call.respond(result)
+        }
     }
-
-    context(PipelineContext<Unit, ApplicationCall>)
-    override suspend fun judge(code: String, stdin: String) {
-        val result = gppCompileTask.run(CodeInput(code, stdin), judgeClient)
-        call.respond(result)
-    }
-}

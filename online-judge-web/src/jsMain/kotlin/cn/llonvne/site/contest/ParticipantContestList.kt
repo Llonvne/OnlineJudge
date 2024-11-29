@@ -56,41 +56,45 @@ fun participantContestList(root: Container) {
     }
 }
 
-private fun onOk(root: Container, resp: GetParticipantContestOk) {
-
-
+private fun onOk(
+    root: Container,
+    resp: GetParticipantContestOk,
+) {
     root.tabulator(
-        resp.contests, options = TabulatorOptions(
-            layout = Layout.FITCOLUMNS,
-            columns = listOf(
-                defineColumn("比赛名") {
-                    Span {
-                        +it.title
+        resp.contests,
+        options =
+            TabulatorOptions(
+                layout = Layout.FITCOLUMNS,
+                columns =
+                    listOf(
+                        defineColumn("比赛名") {
+                            Span {
+                                +it.title
 
-                        val id = it.contestId
+                                val id = it.contestId
 
-                        onClickLaunch {
-                            RoutingModule.routing.navigate("/contest/$id")
-                        }
-                    }
-                },
-                defineColumn("状态") {
-                    val contestStatusResolver = ContestStatusResolver(it.startAt, it.endAt)
-                    Span {
-                        +contestStatusResolver.status().name
-                    }
-                },
-                defineColumn("AC 数量") {
-                    Span {
-
-                    }
-                },
-                defineColumn("题目总数") {
-                    Span {
-                        +it.context.problems.size.toString()
-                    }
-                }
-            )
-        )
+                                onClickLaunch {
+                                    RoutingModule.routing.navigate("/contest/$id")
+                                }
+                            }
+                        },
+                        defineColumn("状态") {
+                            val contestStatusResolver = ContestStatusResolver(it.startAt, it.endAt)
+                            Span {
+                                +contestStatusResolver.status().name
+                            }
+                        },
+                        defineColumn("AC 数量") {
+                            Span {
+                            }
+                        },
+                        defineColumn("题目总数") {
+                            Span {
+                                +it.context.problems.size
+                                    .toString()
+                            }
+                        },
+                    ),
+            ),
     )
 }
